@@ -1,26 +1,108 @@
 @import "tailwindcss";
 
+/* ─── Daisi Design Brand Colors ─── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Base */
+  --black:       #000000;
+  --offwhite:    #f2f2f2;
+  --amber:       #ffb900;
+  --deep-teal:   #0b4651;
+
+  /* Secondary */
+  --pale-lemon:  #fef4b0;
+  --warm-gold:   #dfa040;
+  --steel-teal:  #335c67;
+  --warm-gray:   #949597;
+
+  /* ─── Surfaces ─── */
+  --bg-base:     #0a0a0f;
+  --bg-card:     #111118;
+  --bg-raised:   #18181f;
+  --bg-input:    #1f1f28;
+  --border:      #24242e;
+  --border-soft: #18181f;
+
+  /* ─── Text ─── */
+  --text-1:      #f2f2f2;
+  --text-2:      #949597;
+  --text-3:      #3a3a48;
+
+  /* ─── Brand accent ─── */
+  --brand:       #ffb900;
+  --brand-soft:  rgba(255,185,0,0.12);
+  --brand-dim:   rgba(255,185,0,0.06);
+
+  /* ─── Teal depth ─── */
+  --teal:        #0b4651;
+  --teal-mid:    #335c67;
+  --teal-soft:   rgba(11,70,81,0.35);
+  --teal-glow:   rgba(51,92,103,0.25);
+
+  /* ─── Status ─── */
+  --red:         #e04545;
+  --red-soft:    rgba(224,69,69,0.11);
+  --yellow:      #ffb900;
+  --yellow-soft: rgba(255,185,0,0.11);
+  --green:       #2db877;
+  --green-soft:  rgba(45,184,119,0.11);
+
+  /* ─── Categories ─── */
+  --cat-work:       #335c67;
+  --cat-work-bg:    rgba(51,92,103,0.20);
+  --cat-design:     #6685cc;
+  --cat-design-bg:  rgba(102,133,204,0.13);
+  --cat-family:     #dfa040;
+  --cat-family-bg:  rgba(223,160,64,0.15);
+  --cat-friends:    #7faab2;
+  --cat-friends-bg: rgba(127,170,178,0.13);
+  --cat-holiday:    #fef4b0;
+  --cat-holiday-bg: rgba(254,244,176,0.10);
+  --cat-note:       #949597;
+  --cat-note-bg:    rgba(148,149,151,0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── Light theme ─── */
+[data-theme="light"] {
+  --bg-base:     #f5f5f8;
+  --bg-card:     #ffffff;
+  --bg-raised:   #eeeeef;
+  --bg-input:    #e8e8ef;
+  --border:      #d5d5e0;
+  --border-soft: #eeeeef;
+  --text-1:      #111118;
+  --text-2:      #55555f;
+  --text-3:      #aaaabc;
+  --brand-soft:  rgba(255,185,0,0.15);
+  --brand-dim:   rgba(255,185,0,0.08);
+  --teal-soft:   rgba(11,70,81,0.12);
+  --teal-glow:   rgba(51,92,103,0.10);
+  --red-soft:    rgba(224,69,69,0.09);
+  --green-soft:  rgba(45,184,119,0.09);
+  --cat-work-bg:    rgba(51,92,103,0.12);
+  --cat-design-bg:  rgba(102,133,204,0.10);
+  --cat-family-bg:  rgba(223,160,64,0.12);
+  --cat-friends-bg: rgba(127,170,178,0.10);
+  --cat-holiday-bg: rgba(254,244,176,0.08);
+  --cat-note-bg:    rgba(148,149,151,0.10);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { height: 100%; overflow-x: hidden; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-base);
+  color: var(--text-1);
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', 'Segoe UI', sans-serif;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 0; }
+input, button { font-family: inherit; }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
