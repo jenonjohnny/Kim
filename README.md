@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Personal OS — Time-Block Task Manager
 
-## Getting Started
+แอปจัดการงานส่วนตัวที่เชื่อมกับ Notion โดยตรง  
+ดู task, จัดเวลาด้วย drag & drop, ติดตาม priority — ทุกอย่างอยู่ใน Notion DB ของคุณ
 
-First, run the development server:
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/YOUR_USERNAME/kim-app&env=NOTION_TOKEN,NOTION_TASKS_DB&envDescription=Notion%20credentials&envLink=https://github.com/YOUR_USERNAME/kim-app/blob/main/SETUP.md)
+
+---
+
+## ฟีเจอร์หลัก
+
+- 📅 **Time-Block Calendar** — ลาก task ขึ้น grid เวลาได้เลย
+- 🗂 **Task Tray** — งานวันนี้ + งาน multi-day + งาน urgent
+- 🎯 **Priority Tracking** — High / Medium / Low + Urgent flag
+- 🌙 **Dark Mode** — ออกแบบมาสำหรับหน้าจอกลางคืน
+- 🔗 **Notion Native** — ข้อมูลเก็บใน Notion DB ของคุณ ไม่ผ่าน server กลาง
+
+---
+
+## เริ่มต้น
+
+ดูคู่มือติดตั้งแบบ step-by-step ได้ที่ → **[SETUP.md](./SETUP.md)**
+
+### สรุปสั้น
+
+1. Duplicate [Notion Template](#) *(ลิงก์เร็วๆ นี้)*
+2. สร้าง Notion Integration → คัดลอก token
+3. กดปุ่ม Deploy บน Vercel ด้านบน
+4. ใส่ `NOTION_TOKEN` + `NOTION_TASKS_DB` → Deploy
+
+**ค่าใช้จ่าย: $0** (Vercel free tier + Notion free)
+
+---
+
+## Tech Stack
+
+- [Next.js](https://nextjs.org) 15 App Router
+- [Notion API](https://developers.notion.com) v2022-06-28
+- TypeScript + CSS Variables
+- Deploy บน [Vercel](https://vercel.com)
+
+---
+
+## Local Development
 
 ```bash
+# ติดตั้ง dependencies
+npm install
+
+# สร้างไฟล์ env
+cp .env.example .env.local
+# แก้ NOTION_TOKEN และ NOTION_TASKS_DB ใน .env.local
+
+# รัน dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+เปิด [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Environment Variables
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | จำเป็น | คำอธิบาย |
+|---|---|---|
+| `NOTION_TOKEN` | ✅ | Notion Integration Secret (`secret_...`) |
+| `NOTION_TASKS_DB` | ✅ | ID ของ Notion Database |
+| `NOTION_STS_AREA_ID` | ❌ | Area ID สำหรับ STS (เฉพาะ owner) |
+| `NOTION_DAISI_AREA_ID` | ❌ | Area ID สำหรับ Daisi (เฉพาะ owner) |
+| `NOTION_DIGITAL_PRODUCT_AREA_ID` | ❌ | Area ID สำหรับ Digital (เฉพาะ owner) |
