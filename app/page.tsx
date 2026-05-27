@@ -21,6 +21,8 @@ import {
 const THAI_DAYS = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
+interface GCalEvent { id: string; title: string; start: string; end: string; color: string | null; fromKim: boolean; }
+
 const AREA_STYLE: Record<string, { label: string; color: string }> = {
   sts:     { label: "STS",     color: "var(--amber)"      },  // #ffb900 — brand gold
   daisi:   { label: "Daisi",   color: "var(--warm-gold)"  },  // #dfa040 — deep gold
@@ -682,12 +684,67 @@ function ZoneCard({
   );
 }
 
+/* ─── Meetings Strip — GCal events for today ─── */
+function MeetingsStrip({ events }: { events: GCalEvent[] }) {
+  if (events.length === 0) return null;
+  const now = new Date();
+  const nowHHMM = `${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+  return (
+    <div style={{
+      background: "rgba(84,132,237,0.08)",
+      border: "1px solid rgba(84,132,237,0.22)",
+      borderLeft: "2px solid rgba(84,132,237,0.75)",
+      borderRadius: 14, marginBottom: 14, overflow: "hidden",
+    }}>
+      {/* Header */}
+      <div style={{ display:"flex", alignItems:"center", gap:8, padding:"11px 14px 8px" }}>
+        <span style={{ fontSize:9, fontWeight:700, color:"rgba(100,160,255,0.8)", letterSpacing:"0.12em" }}>◈  นัดหมายวันนี้</span>
+        <span style={{ fontSize:10, fontWeight:700, color:"rgba(84,132,237,0.9)", background:"rgba(84,132,237,0.15)", borderRadius:6, padding:"1px 7px", marginLeft:"auto" }}>{events.length}</span>
+      </div>
+      {/* Event rows */}
+      <div style={{ display:"flex", flexDirection:"column", gap:1, padding:"0 10px 10px" }}>
+        {events.map(ev => {
+          const isPast = ev.end <= nowHHMM;
+          const isNow  = ev.start <= nowHHMM && ev.end > nowHHMM;
+          return (
+            <div key={ev.id} style={{
+              display:"flex", alignItems:"center", gap:10,
+              padding:"8px 10px", borderRadius:10,
+              background: isNow ? "rgba(84,132,237,0.16)" : "transparent",
+              opacity: isPast ? 0.45 : 1,
+            }}>
+              {/* Active indicator */}
+              <div style={{
+                width:3, height:28, borderRadius:2, flexShrink:0,
+                background: isNow ? "rgba(84,132,237,0.9)" : "rgba(84,132,237,0.3)",
+              }} />
+              {/* Time */}
+              <div style={{ display:"flex", flexDirection:"column", gap:1, flexShrink:0, minWidth:48 }}>
+                <span style={{ fontSize:11, fontWeight:700, color: isNow ? "rgba(120,180,255,1)" : "rgba(120,180,255,0.75)", lineHeight:1 }}>{ev.start}</span>
+                <span style={{ fontSize:9, color:"rgba(100,150,220,0.6)", lineHeight:1 }}>{ev.end}</span>
+              </div>
+              {/* Title */}
+              <span style={{ flex:1, fontSize:13, fontWeight: isNow ? 600 : 500, color: isNow ? "var(--text-1)" : "var(--text-2)", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                {ev.title}
+              </span>
+              {isNow && (
+                <span style={{ fontSize:8, fontWeight:700, color:"rgba(84,132,237,1)", background:"rgba(84,132,237,0.18)", borderRadius:4, padding:"2px 6px", flexShrink:0 }}>NOW</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Today — 3-zone card layout ─── */
 function TodayView({
-  data, onDone, onTaskClick, syncTime,
+  data, onDone, onTaskClick, syncTime, gcalEvents,
 }: {
   data: TaskData; onDone: (id: string) => void;
   onTaskClick: (t: Task) => void; syncTime: string;
+  gcalEvents: GCalEvent[];
 }) {
   const todayStr  = new Date().toISOString().split("T")[0];
   const in3days   = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
@@ -713,6 +770,9 @@ function TodayView({
 
   return (
     <div>
+      {/* ── Meetings Strip (GCal) ── */}
+      <MeetingsStrip events={gcalEvents} />
+
       {/* ── Focus Card ── */}
       {focusTask && (
         <FocusCard task={focusTask} onDone={onDone} onClick={() => onTaskClick(focusTask)} />
@@ -1057,6 +1117,16 @@ export default function Home() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pullY, setPullY] = useState(0);
   const PULL_THRESHOLD = 70;
+  const [gcalToday, setGcalToday] = useState<GCalEvent[]>([]);
+
+  // Fetch today's GCal events for the dashboard strip
+  useEffect(() => {
+    const today = new Date().toISOString().split("T")[0];
+    fetch(`/api/gcal?date=${today}`)
+      .then(r => r.json())
+      .then(d => { if (d.events) setGcalToday(d.events); })
+      .catch(() => {});
+  }, []);
 
   // ── Body scroll lock when any overlay is open ──
   useEffect(() => {
@@ -1262,6 +1332,7 @@ export default function Home() {
                 onDone={markDone}
                 onTaskClick={openDetail}
                 syncTime={refreshed.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
+                gcalEvents={gcalToday}
               />
             )}
 
