@@ -1,11 +1,13 @@
 "use client";
+import { HomeIcon, ListIcon, CalendarIcon, TargetIcon } from "./icons";
 
-export type Tab = "home" | "tasks" | "okr";
+export type Tab = "home" | "tasks" | "calendar" | "okr";
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: "home",  label: "วันนี้", icon: "◈" },
-  { id: "tasks", label: "งาน",   icon: "≡" },
-  { id: "okr",   label: "OKR",   icon: "🎯" },
+const TABS: { id: Tab; label: string; Icon: React.FC<{ size?: number; color?: string }> }[] = [
+  { id: "home",     label: "วันนี้",  Icon: HomeIcon     },
+  { id: "tasks",    label: "งาน",    Icon: ListIcon     },
+  { id: "calendar", label: "ตาราง",  Icon: CalendarIcon },
+  { id: "okr",      label: "OKR",    Icon: TargetIcon   },
 ];
 
 export default function Nav({
@@ -32,24 +34,19 @@ export default function Nav({
               onClick={() => onChange(tab.id)}
               style={{
                 flex: 1,
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                 padding: "7px 4px 8px",
                 background: on ? "var(--brand-soft)" : "none",
                 border: "none", cursor: "pointer",
                 borderRadius: 12,
                 transition: "background 0.18s",
+                color: on ? "var(--icon-active)" : "var(--icon-tint)",
               }}
             >
-              <span style={{
-                fontSize: 18, lineHeight: 1,
-                color: on ? "var(--amber)" : "var(--text-3)",
-                transition: "color 0.18s",
-              }}>
-                {tab.icon}
-              </span>
+              <tab.Icon size={20} color={on ? "var(--icon-active)" : "var(--icon-tint)"} />
               <span style={{
                 fontSize: 10, fontWeight: on ? 700 : 400,
-                color: on ? "var(--amber)" : "var(--text-3)",
+                color: on ? "var(--amber)" : "var(--icon-tint)",
                 letterSpacing: "0.03em",
                 transition: "color 0.18s",
               }}>

@@ -1,103 +1,86 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Task } from "./types";
-import { AreaItem, getVisibleAreaIds, getPinnedAreaIds } from "./SettingsSheet";
+import { Quadrant, QUADRANT_INFO, quadrantToNotion } from "./types";
+import { AreaItem, getVisibleAreaIds, getPinnedAreaIds, STORAGE_PINNED, togglePinArea } from "./SettingsSheet";
+import { CalendarPicker, formatDateTH } from "./CalendarPicker";
 
-const PRIORITIES = ["P1", "P2", "P3"] as const;
-const PRIORITY_INFO: Record<string, { emoji: string; color: string }> = {
-  P1: { emoji: "🔴", color: "var(--red)" },
-  P2: { emoji: "🟡", color: "var(--amber)" },
-  P3: { emoji: "🔵", color: "var(--steel-teal)" },
-};
-
-const THAI_MONTHS_SHORT = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-const DAY_LABELS = ["อา","จ","อ","พ","พฤ","ศ","ส"];
-
-function formatDateTH(s: string) {
-  const d = new Date(s + "T00:00:00");
-  return `${d.getDate()} ${THAI_MONTHS_SHORT[d.getMonth()]} ${d.getFullYear() + 543}`;
+/* ── Eisenhower 2×2 Grid — P1/P2/P3/P4 ── */
+function EisenhowerPicker({ value, onChange }: { value: Quadrant; onChange: (q: Quadrant) => void }) {
+  const quadrants: Quadrant[] = ["Q1", "Q2", "Q3", "Q4"];
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+      {quadrants.map(q => {
+        const info = QUADRANT_INFO[q];
+        const on = value === q;
+        return (
+          <button key={q} onClick={() => onChange(q)} style={{
+            padding: "10px 10px 9px",
+            borderRadius: 12, cursor: "pointer",
+            border: `1.5px solid ${on ? info.color : "var(--border)"}`,
+            background: on ? info.color + "18" : "transparent",
+            textAlign: "left", transition: "all 0.15s",
+          }}>
+            {/* P-label + emoji */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 5 }}>
+              <span style={{
+                fontSize: 14, fontWeight: 800,
+                color: on ? info.color : "var(--text-2)",
+              }}>{info.shortLabel}</span>
+              <span style={{ fontSize: 12 }}>{info.emoji}</span>
+            </div>
+            {/* Description */}
+            <div style={{ fontSize: 10, fontWeight: 500, color: on ? info.color : "var(--text-3)", lineHeight: 1.4 }}>
+              {info.label}
+            </div>
+            {/* Action hint */}
+            <div style={{ fontSize: 9, color: on ? info.color + "cc" : "var(--text-3)", marginTop: 3, fontWeight: 600, opacity: 0.7 }}>
+              → {info.action}
+            </div>
+          </button>
+        );
+      })}
+    </div>
+  );
 }
 
-/* ── Custom inline calendar ── */
-function CalendarPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const today = new Date();
-  const sel = value ? new Date(value + "T00:00:00") : null;
-  const [year, setYear]   = useState(sel?.getFullYear() || today.getFullYear());
-  const [month, setMonth] = useState(sel?.getMonth() ?? today.getMonth());
+/* ── Area chip with long-press to pin ── */
+function AreaChip({ area, selected, pinned, onSelect, onPin }: {
+  area: AreaItem; selected: boolean; pinned: boolean;
+  onSelect: () => void; onPin: () => void;
+}) {
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [pressing, setPressing] = useState(false);
 
-  const firstDay    = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const todayStr    = today.toISOString().split("T")[0];
-
-  const prevMonth = () => month === 0  ? (setMonth(11), setYear(y => y - 1)) : setMonth(m => m - 1);
-  const nextMonth = () => month === 11 ? (setMonth(0),  setYear(y => y + 1)) : setMonth(m => m + 1);
-
-  const cells: (number | null)[] = [];
-  for (let i = 0; i < firstDay; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+  const startPress = () => {
+    setPressing(true);
+    timerRef.current = setTimeout(() => {
+      onPin(); setPressing(false);
+      try { navigator.vibrate(40); } catch (_) {}
+    }, 500);
+  };
+  const cancelPress = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    setPressing(false);
+  };
 
   return (
-    <div style={{
-      marginTop: 8, padding: "12px 10px",
-      background: "var(--bg-raised)", borderRadius: 14,
-      border: "1px solid var(--border)",
-    }}>
-      {/* Month/Year nav */}
-      <div style={{ display: "flex", alignItems: "center", marginBottom: 10 }}>
-        <button onClick={prevMonth} style={{
-          background: "none", border: "none", color: "var(--text-2)",
-          cursor: "pointer", fontSize: 20, padding: "0 10px", lineHeight: 1,
-        }}>‹</button>
-        <div style={{ flex: 1, textAlign: "center", fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>
-          {THAI_MONTHS_SHORT[month]} {year + 543}
-        </div>
-        <button onClick={nextMonth} style={{
-          background: "none", border: "none", color: "var(--text-2)",
-          cursor: "pointer", fontSize: 20, padding: "0 10px", lineHeight: 1,
-        }}>›</button>
-      </div>
-
-      {/* Day headers */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", marginBottom: 4 }}>
-        {DAY_LABELS.map((d, i) => (
-          <div key={d} style={{
-            textAlign: "center", fontSize: 10, fontWeight: 600, padding: "2px 0",
-            color: i === 0 ? "var(--red)" : "var(--text-3)",
-          }}>{d}</div>
-        ))}
-      </div>
-
-      {/* Day grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 2 }}>
-        {cells.map((day, i) => {
-          if (day === null) return <div key={`e${i}`} />;
-          const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-          const isToday    = dateStr === todayStr;
-          const isSelected = dateStr === value;
-          return (
-            <button key={day} onClick={() => onChange(dateStr)} style={{
-              padding: "7px 2px", textAlign: "center",
-              background: isSelected ? "var(--amber)" : isToday ? "var(--brand-soft)" : "transparent",
-              border: `1px solid ${isToday && !isSelected ? "rgba(255,185,0,0.35)" : "transparent"}`,
-              borderRadius: 8,
-              color: isSelected ? "#000" : isToday ? "var(--amber)" : "var(--text-1)",
-              fontSize: 12, fontWeight: isSelected || isToday ? 700 : 400,
-              cursor: "pointer", transition: "background 0.12s",
-            }}>{day}</button>
-          );
-        })}
-      </div>
-
-      {/* Clear */}
-      {value && (
-        <button onClick={() => onChange("")} style={{
-          marginTop: 10, width: "100%",
-          background: "transparent", border: "1px solid var(--border)",
-          borderRadius: 8, padding: "7px", fontSize: 11,
-          color: "var(--text-3)", cursor: "pointer",
-        }}>✕ ล้างวันที่</button>
-      )}
-    </div>
+    <button
+      onClick={onSelect}
+      onTouchStart={startPress} onTouchEnd={cancelPress} onTouchMove={cancelPress}
+      onMouseDown={startPress}  onMouseUp={cancelPress}  onMouseLeave={cancelPress}
+      style={{
+        flexShrink: 0, padding: "6px 10px", borderRadius: 8, cursor: "pointer",
+        border: `1.5px solid ${selected ? "var(--amber)" : pinned ? "rgba(255,185,0,0.3)" : "var(--border)"}`,
+        background: pressing ? "var(--brand-soft)" : selected ? "var(--brand-soft)" : pinned ? "rgba(255,185,0,0.06)" : "transparent",
+        color: selected ? "var(--amber)" : pinned ? "var(--amber)" : "var(--text-3)",
+        fontSize: 11, fontWeight: selected || pinned ? 700 : 400,
+        whiteSpace: "nowrap", transition: "all 0.15s",
+        userSelect: "none", WebkitUserSelect: "none",
+      } as React.CSSProperties}
+    >
+      {pinned && !selected ? "📌 " : (area.emoji || "📁") + " "}{area.name}
+    </button>
   );
 }
 
@@ -106,36 +89,46 @@ export default function AddTaskModal({ onClose, onAdd }: { onClose: () => void; 
   const [title, setTitle]       = useState("");
   const [notes, setNotes]       = useState("");
   const [due, setDue]           = useState("");
+  const [endDue, setEndDue]     = useState("");
   const [showCal, setShowCal]   = useState(false);
   const [areaId, setAreaId]     = useState("");
-  const [priority, setPriority] = useState<string>("P3");
-  const [isUrgent, setIsUrgent] = useState(false);
+  const [quadrant, setQuadrant] = useState<Quadrant>("Q3");
   const [areas, setAreas]       = useState<AreaItem[]>([]);
+  const [pinned, setPinned]     = useState<string[]>([]);
   const [loading, setLoading]   = useState(false);
 
+  const sortAreas = (list: AreaItem[], pins: string[]) =>
+    [...list].sort((a, b) => {
+      const ap = pins.includes(a.id) ? 0 : 1;
+      const bp = pins.includes(b.id) ? 0 : 1;
+      if (ap !== bp) return ap - bp;
+      return a.name.localeCompare(b.name, "th");
+    });
+
   useEffect(() => {
+    const pins = getPinnedAreaIds();
+    setPinned(pins);
     fetch("/api/areas")
       .then(r => r.json())
       .then(d => {
         const all: AreaItem[] = d.areas || [];
-        const visibleIds  = getVisibleAreaIds(all);
-        const pinnedIds   = getPinnedAreaIds();
-        const visible = all
-          .filter(a => visibleIds.includes(a.id))
-          .sort((a, b) => {
-            const ap = pinnedIds.includes(a.id) ? 0 : 1;
-            const bp = pinnedIds.includes(b.id) ? 0 : 1;
-            if (ap !== bp) return ap - bp;
-            return a.name.localeCompare(b.name, "th");
-          });
+        const visibleIds = getVisibleAreaIds(all);
+        const visible = sortAreas(all.filter(a => visibleIds.includes(a.id)), pins);
         setAreas(visible);
         if (visible.length > 0) setAreaId(visible[0].id);
       });
   }, []);
 
+  const handlePin = (id: string) => {
+    const next = togglePinArea(id);
+    setPinned(next);
+    setAreas(prev => sortAreas(prev, next));
+  };
+
   const submit = async () => {
     if (!title.trim()) return;
     setLoading(true);
+    const { priority } = quadrantToNotion(quadrant);
     const res = await fetch("/api/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -143,9 +136,9 @@ export default function AddTaskModal({ onClose, onAdd }: { onClose: () => void; 
         title:  title.trim(),
         notes:  notes.trim() || undefined,
         due:    due || undefined,
+        endDue: endDue || undefined,
         areaId: areaId || undefined,
         priority,
-        urgent: isUrgent ? "!!!!" : undefined,
       }),
     });
     const task = await res.json();
@@ -154,18 +147,21 @@ export default function AddTaskModal({ onClose, onAdd }: { onClose: () => void; 
   };
 
   const selectedArea = areas.find(a => a.id === areaId);
+  const dueSummary = due ? (endDue ? `${formatDateTH(due)} – ${formatDateTH(endDue)}` : formatDateTH(due)) : null;
 
   return (
     <div
       onClick={e => e.target === e.currentTarget && onClose()}
-      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 50 }}
+      style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", display: "flex", alignItems: "flex-end", justifyContent: "center", zIndex: 50, animation: "fadeIn 0.15s ease-out" }}
     >
       <div style={{
         background: "var(--bg-card)", borderTop: "1px solid var(--border)",
         borderRadius: "24px 24px 0 0",
         padding: "0 20px calc(24px + env(safe-area-inset-bottom))",
         width: "100%", maxWidth: 480,
-        maxHeight: "92dvh", overflowY: "auto",
+        maxHeight: "92vh", overflowY: "auto",
+        overscrollBehavior: "contain", overflowAnchor: "none" as any,
+        animation: "sheetIn 0.42s cubic-bezier(0.32, 0.72, 0, 1)",
       }}>
         {/* Handle */}
         <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 14px" }}>
@@ -204,33 +200,34 @@ export default function AddTaskModal({ onClose, onAdd }: { onClose: () => void; 
           }}
         />
 
-        {/* Area — horizontal scroll, pinned first A-Z */}
+        {/* Area — กดค้างเพื่อปักหมุด */}
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.1em", marginBottom: 7 }}>พื้นที่</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.1em", marginBottom: 7 }}>
+            พื้นที่ <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>· กดค้างเพื่อปักหมุด</span>
+          </div>
           <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 3, msOverflowStyle: "none" } as React.CSSProperties}>
-            {areas.map(area => {
-              const on = areaId === area.id;
-              return (
-                <button key={area.id} onClick={() => setAreaId(area.id)} style={{
-                  flexShrink: 0, padding: "6px 10px", borderRadius: 8, cursor: "pointer",
-                  border: `1.5px solid ${on ? "var(--amber)" : "var(--border)"}`,
-                  background: on ? "var(--brand-soft)" : "transparent",
-                  color: on ? "var(--amber)" : "var(--text-3)",
-                  fontSize: 11, fontWeight: on ? 700 : 400,
-                  whiteSpace: "nowrap", transition: "all 0.15s",
-                }}>
-                  {area.emoji || "📁"} {area.name}
-                </button>
-              );
-            })}
+            {areas.map(area => (
+              <AreaChip
+                key={area.id}
+                area={area}
+                selected={areaId === area.id}
+                pinned={pinned.includes(area.id)}
+                onSelect={() => setAreaId(area.id)}
+                onPin={() => handlePin(area.id)}
+              />
+            ))}
           </div>
         </div>
 
-        {/* Due date — custom calendar */}
-        <div style={{ marginBottom: 14 }}>
+        {/* Due date */}
+        <div id="cal-row-add" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.1em", marginBottom: 7 }}>วันที่กำหนด</div>
           <button
-            onClick={() => setShowCal(v => !v)}
+            onClick={() => {
+              const next = !showCal;
+              setShowCal(next);
+              if (next) setTimeout(() => document.getElementById("cal-row-add")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+            }}
             style={{
               width: "100%", display: "flex", alignItems: "center", gap: 10,
               padding: "11px 14px", borderRadius: 12, cursor: "pointer",
@@ -240,51 +237,26 @@ export default function AddTaskModal({ onClose, onAdd }: { onClose: () => void; 
           >
             <span style={{ fontSize: 17 }}>📅</span>
             <span style={{
-              flex: 1, fontSize: 14, textAlign: "left",
-              color: due ? "var(--amber)" : "var(--text-3)",
-              fontWeight: due ? 600 : 400,
+              flex: 1, fontSize: 13, textAlign: "left",
+              color: dueSummary ? "var(--amber)" : "var(--text-3)",
+              fontWeight: dueSummary ? 600 : 400,
             }}>
-              {due ? formatDateTH(due) : "กำหนดวันที่..."}
+              {dueSummary || "กำหนดวันที่..."}
             </span>
             <span style={{ fontSize: 11, color: "var(--text-3)" }}>{showCal ? "▲" : "▼"}</span>
           </button>
           {showCal && (
             <CalendarPicker
-              value={due}
-              onChange={v => { setDue(v); if (v) setShowCal(false); }}
+              startValue={due} onStartChange={v => { setDue(v); }}
+              endValue={endDue} onEndChange={v => { setEndDue(v); }}
             />
           )}
         </div>
 
-        {/* Priority + Urgent — single row */}
+        {/* Eisenhower priority */}
         <div style={{ marginBottom: 18 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.1em", marginBottom: 7 }}>ลำดับความสำคัญ</div>
-          <div style={{ display: "flex", gap: 6 }}>
-            {PRIORITIES.map(p => {
-              const on   = priority === p;
-              const info = PRIORITY_INFO[p];
-              return (
-                <button key={p} onClick={() => setPriority(p)} style={{
-                  flex: 1, padding: "8px 4px", borderRadius: 10, cursor: "pointer",
-                  border: `1.5px solid ${on ? info.color : "var(--border)"}`,
-                  background: on ? info.color + "18" : "transparent",
-                  color: on ? info.color : "var(--text-3)",
-                  fontSize: 11, fontWeight: on ? 700 : 400, transition: "all 0.15s",
-                }}>
-                  {info.emoji} {p}
-                </button>
-              );
-            })}
-            <button onClick={() => setIsUrgent(p => !p)} style={{
-              padding: "8px 12px", borderRadius: 10, cursor: "pointer", flexShrink: 0,
-              border: `1.5px solid ${isUrgent ? "var(--red)" : "var(--border)"}`,
-              background: isUrgent ? "var(--red-soft)" : "transparent",
-              color: isUrgent ? "var(--red)" : "var(--text-3)",
-              fontSize: 11, fontWeight: isUrgent ? 700 : 400, transition: "all 0.15s",
-            }}>
-              🚨 ด่วน
-            </button>
-          </div>
+          <EisenhowerPicker value={quadrant} onChange={setQuadrant} />
         </div>
 
         {/* Action buttons */}

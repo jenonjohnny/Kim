@@ -7,10 +7,19 @@ const HEADERS = {
   "Content-Type": "application/json",
 };
 
+const AREA_IDS: Record<string, string> = {
+  sts:     "2a02ffbd-a6db-8096-8ee5-f4a9b6b73c02",
+  daisi:   "2982ffbd-a6db-8050-bf58-dfac37b527e2",
+  digital: "36b2ffbd-a6db-81c1-b644-f337f63e7738",
+};
+
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await req.json();
   const properties: any = {};
+
+  if (body.title !== undefined)
+    properties["Name"] = { title: [{ text: { content: body.title } }] };
 
   if (body.status !== undefined)
     properties["Status"] = { status: { name: body.status } };
@@ -19,6 +28,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     properties["Notes"] = {
       rich_text: body.notes ? [{ text: { content: body.notes } }] : [],
     };
+
+  if (body.priority !== undefined)
+    properties["Priority Level"] = { select: body.priority ? { name: body.priority } : null };
+
+  if (body.due !== undefined)
+    properties["Due Date"] = body.due
+      ? { date: { start: body.due, end: body.endDue ?? null } }
+      : { date: null };
+
+  if (body.area !== undefined) {
+    const areaId = AREA_IDS[body.area];
+    properties["Areas"] = areaId ? { relation: [{ id: areaId }] } : { relation: [] };
+  }
 
   const res = await fetch(`https://api.notion.com/v1/pages/${id}`, {
     method: "PATCH",

@@ -1,5 +1,10 @@
 "use client";
-import { useState } from "react";
+import React, { useState, useRef } from "react";
+import {
+  BriefcaseIcon, TargetIcon, PenIcon, TrendingUpIcon, BookIcon,
+  LightningIcon, ClockIcon, FileTextIcon, RobotIcon,
+  ChevronRightIcon, ChevronDownIcon, ChevronUpIcon,
+} from "./icons";
 import { TaskData } from "./types";
 
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -43,9 +48,9 @@ const OKRs = [
 const CARD_H = "max(60px, calc((100dvh - 310px) / 4))";
 
 function ActionCard({
-  emoji, title, desc, color = "var(--amber)", onClick, active,
+  icon, title, desc, color = "var(--amber)", onClick, active,
 }: {
-  emoji: string; title: string; desc: string;
+  icon: React.ReactNode; title: string; desc: string;
   color?: string; onClick: () => void; active?: boolean;
 }) {
   return (
@@ -58,13 +63,13 @@ function ActionCard({
       transition: "background 0.15s, border 0.15s",
       minHeight: CARD_H,
     }}>
-      <span style={{ fontSize: 22, flexShrink: 0 }}>{emoji}</span>
+      <span style={{ flexShrink: 0, display: "flex", alignItems: "center" }}>{icon}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-1)" }}>{title}</div>
         <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>{desc}</div>
       </div>
-      <span style={{ fontSize: 12, color: active ? color : "var(--text-3)", flexShrink: 0 }}>
-        {active ? "▼" : "›"}
+      <span style={{ display: "flex", alignItems: "center", color: active ? color : "var(--text-3)", flexShrink: 0 }}>
+        {active ? <ChevronDownIcon size={14} color={color} /> : <ChevronRightIcon size={14} color="var(--text-3)" />}
       </span>
     </button>
   );
@@ -92,98 +97,72 @@ function ProgressBar({ pct, color }: { pct: number; color: string }) {
   );
 }
 
-/* ── Morning Brief — Work + Personal side by side ── */
-function MorningBrief({ tasks }: { tasks: TaskData }) {
+/* ── Morning Brief — task summary strip ── */
+export function MorningBrief({ tasks }: { tasks: TaskData }) {
   const now     = new Date();
   const hour    = now.getHours();
   const timeTag = hour < 12 ? "เช้า" : hour < 17 ? "บ่าย" : "เย็น";
+  const today   = now.toISOString().split("T")[0];
 
-  const daysElapsed = Math.floor((now.getTime() - OKR_START.getTime()) / 86400000);
-  const okrPct      = Math.min(daysElapsed / OKR_DAYS, 1);
-  const daysLeft    = Math.max(OKR_DAYS - daysElapsed, 0);
-  const dow         = now.getDay();
-  const isWeekend   = dow === 0 || dow === 6;
-
-  // งาน Daisi ที่สำคัญที่สุดวันนี้
-  const topWork = [...tasks.urgent.slice(0, 2), ...tasks.soon.slice(0, 1)].slice(0, 2);
+  // งานที่ต้องโฟกัสวันนี้ — ด่วนก่อน ถัดมา soon
+  const topWork = [...tasks.urgent, ...tasks.soon].slice(0, 3);
 
   return (
     <div style={{ marginBottom: 14 }}>
       {/* Header strip */}
-      <div style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.12em", marginBottom: 10 }}>
-        ⚡ BRIEF {timeTag}นี้
+      <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 10, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.12em", marginBottom: 10 }}>
+        <LightningIcon size={11} color="var(--text-3)" />
+        BRIEF {timeTag}นี้
       </div>
 
-      <div style={{ display: "flex", gap: 8 }}>
-
-        {/* ── Work side — Daisi ── */}
-        <div style={{
-          flex: 1,
-          background: "var(--bg-card)", border: "1px solid var(--border)",
-          borderLeft: "3px solid var(--steel-teal)",
-          borderRadius: 14, padding: "12px 14px",
-        }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: "var(--steel-teal)", letterSpacing: "0.1em", marginBottom: 8 }}>
-            🏢 DAISI
-          </div>
-          {tasks.urgent.length + tasks.soon.length === 0 ? (
-            <div style={{ fontSize: 12, color: "var(--text-3)" }}>ไม่มีงานด่วน ✨</div>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              {topWork.map(t => {
-                const today  = new Date().toISOString().split("T")[0];
-                const isUrgent = t.due && t.due <= today;
-                return (
-                  <div key={t.id} style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
-                    <div style={{
-                      width: 6, height: 6, borderRadius: "50%", flexShrink: 0, marginTop: 4,
-                      background: isUrgent ? "var(--red)" : "var(--amber)",
-                    }} />
-                    <span style={{ fontSize: 12, color: "var(--text-1)", lineHeight: 1.4, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
-                      {t.title}
-                    </span>
-                  </div>
-                );
-              })}
-              {tasks.urgent.length + tasks.soon.length > 2 && (
-                <div style={{ fontSize: 10, color: "var(--text-3)" }}>
-                  +{tasks.urgent.length + tasks.soon.length - 2} งานอีก
-                </div>
-              )}
+      <div style={{
+        background: "var(--bg-card)", border: "1px solid var(--border)",
+        borderLeft: "3px solid var(--steel-teal)",
+        borderRadius: 14, padding: "12px 14px",
+      }}>
+        {/* stats row */}
+        <div style={{ display: "flex", gap: 0, marginBottom: topWork.length > 0 ? 10 : 0 }}>
+          {[
+            { label: "เลยกำหนด", n: tasks.urgent.length, color: "var(--red)"        },
+            { label: "ใกล้มา",   n: tasks.soon.length,   color: "var(--amber)"      },
+            { label: "ถัดไป",    n: tasks.normal.length, color: "var(--text-3)"     },
+            { label: "รวม",      n: tasks.total,          color: "var(--steel-teal)" },
+          ].map((s, i) => (
+            <div key={s.label} style={{ flex: 1, textAlign: "center", borderLeft: i > 0 ? "1px solid var(--border)" : "none" }}>
+              <div style={{ fontSize: 18, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.n}</div>
+              <div style={{ fontSize: 9, color: "var(--text-3)", marginTop: 2 }}>{s.label}</div>
             </div>
-          )}
-          <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-3)", borderTop: "1px solid var(--border-soft)", paddingTop: 6 }}>
-            รวม {tasks.total} งาน · ค้าง {tasks.urgent.length} ด่วน
-          </div>
+          ))}
         </div>
 
-        {/* ── Personal side — OKR ── */}
-        <div style={{
-          flex: 1,
-          background: "var(--bg-card)", border: "1px solid var(--border)",
-          borderLeft: "3px solid var(--warm-gold)",
-          borderRadius: 14, padding: "12px 14px",
-        }}>
-          <div style={{ fontSize: 9, fontWeight: 700, color: "var(--warm-gold)", letterSpacing: "0.1em", marginBottom: 8 }}>
-            🎯 OKR
+        {/* top tasks list */}
+        {topWork.length > 0 && (
+          <div style={{ borderTop: "1px solid var(--border-soft)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 6 }}>
+            {topWork.map(t => {
+              const isUrgent = t.due && t.due <= today;
+              return (
+                <div key={t.id} style={{ display: "flex", alignItems: "flex-start", gap: 7 }}>
+                  <div style={{
+                    width: 6, height: 6, borderRadius: "50%", flexShrink: 0, marginTop: 5,
+                    background: isUrgent ? "var(--red)" : "var(--amber)",
+                  }} />
+                  <span style={{ fontSize: 12, color: "var(--text-1)", lineHeight: 1.45, overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 1, WebkitBoxOrient: "vertical" }}>
+                    {t.title}
+                  </span>
+                </div>
+              );
+            })}
+            {tasks.urgent.length + tasks.soon.length > 3 && (
+              <div style={{ fontSize: 10, color: "var(--text-3)", paddingLeft: 13 }}>
+                +{tasks.urgent.length + tasks.soon.length - 3} งานอีก
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: 12, color: "var(--text-1)", fontWeight: 600, marginBottom: 4 }}>
-            Day {daysElapsed}/{OKR_DAYS}
-          </div>
-          <ProgressBar pct={okrPct} color="var(--warm-gold)" />
-          <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 6 }}>
-            เหลือ {daysLeft} วัน
-          </div>
+        )}
 
-          {/* Daily nudge */}
-          <div style={{ marginTop: 8, fontSize: 10, color: "var(--warm-gold)", borderTop: "1px solid var(--border-soft)", paddingTop: 6, lineHeight: 1.4 }}>
-            {isWeekend
-              ? "🌿 วันหยุด — เคลียงาน + OKR ได้เลยค่ะ"
-              : daysElapsed % 3 === 0
-                ? "🎨 วันนี้ควรทำ Art Direction ด้วยค่ะ"
-                : "💼 วันนี้มีเวลา Side Project ไหมคะ?"}
-          </div>
-        </div>
+        {topWork.length === 0 && (
+          <div style={{ fontSize: 12, color: "var(--text-3)", textAlign: "center", padding: "4px 0" }}>ไม่มีงานด่วนวันนี้ ✨</div>
+        )}
       </div>
     </div>
   );
@@ -197,7 +176,7 @@ function ls(key: string, def: string) {
 function lsSet(key: string, val: string) { localStorage.setItem(key, val); }
 
 const DISCIPLINES = ["Brand Identity", "Social Media", "Packaging / NPD", "Motion / Video", "Editorial / Print"];
-const TOOLS_LABEL = ["Tool 1", "Tool 2"];
+const DEFAULT_TOOLS = ["Figma", "Framer"];
 
 /* ── KR row ── */
 function KRRow({ label, pct, color, children }: { label: string; pct: number; color: string; children?: React.ReactNode }) {
@@ -224,6 +203,28 @@ function Counter({ value, min, max, onChange, color }: { value: number; min: num
   );
 }
 
+/* ── Tool chip with long-press to rename ── */
+function ToolChip({ label, on, onTap, onLongPress }: { label: string; on: boolean; onTap: () => void; onLongPress: () => void }) {
+  const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startPress = () => { timerRef.current = setTimeout(() => { onLongPress(); try { navigator.vibrate(30); } catch {} }, 500); };
+  const cancelPress = () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  return (
+    <button
+      onClick={onTap}
+      onTouchStart={startPress} onTouchEnd={cancelPress} onTouchMove={cancelPress}
+      onMouseDown={startPress}  onMouseUp={cancelPress}  onMouseLeave={cancelPress}
+      onContextMenu={e => { e.preventDefault(); onLongPress(); }}
+      style={{
+        padding: "5px 12px", borderRadius: 8, fontSize: 10, cursor: "pointer",
+        background: on ? "var(--cat-holiday-bg)" : "var(--bg-raised)",
+        border: `1px solid ${on ? "var(--cat-holiday)" : "var(--border)"}`,
+        color: on ? "var(--cat-holiday)" : "var(--text-3)", fontWeight: on ? 700 : 400,
+        userSelect: "none", WebkitUserSelect: "none",
+      } as React.CSSProperties}
+    >{on ? "✓ " : ""}{label}</button>
+  );
+}
+
 /* ── OKR Tracker panel ── */
 function OKRTracker() {
   const now = new Date();
@@ -245,6 +246,10 @@ function OKRTracker() {
   const [sessions, setSessions] = useState(() => parseInt(ls("okr_sessions", "0")));
   const [notes, setNotes]       = useState(() => parseInt(ls("okr_notes", "0")));
   const [tools, setTools]       = useState<string[]>(() => JSON.parse(ls("okr_tools", "[]")));
+  const [toolNames, setToolNames] = useState<[string, string]>(() => {
+    try { return JSON.parse(ls("okr_tool_names", JSON.stringify(DEFAULT_TOOLS))); } catch { return DEFAULT_TOOLS as [string, string]; }
+  });
+  const [editingTool, setEditingTool] = useState<number | null>(null);
 
   /* score calculations */
   const o1Score = ((portfolio.length / 5) * 0.4) + (Math.min(projects / 3, 1) * 0.4) + (courseDone ? 0.2 : 0);
@@ -257,14 +262,14 @@ function OKRTracker() {
     setter(next); lsSet(key, JSON.stringify(next));
   };
 
-  const sectionHead = (emoji: string, label: string, score: number, color: string) => (
+  const sectionHead = (icon: React.ReactNode, label: string, score: number, color: string) => (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-      <span style={{ fontSize: 12, fontWeight: 700, color }}>{emoji} {label}</span>
+      <span style={{ fontSize: 12, fontWeight: 700, color, display: "flex", alignItems: "center", gap: 5 }}>{icon} {label}</span>
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
         <span style={{ fontSize: 10, color: "var(--text-3)" }}>on-track: {Math.round(timePct * 100)}%</span>
         <span style={{
-          fontSize: 10, fontWeight: 700, color: score >= timePct ? "var(--green)" : "var(--red)",
-          background: score >= timePct ? "var(--green-soft)" : "var(--red-soft)",
+          fontSize: 10, fontWeight: 700, color: score >= timePct ? "var(--steel-teal)" : "var(--red)",
+          background: score >= timePct ? "rgba(51,92,103,0.13)" : "var(--red-soft)",
           padding: "2px 6px", borderRadius: 6,
         }}>{Math.round(score * 100)}%</span>
       </div>
@@ -277,14 +282,16 @@ function OKRTracker() {
       {/* ── Overall header ── */}
       <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--bg-raised)", borderRadius: 12 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)" }}>⏱ Day {daysElapsed} / {OKR_DAYS} · เหลือ {daysLeft} วัน</span>
-          <span style={{ fontSize: 12, fontWeight: 800, color: totalScore >= timePct ? "var(--green)" : "var(--amber)" }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-2)", display: "flex", alignItems: "center", gap: 4 }}>
+            <ClockIcon size={11} color="var(--text-2)" /> Day {daysElapsed} / {OKR_DAYS} · เหลือ {daysLeft} วัน
+          </span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: totalScore >= timePct ? "var(--steel-teal)" : "var(--amber)" }}>
             รวม {Math.round(totalScore * 100)}%
           </span>
         </div>
         <ProgressBar pct={timePct} color="var(--border)" />
         <div style={{ marginTop: 3 }}>
-          <ProgressBar pct={totalScore} color={totalScore >= timePct ? "var(--green)" : "var(--amber)"} />
+          <ProgressBar pct={totalScore} color={totalScore >= timePct ? "var(--steel-teal)" : "var(--amber)"} />
         </div>
         <div style={{ fontSize: 9, color: "var(--text-3)", marginTop: 4 }}>
           แถบบน = เวลาที่ผ่านไป · แถบล่าง = ความคืบหน้าจริง
@@ -293,7 +300,7 @@ function OKRTracker() {
 
       {/* ══ O1: Art Direction ══ */}
       <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid var(--border-soft)" }}>
-        {sectionHead("🎨", "O1: Art Direction ครบวงจร", o1Score, "var(--cat-design)")}
+        {sectionHead(<PenIcon size={13} color="var(--cat-design)" />, "O1: Art Direction ครบวงจร", o1Score, "var(--cat-design)")}
 
         <KRRow label="KR1 · Portfolio disciplines (0/5)" pct={portfolio.length / 5} color="var(--cat-design)">
           <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
@@ -328,7 +335,7 @@ function OKRTracker() {
 
       {/* ══ O2: รายได้เสริม ══ */}
       <div style={{ marginBottom: 16, paddingBottom: 16, borderBottom: "1px solid var(--border-soft)" }}>
-        {sectionHead("💰", "O2: รายได้เสริม 20k", o2Score, "var(--warm-gold)")}
+        {sectionHead(<TrendingUpIcon size={13} color="var(--warm-gold)" />, "O2: รายได้เสริม 20k", o2Score, "var(--warm-gold)")}
 
         <KRRow label={`KR1 · Reach out clients (${clientsOut}/5)`} pct={Math.min(clientsOut / 5, 1)} color="var(--warm-gold)">
           <Counter value={clientsOut} min={0} max={20} color="var(--warm-gold)"
@@ -341,7 +348,7 @@ function OKRTracker() {
             background: firstClient ? "var(--brand-soft)" : "var(--bg-raised)",
             border: `1px solid ${firstClient ? "var(--warm-gold)" : "var(--border)"}`,
             color: firstClient ? "var(--warm-gold)" : "var(--text-3)", fontWeight: firstClient ? 700 : 400,
-          }}>{firstClient ? "✓ มี client แล้ว! 🎉" : "ยังไม่มี client"}</button>
+          }}>{firstClient ? "✓ มี client แล้ว!" : "ยังไม่มี client"}</button>
         </KRRow>
 
         <KRRow label={`KR3 · รายได้สะสม (${income.toLocaleString()} / 20,000 ฿)`} pct={Math.min(income / OKR_INCOME_TARGET, 1)} color="var(--warm-gold)">
@@ -366,7 +373,7 @@ function OKRTracker() {
 
       {/* ══ O3: พัฒนาทักษะ ══ */}
       <div>
-        {sectionHead("📚", "O3: พัฒนาทักษะต่อเนื่อง", o3Score, "var(--cat-holiday)")}
+        {sectionHead(<BookIcon size={13} color="var(--cat-holiday)" />, "O3: พัฒนาทักษะต่อเนื่อง", o3Score, "var(--cat-holiday)")}
 
         <KRRow label={`KR1 · Learning sessions (${sessions}/12 สัปดาห์)`} pct={Math.min(sessions / 12, 1)} color="var(--cat-holiday)">
           <Counter value={sessions} min={0} max={12} color="var(--cat-holiday)"
@@ -379,23 +386,153 @@ function OKRTracker() {
         </KRRow>
 
         <KRRow label={`KR3 · Tools ใหม่ (${tools.length}/2)`} pct={Math.min(tools.length / 2, 1)} color="var(--cat-holiday)">
-          <div style={{ display: "flex", gap: 5 }}>
-            {TOOLS_LABEL.map((t, i) => {
+          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+            {([0, 1] as const).map(i => {
               const key = `tool_${i}`;
               const on = tools.includes(key);
-              return (
-                <button key={key} onClick={() => toggle(tools, key, "okr_tools", setTools)} style={{
-                  padding: "5px 12px", borderRadius: 8, fontSize: 10, cursor: "pointer",
-                  background: on ? "var(--cat-holiday-bg)" : "var(--bg-raised)",
-                  border: `1px solid ${on ? "var(--cat-holiday)" : "var(--border)"}`,
-                  color: on ? "var(--cat-holiday)" : "var(--text-3)", fontWeight: on ? 700 : 400,
-                }}>{on ? "✓ " : ""}{t}</button>
+              const name = toolNames[i] || DEFAULT_TOOLS[i];
+              const isEditing = editingTool === i;
+              return isEditing ? (
+                <input
+                  key={key}
+                  autoFocus
+                  defaultValue={name}
+                  onBlur={e => {
+                    const val = e.target.value.trim() || DEFAULT_TOOLS[i];
+                    const next: [string, string] = [...toolNames] as [string, string];
+                    next[i] = val;
+                    setToolNames(next);
+                    lsSet("okr_tool_names", JSON.stringify(next));
+                    setEditingTool(null);
+                  }}
+                  onKeyDown={e => { if (e.key === "Enter") (e.target as HTMLInputElement).blur(); }}
+                  style={{
+                    padding: "4px 8px", borderRadius: 8, fontSize: 10,
+                    background: "var(--bg-raised)", border: `1px solid var(--cat-holiday)`,
+                    color: "var(--cat-holiday)", fontWeight: 700,
+                    outline: "none", width: 90, fontFamily: "inherit",
+                  }}
+                />
+              ) : (
+                <ToolChip
+                  key={key}
+                  label={name}
+                  on={on}
+                  onTap={() => toggle(tools, key, "okr_tools", setTools)}
+                  onLongPress={() => setEditingTool(i)}
+                />
               );
             })}
+            <span style={{ fontSize: 9, color: "var(--text-3)", alignSelf: "center" }}>กดค้างเพื่อเปลี่ยนชื่อ</span>
           </div>
         </KRRow>
       </div>
 
+    </div>
+  );
+}
+
+/* ── Personal Tasks — localStorage only ── */
+function PersonalTasks() {
+  const [items, setItems] = useState<{ id: string; title: string }[]>(() => {
+    try { return JSON.parse(ls("personal_tasks", "[]")); } catch { return []; }
+  });
+  const [input, setInput] = useState("");
+  const [doneIds, setDoneIds] = useState<string[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const add = () => {
+    const t = input.trim();
+    if (!t) return;
+    const next = [...items, { id: Date.now().toString(), title: t }];
+    setItems(next);
+    lsSet("personal_tasks", JSON.stringify(next));
+    setInput("");
+    inputRef.current?.focus();
+  };
+
+  const done = (id: string) => {
+    try { navigator.vibrate(18); } catch {}
+    setDoneIds(prev => [...prev, id]);
+    setTimeout(() => {
+      setItems(prev => {
+        const next = prev.filter(x => x.id !== id);
+        lsSet("personal_tasks", JSON.stringify(next));
+        return next;
+      });
+      setDoneIds(prev => prev.filter(x => x !== id));
+    }, 280);
+  };
+
+  return (
+    <div>
+      {/* ── Add input ── */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") add(); }}
+          placeholder="เพิ่มงานส่วนตัว..."
+          style={{
+            flex: 1, background: "var(--bg-input)",
+            border: `1px solid ${input ? "rgba(255,185,0,0.4)" : "var(--border)"}`,
+            borderRadius: 10, padding: "9px 12px", fontSize: 13,
+            color: "var(--text-1)", outline: "none", fontFamily: "inherit",
+            transition: "border 0.15s",
+          }}
+        />
+        <button
+          onClick={add}
+          disabled={!input.trim()}
+          style={{
+            width: 38, height: 38, borderRadius: 10, border: "none", flexShrink: 0,
+            background: input.trim() ? "var(--amber)" : "var(--border)",
+            color: input.trim() ? "#000" : "var(--text-3)",
+            fontSize: 20, fontWeight: 400, lineHeight: 1,
+            cursor: input.trim() ? "pointer" : "default", transition: "all 0.15s",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >+</button>
+      </div>
+
+      {/* ── Task list ── */}
+      {items.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "14px 0 6px", color: "var(--text-3)", fontSize: 12 }}>
+          ไม่มีงานส่วนตัว ✨
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          {items.map(item => {
+            const isDone = doneIds.includes(item.id);
+            return (
+              <div key={item.id} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "10px 12px", borderRadius: 10,
+                background: "var(--bg-input)", border: "1px solid var(--border)",
+                opacity: isDone ? 0 : 1,
+                transform: isDone ? "translateX(20px)" : "none",
+                transition: "opacity 0.25s, transform 0.28s cubic-bezier(0.32,0.72,0,1)",
+              }}>
+                {/* Checkbox */}
+                <button onClick={() => done(item.id)} style={{
+                  width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
+                  border: "2px solid var(--border)", background: "transparent",
+                  cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "all 0.15s",
+                }} />
+                <span style={{ flex: 1, fontSize: 13, color: "var(--text-1)", lineHeight: 1.4 }}>
+                  {item.title}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      <div style={{ fontSize: 9, color: "var(--text-3)", marginTop: 10, textAlign: "center" }}>
+        บันทึกใน device นี้ · ไม่ sync Notion
+      </div>
     </div>
   );
 }
@@ -420,7 +557,9 @@ export default function QuickActionsView({
       {/* ═══ Work section label ═══ */}
       <div style={{ fontSize: 9, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.12em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-        🏢 DAISI DESIGN
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <BriefcaseIcon size={10} color="var(--text-3)" /> DAISI DESIGN
+        </span>
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
       </div>
 
@@ -447,14 +586,17 @@ export default function QuickActionsView({
       {/* ═══ Personal section label ═══ */}
       <div style={{ fontSize: 9, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.12em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-        🎯 งานตัวเอง &amp; OKR
+        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <TargetIcon size={10} color="var(--text-3)" /> งานตัวเอง &amp; OKR
+        </span>
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
       </div>
 
       {/* ── OKR Tracker ── */}
       <div style={{ marginBottom: 10 }}>
         <ActionCard
-          emoji="🎯" title="OKR Progress"
+          icon={<TargetIcon size={22} color="var(--warm-gold)" />}
+          title="OKR Progress"
           desc="Art Direction · รายได้เสริม · ทักษะ"
           color="var(--warm-gold)"
           onClick={() => toggle("okr")}
@@ -465,25 +607,18 @@ export default function QuickActionsView({
         )}
       </div>
 
-      {/* ── Personal tasks placeholder ── */}
+      {/* ── Personal tasks ── */}
       <div style={{ marginBottom: 10 }}>
         <ActionCard
-          emoji="🤖" title="งานส่วนตัว (เร็วๆ นี้)"
-          desc="เลขาแพรจะส่ง personal tasks มาได้โดยตรง"
-          color="var(--text-3)"
+          icon={<FileTextIcon size={22} color="var(--cat-holiday)" />}
+          title="งานส่วนตัว"
+          desc="จด to-do ส่วนตัว · บันทึกใน device"
+          color="var(--cat-holiday)"
           onClick={() => toggle("personal")}
           active={panel === "personal"}
         />
         {panel === "personal" && (
-          <PanelWrap>
-            <div style={{ textAlign: "center", padding: "16px 0" }}>
-              <div style={{ fontSize: 28, marginBottom: 10 }}>🤖</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-2)", marginBottom: 8 }}>กำลังพัฒนาค่ะ</div>
-              <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.6 }}>
-                เลขาแพร + เลขาพีช จะสามารถ<br/>ส่ง task ส่วนตัวมาแสดงที่นี่ได้<br/>เชื่อมกับ Notion Personal DB ค่ะ
-              </div>
-            </div>
-          </PanelWrap>
+          <PanelWrap><PersonalTasks /></PanelWrap>
         )}
       </div>
 

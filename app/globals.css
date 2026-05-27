@@ -27,6 +27,10 @@
   --text-2:      #949597;
   --text-3:      #3a3a48;
 
+  /* ─── Icon tint — customizable via Settings ─── */
+  --icon-tint:   #949597;   /* default = text-2, change to customize */
+  --icon-active: #ffb900;   /* active/selected icon = amber */
+
   /* ─── Brand accent ─── */
   --brand:       #ffb900;
   --brand-soft:  rgba(255,185,0,0.12);
@@ -105,4 +109,29 @@ input, button { font-family: inherit; }
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+/* ── iOS-style spring sheet — slide from bottom ── */
+@keyframes sheetIn {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* ── Pull-to-refresh spinner ── */
+@keyframes ptr-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── Backdrop fade ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Scroll lock when overlay open ── */
+body.modal-open {
+  overflow: hidden;
+  /* iOS Safari: prevent background bounce */
+  touch-action: none;
 }

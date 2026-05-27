@@ -1,11 +1,23 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  LinkIcon, UserIcon, KeyIcon, MoonIcon, SunIcon, GlobeIcon, SliderIcon,
+  EyeIcon, EyeOffIcon, PinIcon, GearIcon,
+} from "./icons";
 
 export interface AreaItem { id: string; name: string; emoji: string | null; }
 
-const STORAGE_HIDDEN = "hidden_areas";
-const STORAGE_PINNED = "pinned_areas";
-const STORAGE_THEME  = "app_theme";
+export const STORAGE_HIDDEN = "hidden_areas";
+export const STORAGE_PINNED = "pinned_areas";
+export const STORAGE_THEME  = "app_theme";
+
+export function togglePinArea(id: string): string[] {
+  if (typeof window === "undefined") return [];
+  const prev: string[] = JSON.parse(localStorage.getItem(STORAGE_PINNED) || "[]");
+  const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
+  localStorage.setItem(STORAGE_PINNED, JSON.stringify(next));
+  return next;
+}
 
 export function getVisibleAreaIds(all: AreaItem[]): string[] {
   if (typeof window === "undefined") return all.map(a => a.id);
@@ -40,14 +52,14 @@ function SectionLabel({ title, hint }: { title: string; hint?: string }) {
 }
 
 function SettingsRow({ icon, label, value, dim, right }: {
-  icon: string; label: string; value?: string; dim?: boolean; right?: React.ReactNode;
+  icon: React.ReactNode; label: string; value?: string; dim?: boolean; right?: React.ReactNode;
 }) {
   return (
     <div style={{
       display: "flex", alignItems: "center", gap: 12,
       padding: "13px 20px", borderBottom: "1px solid var(--border-soft)",
     }}>
-      <span style={{ fontSize: 16, width: 24, textAlign: "center", flexShrink: 0 }}>{icon}</span>
+      <span style={{ width: 22, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "var(--icon-tint)" }}>{icon}</span>
       <span style={{ flex: 1, fontSize: 13, color: dim ? "var(--text-3)" : "var(--text-1)" }}>{label}</span>
       {value && <span style={{ fontSize: 11, color: "var(--text-3)" }}>{value}</span>}
       {right}
@@ -59,8 +71,8 @@ function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
     <div onClick={onToggle} style={{
       width: 44, height: 26, borderRadius: 13, flexShrink: 0, cursor: "pointer",
-      background: on ? "var(--green)" : "var(--bg-raised)",
-      border: `1.5px solid ${on ? "var(--green)" : "var(--border)"}`,
+      background: on ? "var(--amber)" : "var(--bg-raised)",
+      border: `1.5px solid ${on ? "var(--amber)" : "var(--border)"}`,
       position: "relative", transition: "background 0.2s, border-color 0.2s",
     }}>
       <div style={{
@@ -75,23 +87,7 @@ function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   );
 }
 
-/* ── Eye icons (SVG) ── */
-function EyeOn() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
-    </svg>
-  );
-}
-function EyeOff() {
-  return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-      <line x1="1" y1="1" x2="23" y2="23"/>
-    </svg>
-  );
-}
+/* Eye icons now imported from icons.tsx */
 
 /* ── Area section header ── */
 function AreaSectionHeader({ label, count, actionLabel, onAction }: {
@@ -149,9 +145,12 @@ function AreaRow({ area, visible, pinned, onToggle, onPin }: {
         userSelect: "none", WebkitUserSelect: "none",
       } as React.CSSProperties}
     >
-      {/* Emoji */}
-      <span style={{ fontSize: 14, width: 20, textAlign: "center", flexShrink: 0, marginRight: 8 }}>
-        {pinned ? "📌" : (area.emoji || "📁")}
+      {/* Pin / area icon */}
+      <span style={{ width: 20, display: "flex", justifyContent: "center", flexShrink: 0, marginRight: 8 }}>
+        {pinned
+          ? <PinIcon size={15} color="var(--amber)" />
+          : <span style={{ fontSize: 14 }}>{area.emoji || "·"}</span>
+        }
       </span>
       {/* Name */}
       <span style={{
@@ -168,7 +167,7 @@ function AreaRow({ area, visible, pinned, onToggle, onPin }: {
         display: "flex", alignItems: "center",
         flexShrink: 0,
       }}>
-        {visible ? <EyeOn /> : <EyeOff />}
+        {visible ? <EyeIcon size={17} /> : <EyeOffIcon size={17} />}
       </button>
     </div>
   );
@@ -176,18 +175,32 @@ function AreaRow({ area, visible, pinned, onToggle, onPin }: {
 
 /* ── Main Sheet ── */
 export default function SettingsSheet({ onClose }: { onClose: () => void }) {
-  const [areas, setAreas]     = useState<AreaItem[]>([]);
-  const [hidden, setHidden]   = useState<string[]>([]);
-  const [pinned, setPinned]   = useState<string[]>([]);
-  const [theme, setTheme]     = useState<"dark" | "light">("dark");
-  const [loading, setLoading] = useState(true);
+  const [areas, setAreas]       = useState<AreaItem[]>([]);
+  const [hidden, setHidden]     = useState<string[]>([]);
+  const [pinned, setPinned]     = useState<string[]>([]);
+  const [theme, setTheme]       = useState<"dark" | "light">("dark");
+  const [iconTint, setIconTint] = useState("#949597");
+  const [loading, setLoading]   = useState(true);
   const [areasOpen, setAreasOpen] = useState(false);
+  const [profileName, setProfileName] = useState("คิม");
+  const [editingName, setEditingName] = useState(false);
+  const nameInputRef   = useRef<HTMLInputElement>(null);
+  const settingsDragRef= useRef<{startY:number; dy:number}|null>(null);
+  const [sheetTransY,   setSheetTransY]   = useState(0);
+  const [sheetDragging, setSheetDragging] = useState(false);
 
   useEffect(() => {
     setHidden(JSON.parse(localStorage.getItem(STORAGE_HIDDEN) || "[]"));
     setPinned(JSON.parse(localStorage.getItem(STORAGE_PINNED) || "[]"));
     const saved = localStorage.getItem(STORAGE_THEME) as "dark" | "light" | null;
     setTheme(saved || "dark");
+    const savedTint = localStorage.getItem("icon_tint");
+    if (savedTint) {
+      setIconTint(savedTint);
+      document.documentElement.style.setProperty("--icon-tint", savedTint);
+    }
+    const savedName = localStorage.getItem("profile_name");
+    if (savedName) setProfileName(savedName);
     fetch("/api/areas")
       .then(r => r.json())
       .then(d => { setAreas(d.areas || []); setLoading(false); });
@@ -215,6 +228,21 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
       return next;
     });
 
+  const applyIconTint = (color: string) => {
+    setIconTint(color);
+    localStorage.setItem("icon_tint", color);
+    document.documentElement.style.setProperty("--icon-tint", color);
+  };
+
+  const ICON_TINTS = [
+    { label: "Gray",      value: "#949597" },
+    { label: "Amber",     value: "#ffb900" },
+    { label: "Teal",      value: "#335c67" },
+    { label: "Gold",      value: "#dfa040" },
+    { label: "White",     value: "#e8e8e8" },
+    { label: "Cream",     value: "#ede4a0" },
+  ];
+
   const sorted = sortAreas(areas, pinned);
 
   return (
@@ -231,9 +259,33 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
         border: "1px solid var(--border)",
         paddingBottom: "calc(20px + env(safe-area-inset-bottom))",
         maxHeight: "82dvh", overflowY: "auto",
+        transform: `translateY(${sheetTransY}px)`,
+        transition: sheetDragging ? "none" : "transform 0.22s ease-out",
       }}>
-        {/* Handle */}
-        <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
+        {/* Handle — swipe down to dismiss */}
+        <div
+          style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px", cursor: "s-resize", touchAction: "none", userSelect: "none" } as React.CSSProperties}
+          onPointerDown={e => {
+            e.currentTarget.setPointerCapture(e.pointerId);
+            settingsDragRef.current = { startY: e.clientY, dy: 0 };
+            setSheetDragging(true);
+            setSheetTransY(0);
+          }}
+          onPointerMove={e => {
+            if (!settingsDragRef.current) return;
+            const dy = e.clientY - settingsDragRef.current.startY;
+            settingsDragRef.current.dy = dy;
+            if (dy > 0) setSheetTransY(dy);
+          }}
+          onPointerUp={() => {
+            if (!settingsDragRef.current) return;
+            const dy = settingsDragRef.current.dy;
+            settingsDragRef.current = null;
+            setSheetDragging(false);
+            if (dy > 100) onClose();
+            else setSheetTransY(0);
+          }}
+        >
           <div style={{ width: 36, height: 4, borderRadius: 2, background: "var(--border)" }} />
         </div>
 
@@ -241,26 +293,112 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 20px 2px" }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>ตั้งค่า</span>
           <button onClick={onClose} style={{
-            background: "none", border: "none", fontSize: 18,
-            color: "var(--text-3)", cursor: "pointer", padding: "4px 6px",
-          }}>✕</button>
+            background: "none", border: "none", cursor: "pointer", padding: "4px 6px",
+            display: "flex", alignItems: "center", color: "var(--text-3)",
+          }}>
+            <GearIcon size={16} color="var(--text-3)" />
+          </button>
         </div>
 
         {/* ── บัญชีผู้ใช้ ── */}
         <SectionLabel title="บัญชีผู้ใช้" />
-        <SettingsRow icon="🔗" label="Notion Workspace" value="เชื่อมต่อแล้ว ✓" />
-        <SettingsRow icon="👤" label="โปรไฟล์ & ชื่อผู้ใช้" value="เร็วๆ นี้" dim />
-        <SettingsRow icon="🔑" label="เปลี่ยน Notion Token" value="เร็วๆ นี้" dim />
+        <SettingsRow icon={<LinkIcon size={16} />} label="Notion Workspace" value="เชื่อมต่อแล้ว ✓" />
+
+        {/* Profile name — editable inline */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 12,
+          padding: "13px 20px", borderBottom: "1px solid var(--border-soft)",
+        }}>
+          <span style={{ width: 22, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, color: "var(--icon-tint)" }}>
+            <UserIcon size={16} />
+          </span>
+          <span style={{ fontSize: 13, color: "var(--text-1)", flexShrink: 0 }}>ชื่อที่แสดง</span>
+          {editingName ? (
+            <input
+              ref={nameInputRef}
+              defaultValue={profileName}
+              onBlur={e => {
+                const val = e.target.value.trim() || "คิม";
+                setProfileName(val);
+                localStorage.setItem("profile_name", val);
+                // dispatch event so Greeting updates without reload
+                window.dispatchEvent(new Event("profile-name-change"));
+                setEditingName(false);
+              }}
+              onKeyDown={e => { if (e.key === "Enter" || e.key === "Escape") (e.target as HTMLInputElement).blur(); }}
+              autoFocus
+              style={{
+                flex: 1, background: "var(--bg-input)",
+                border: "1.5px solid var(--amber)", borderRadius: 8,
+                padding: "5px 10px", fontSize: 13, color: "var(--text-1)",
+                fontFamily: "inherit", outline: "none",
+              }}
+            />
+          ) : (
+            <button
+              onClick={() => { setEditingName(true); setTimeout(() => nameInputRef.current?.focus(), 30); }}
+              style={{
+                flex: 1, textAlign: "left", background: "var(--bg-input)",
+                border: "1px solid var(--border)", borderRadius: 8,
+                padding: "5px 10px", fontSize: 13,
+                color: "var(--text-2)", cursor: "pointer", fontFamily: "inherit",
+              }}
+            >
+              {profileName}
+            </button>
+          )}
+        </div>
+
+        <SettingsRow icon={<KeyIcon size={16} />} label="เปลี่ยน Notion Token" value="เร็วๆ นี้" dim />
 
         {/* ── หน้าจอ ── */}
         <SectionLabel title="หน้าจอ" />
         <SettingsRow
-          icon={theme === "dark" ? "🌙" : "☀️"}
+          icon={theme === "dark" ? <MoonIcon size={16} /> : <SunIcon size={16} />}
           label={theme === "dark" ? "โหมดมืด" : "โหมดสว่าง"}
           right={<ToggleSwitch on={theme === "light"} onToggle={toggleTheme} />}
         />
-        <SettingsRow icon="🌐" label="ภาษา" value="ไทย — เร็วๆ นี้" dim />
-        <SettingsRow icon="🎨" label="Custom Icons & Themes" value="เร็วๆ นี้" dim />
+        <SettingsRow icon={<GlobeIcon size={16} />} label="ภาษา" value="ไทย — เร็วๆ นี้" dim />
+
+        {/* ── ไอคอน & สี ── */}
+        <SectionLabel title="ไอคอน & สี" hint="· เลือก tint สำหรับ icon ทั้งหมด" />
+        <div style={{ padding: "8px 20px 16px" }}>
+          {/* Tint color presets */}
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+            {ICON_TINTS.map(t => {
+              const on = iconTint === t.value;
+              return (
+                <button key={t.value} onClick={() => applyIconTint(t.value)} style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 5,
+                  background: "none", border: "none", cursor: "pointer", padding: "4px 2px",
+                }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: "50%",
+                    background: t.value,
+                    border: `2px solid ${on ? "var(--amber)" : "var(--border)"}`,
+                    boxShadow: on ? "0 0 0 3px rgba(255,185,0,0.25)" : "none",
+                    transition: "all 0.15s",
+                  }} />
+                  <span style={{ fontSize: 9, color: on ? "var(--amber)" : "var(--text-3)", fontWeight: on ? 700 : 400 }}>
+                    {t.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {/* Upload icon pack placeholder */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 10,
+            padding: "10px 14px", borderRadius: 10,
+            border: "1px dashed var(--border)", opacity: 0.6,
+          }}>
+            <SliderIcon size={16} color="var(--text-3)" />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 12, color: "var(--text-2)", fontWeight: 600 }}>อัพโหลด Icon Pack</div>
+              <div style={{ fontSize: 10, color: "var(--text-3)" }}>เร็วๆ นี้ — แต่งแอพด้วย icon ของตัวเอง</div>
+            </div>
+          </div>
+        </div>
 
         {/* ── พื้นที่ ── */}
         <button
