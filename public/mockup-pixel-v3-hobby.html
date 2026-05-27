@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>PIXEL v3 — Hobby Tracker + Gamification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+
+:root {
+  --bg:     #0d0f1e;
+  --card:   #13152a;
+  --card2:  #191c33;
+  --border: #252844;
+  --t1:     #eeeef8;
+  --t2:     #8888bb;
+  --t3:     #444466;
+  --gold:   #f5c518;
+  --red:    #ff5566;
+  --green:  #44dd88;
+  --blue:   #5599ff;
+  --purple: #aa66ff;
+  --teal:   #33ddcc;
+  --orange: #ff8844;
+  --pink:   #ff66aa;
+  --lime:   #88ee44;
+}
+
+body {
+  background: #080a18;
+  color: var(--t1);
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ── TAB NAV (mockup switcher) ── */
+.mockup-tabs {
+  display: flex; gap: 6px; justify-content: center;
+  padding: 20px 16px 12px;
+  position: sticky; top: 0; z-index: 100;
+  background: #080a18;
+}
+.mtab {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; letter-spacing: 0.08em;
+  padding: 8px 12px; border-radius: 8px;
+  border: 1px solid var(--border);
+  color: var(--t3); background: var(--card);
+  cursor: pointer; transition: all 0.15s;
+  white-space: nowrap;
+}
+.mtab.on {
+  border-color: var(--gold); color: var(--gold);
+  background: rgba(245,197,24,0.08);
+}
+
+/* Each screen hidden by default */
+.screen { display: none; }
+.screen.visible { display: block; }
+
+/* ── SCREEN WRAPPER (phone frame) ── */
+.screen {
+  max-width: 390px;
+  margin: 0 auto 60px;
+  background: var(--bg);
+  min-height: 844px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 40px;
+  box-shadow: 0 0 0 2px #252844, 0 30px 80px rgba(0,0,0,0.8);
+}
+
+/* Screen label */
+.screen-label {
+  text-align: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: #444466;
+  letter-spacing: 0.15em;
+  margin: 40px 0 16px;
+}
+
+/* ══════════════════════════════════════
+   SHARED — HEADER
+══════════════════════════════════════ */
+.header {
+  background: linear-gradient(180deg, #0a0c1f 0%, #0d0f1e 100%);
+  padding: 48px 20px 16px;
+  position: relative;
+  border-bottom: 2px solid var(--border);
+}
+.header::before {
+  content: '★ · ✦ · ★ · ✦ · ★ · ✦ · ★';
+  position: absolute; top: 14px; left: 20px; right: 20px;
+  font-size: 10px; color: rgba(255,255,255,0.1);
+  letter-spacing: 8px; white-space: nowrap; overflow: hidden;
+}
+.header-row { display: flex; align-items: flex-end; gap: 14px; }
+.char-wrap { position: relative; flex-shrink: 0; }
+.char-emoji {
+  width: 56px; height: 68px;
+  font-size: 40px;
+  display: flex; align-items: center; justify-content: center;
+  filter: drop-shadow(0 4px 8px rgba(245,197,24,0.4));
+}
+.lv-badge {
+  position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px; padding: 2px 5px; white-space: nowrap;
+}
+.speech-bubble {
+  background: var(--card2); border: 2px solid var(--border);
+  border-radius: 12px 12px 12px 2px; padding: 12px 14px; flex: 1;
+  position: relative;
+}
+.speech-bubble::before {
+  content: ''; position: absolute; left: -8px; bottom: 16px;
+  border: 4px solid transparent; border-right-color: var(--border);
+}
+.speech-bubble::after {
+  content: ''; position: absolute; left: -5px; bottom: 17px;
+  border: 3px solid transparent; border-right-color: var(--card2);
+}
+.speech-name { font-family: 'Press Start 2P', monospace; font-size: 6px; color: var(--gold); margin-bottom: 6px; }
+.speech-text { font-size: 15px; font-weight: 700; color: var(--t1); line-height: 1.3; }
+.speech-sub  { font-size: 12px; color: var(--t2); margin-top: 3px; font-weight: 600; }
+
+/* XP strip */
+.xp-strip {
+  display: flex; margin-top: 14px;
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 10px; overflow: hidden;
+}
+.xp-cell {
+  flex: 1; padding: 10px 8px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+.xp-cell:last-child { border-right: none; }
+.xp-icon { font-size: 16px; }
+.xp-val  { font-family: 'Press Start 2P', monospace; font-size: 9px; margin-top: 4px; }
+.xp-label { font-size: 8px; color: var(--t3); margin-top: 3px; font-weight: 700; }
+
+/* ══════════════════════════════════════
+   CONTENT PAD
+══════════════════════════════════════ */
+.content { padding: 18px 16px 120px; display: flex; flex-direction: column; gap: 20px; }
+
+.sec-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: var(--t2);
+  letter-spacing: 0.1em; margin-bottom: 10px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sec-action {
+  font-size: 9px; font-weight: 800;
+  color: var(--blue); cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ── Card base ── */
+.card {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 14px; overflow: hidden;
+}
+
+/* ══════════════════════════════════════
+   HOBBY SKILL CARD  (main feature)
+══════════════════════════════════════ */
+.hobby-card {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 14px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 12px;
+  cursor: pointer; transition: border-color 0.2s;
+}
+.hobby-card:hover { border-color: var(--border); }
+
+/* Top row */
+.hc-top { display: flex; align-items: center; gap: 12px; }
+.hc-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.hc-meta { flex: 1; }
+.hc-name { font-size: 15px; font-weight: 800; color: var(--t1); }
+.hc-type {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; margin-top: 3px; letter-spacing: 0.08em;
+}
+.hc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+.hc-streak {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; color: var(--orange);
+}
+.hc-lv {
+  font-size: 10px; font-weight: 800;
+  background: rgba(170,102,255,0.15);
+  border: 1px solid rgba(170,102,255,0.3);
+  color: var(--purple); border-radius: 5px;
+  padding: 2px 8px;
+}
+
+/* XP Progress bar */
+.hc-bar-wrap { width: 100%; }
+.hc-bar-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.hc-bar-label { font-size: 10px; font-weight: 700; color: var(--t2); }
+.hc-bar-xp    { font-family: 'Press Start 2P', monospace; font-size: 7px; }
+.hc-bar {
+  height: 8px; background: rgba(255,255,255,0.06);
+  border-radius: 4px; overflow: hidden;
+}
+.hc-bar-fill {
+  height: 100%; border-radius: 4px;
+  transition: width 0.4s ease;
+  position: relative;
+}
+.hc-bar-fill::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0;
+  width: 6px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 0 4px 4px 0;
+}
+
+/* Bottom row — streak dots + log btn */
+.hc-bottom { display: flex; align-items: center; justify-content: space-between; }
+.hc-dots { display: flex; gap: 4px; align-items: center; }
+.hc-dot {
+  width: 8px; height: 8px; border-radius: 2px;
+  border: 1px solid var(--border);
+}
+.hc-dot.on { border: none; }
+.hc-dot-label { font-size: 9px; color: var(--t3); font-weight: 700; margin-left: 6px; }
+.hc-log-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; padding: 6px 10px;
+  border-radius: 8px; cursor: pointer;
+  border: none; letter-spacing: 0.06em;
+}
+
+/* ══════════════════════════════════════
+   HOBBY COLOR THEMES
+══════════════════════════════════════ */
+/* Drawing */
+.theme-draw .hc-icon { background: rgba(255,102,170,0.15); }
+.theme-draw .hc-type { color: var(--pink); }
+.theme-draw .hc-bar-fill { background: linear-gradient(90deg, #cc4488, #ff66aa); }
+.theme-draw .hc-bar-xp   { color: var(--pink); }
+.theme-draw .hc-dot.on   { background: var(--pink); }
+.theme-draw .hc-log-btn  { background: rgba(255,102,170,0.15); color: var(--pink); border: 1px solid rgba(255,102,170,0.3); }
+
+/* Reading */
+.theme-read .hc-icon { background: rgba(85,153,255,0.15); }
+.theme-read .hc-type { color: var(--blue); }
+.theme-read .hc-bar-fill { background: linear-gradient(90deg, #3366cc, #5599ff); }
+.theme-read .hc-bar-xp   { color: var(--blue); }
+.theme-read .hc-dot.on   { background: var(--blue); }
+.theme-read .hc-log-btn  { background: rgba(85,153,255,0.12); color: var(--blue); border: 1px solid rgba(85,153,255,0.3); }
+
+/* Gaming */
+.theme-game .hc-icon { background: rgba(170,102,255,0.15); }
+.theme-game .hc-type { color: var(--purple); }
+.theme-game .hc-bar-fill { background: linear-gradient(90deg, #7744cc, #aa66ff); }
+.theme-game .hc-bar-xp   { color: var(--purple); }
+.theme-game .hc-dot.on   { background: var(--purple); }
+.theme-game .hc-log-btn  { background: rgba(170,102,255,0.12); color: var(--purple); border: 1px solid rgba(170,102,255,0.3); }
+
+/* Exercise */
+.theme-move .hc-icon { background: rgba(68,221,136,0.12); }
+.theme-move .hc-type { color: var(--green); }
+.theme-move .hc-bar-fill { background: linear-gradient(90deg, #228855, #44dd88); }
+.theme-move .hc-bar-xp   { color: var(--green); }
+.theme-move .hc-dot.on   { background: var(--green); }
+.theme-move .hc-log-btn  { background: rgba(68,221,136,0.1); color: var(--green); border: 1px solid rgba(68,221,136,0.25); }
+
+/* Music */
+.theme-music .hc-icon { background: rgba(255,136,68,0.15); }
+.theme-music .hc-type { color: var(--orange); }
+.theme-music .hc-bar-fill { background: linear-gradient(90deg, #cc5500, #ff8844); }
+.theme-music .hc-bar-xp   { color: var(--orange); }
+.theme-music .hc-dot.on   { background: var(--orange); }
+.theme-music .hc-log-btn  { background: rgba(255,136,68,0.12); color: var(--orange); border: 1px solid rgba(255,136,68,0.3); }
+
+/* ══════════════════════════════════════
+   DAILY DASH — Habit heatmap mini
+══════════════════════════════════════ */
+.heatmap-row {
+  display: flex; gap: 4px; flex-wrap: wrap;
+}
+.hm-cell {
+  width: 30px; height: 30px; border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px; cursor: pointer;
+  flex-shrink: 0;
+}
+.hm-day { font-size: 7px; font-weight: 800; color: var(--t3); }
+.hm-dot { width: 8px; height: 8px; border-radius: 2px; }
+/* Activity levels */
+.hm-cell.l0 .hm-dot { background: rgba(255,255,255,0.05); }
+.hm-cell.l1 .hm-dot { background: rgba(170,102,255,0.35); }
+.hm-cell.l2 .hm-dot { background: rgba(170,102,255,0.6); }
+.hm-cell.l3 .hm-dot { background: var(--purple); box-shadow: 0 0 6px rgba(170,102,255,0.5); }
+.hm-cell.today { border-color: var(--gold); }
+.hm-cell.today .hm-day { color: var(--gold); }
+
+/* ══════════════════════════════════════
+   ACHIEVEMENT BANNER
+══════════════════════════════════════ */
+.achievement {
+  background: linear-gradient(135deg, #1a0d30 0%, #0d1a30 100%);
+  border: 2px solid rgba(245,197,24,0.6);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex; align-items: center; gap: 14px;
+  position: relative; overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(170,102,255,0.2), 0 4px 24px rgba(245,197,24,0.15);
+}
+.achievement::before {
+  content: '★'; position: absolute; top: -8px; right: -8px;
+  font-size: 60px; opacity: 0.06; color: var(--gold);
+}
+.ach-icon { font-size: 36px; flex-shrink: 0; }
+.ach-meta { flex: 1; }
+.ach-new {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 5px;
+}
+.ach-name { font-size: 15px; font-weight: 800; color: var(--t1); }
+.ach-desc { font-size: 11px; color: var(--t2); margin-top: 3px; font-weight: 600; }
+.ach-xp {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: var(--gold);
+  background: rgba(245,197,24,0.1); border: 1px solid rgba(245,197,24,0.3);
+  border-radius: 6px; padding: 4px 8px;
+}
+
+/* ══════════════════════════════════════
+   WORK QUEST LIST (compact in Dashboard)
+══════════════════════════════════════ */
+.qrow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.qrow:last-child { border-bottom: none; }
+.qcheck {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border: 2px solid var(--border); border-radius: 6px;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+}
+.qcheck.urgent { border-color: var(--red); background: rgba(255,85,102,0.08); }
+.qcheck.urgent::after { content: '!'; font-family:'Press Start 2P',monospace; font-size:7px; color:var(--red); }
+.qcheck.done { border-color: var(--green); background: rgba(68,221,136,0.1); }
+.qcheck.done::after { content: '✓'; font-size: 12px; color: var(--green); font-weight: 900; }
+.qtask { flex: 1; }
+.qtask-name { font-size: 13px; font-weight: 700; color: var(--t1); }
+.qtask-name.done { text-decoration: line-through; opacity: 0.5; }
+.qtask-area { font-size: 9px; font-weight: 800; margin-top: 2px; }
+.qtask-area.sts  { color: var(--gold); }
+.qtask-area.daisi { color: #cc9933; }
+.qtask-area.dig  { color: var(--teal); }
+.qdue { font-size: 10px; font-weight: 800; flex-shrink:0; }
+.qdue.overdue { color: var(--red); }
+.qdue.today   { color: var(--gold); }
+.qdue.done    { color: var(--green); }
+
+/* ══════════════════════════════════════
+   STAT SUMMARY ROW (Hobby overview in Dash)
+══════════════════════════════════════ */
+.stat-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.stat-box {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 12px; padding: 12px 10px; text-align: center;
+}
+.stat-emoji { font-size: 22px; }
+.stat-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px; margin-top: 6px;
+}
+.stat-lbl { font-size: 9px; color: var(--t3); font-weight: 800; margin-top: 3px; }
+
+/* ══════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════ */
+.nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(13,15,30,0.97);
+  backdrop-filter: blur(20px);
+  border-top: 2px solid var(--border);
+  display: flex; padding: 10px 0 28px;
+}
+.nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; gap:4px; cursor:pointer;
+}
+.nav-ico { font-size:22px; opacity:0.3; }
+.nav-ico.on { opacity:1; }
+.nav-lbl { font-family:'Press Start 2P',monospace; font-size:5px; color:var(--t3); }
+.nav-lbl.on { color:var(--gold); }
+.nav-pip { width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:-1px; }
+
+/* FAB */
+.fab {
+  position:absolute; bottom:88px; right:20px;
+  width:52px;height:52px;border-radius:14px;
+  background:var(--gold);color:#000;
+  font-size:26px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;
+  box-shadow: 0 4px 0 #a07800, 0 8px 24px rgba(245,197,24,0.4);
+}
+
+/* ══════════════════════════════════════
+   LEVEL UP TOAST (new feature)
+══════════════════════════════════════ */
+.levelup-toast {
+  position: absolute; top: 60px; left: 16px; right: 16px;
+  background: linear-gradient(135deg, #261040, #102610);
+  border: 2px solid var(--gold);
+  border-radius: 14px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 0 0 3px rgba(245,197,24,0.25), 0 8px 40px rgba(245,197,24,0.4);
+  animation: slideDown 0.3s ease;
+  z-index: 10;
+}
+@keyframes slideDown { from{opacity:0;transform:translateY(-20px)} to{opacity:1;transform:translateY(0)} }
+.toast-icon { font-size: 32px; }
+.toast-meta { flex: 1; }
+.toast-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 4px;
+}
+.toast-text { font-size: 14px; font-weight: 800; color: var(--t1); }
+.toast-sub  { font-size: 11px; color: var(--t2); margin-top: 2px; }
+
+/* Animations */
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+.live-dot { width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.2s ease-in-out infinite;display:inline-block; }
+</style>
+</head>
+<body>
+
+<!-- MOCKUP TAB SWITCHER -->
+<div class="mockup-tabs">
+  <div class="mtab on" onclick="showScreen(0)">1 · DASHBOARD</div>
+  <div class="mtab" onclick="showScreen(1)">2 · HOBBY TRACKER</div>
+  <div class="mtab" onclick="showScreen(2)">3 · LOG + LEVEL UP</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+  SCREEN 1 — DASHBOARD (Home) with Hobby widget
+════════════════════════════════════════════════════════ -->
+<div class="screen visible" id="s1">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-row">
+      <div class="char-wrap">
+        <div class="char-emoji">🧙‍♀️</div>
+        <div class="lv-badge">LV.7</div>
+      </div>
+      <div class="speech-bubble">
+        <div class="speech-name">▶ KIM OS · v3.0</div>
+        <div class="speech-text">ยินดีต้อนรับกลับมาค่ะ!</div>
+        <div class="speech-sub">คิม · พุธ 27 พ.ค. 2569 · 19:32</div>
+      </div>
+    </div>
+    <div class="xp-strip">
+      <div class="xp-cell">
+        <div class="xp-icon">🔥</div>
+        <div class="xp-val" style="color:var(--orange)">12</div>
+        <div class="xp-label">STREAK</div>
+      </div>
+      <div class="xp-cell">
+        <div class="xp-icon">⭐</div>
+        <div class="xp-val" style="color:var(--gold)">340</div>
+        <div class="xp-label">TOTAL XP</div>
+      </div>
+      <div class="xp-cell">
+        <div class="xp-icon">✅</div>
+        <div class="xp-val" style="color:var(--green)">5/8</div>
+        <div class="xp-label">TASKS</div>
+      </div>
+      <div class="xp-cell">
+        <div class="xp-icon">🎮</div>
+        <div class="xp-val" style="color:var(--purple)">3</div>
+        <div class="xp-label">HOBBIES</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- WORK QUESTS (compact) -->
+    <div>
+      <div class="sec-label">
+        <span>⚔️ WORK QUESTS TODAY</span>
+        <span class="sec-action">SEE ALL →</span>
+      </div>
+      <div class="card">
+        <div class="qrow">
+          <div class="qcheck urgent"></div>
+          <div class="qtask">
+            <div class="qtask-name">LifeBar — CI Full Review</div>
+            <div class="qtask-area sts">STS · LIFEBAR</div>
+          </div>
+          <div class="qdue overdue">OVERDUE</div>
+        </div>
+        <div class="qrow">
+          <div class="qcheck done"></div>
+          <div class="qtask">
+            <div class="qtask-name done">Daisi Brand Moodboard</div>
+            <div class="qtask-area daisi">DAISI</div>
+          </div>
+          <div class="qdue done">DONE +20XP</div>
+        </div>
+        <div class="qrow">
+          <div class="qcheck"></div>
+          <div class="qtask">
+            <div class="qtask-name">Digital Project Logo A/B</div>
+            <div class="qtask-area dig">DIGITAL</div>
+          </div>
+          <div class="qdue today">TODAY</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HOBBY SNAPSHOT (dashboard widget) -->
+    <div>
+      <div class="sec-label">
+        <span>🎮 SIDE QUESTS · HOBBIES</span>
+        <span class="sec-action">EXPLORE →</span>
+      </div>
+
+      <!-- Stat summary -->
+      <div class="stat-grid" style="margin-bottom:10px">
+        <div class="stat-box">
+          <div class="stat-emoji">🎨</div>
+          <div class="stat-val" style="color:var(--pink)">LV.5</div>
+          <div class="stat-lbl">DRAWING</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-emoji">📚</div>
+          <div class="stat-val" style="color:var(--blue)">LV.3</div>
+          <div class="stat-lbl">READING</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-emoji">🏃‍♀️</div>
+          <div class="stat-val" style="color:var(--green)">LV.4</div>
+          <div class="stat-lbl">EXERCISE</div>
+        </div>
+      </div>
+
+      <!-- Weekly heatmap (hobby this week) -->
+      <div class="card" style="padding:14px 16px">
+        <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--t2);margin-bottom:10px;letter-spacing:0.1em">THIS WEEK ACTIVITY</div>
+        <div class="heatmap-row">
+          <div class="hm-cell l2"><div class="hm-day">จ</div><div class="hm-dot"></div></div>
+          <div class="hm-cell l3"><div class="hm-day">อ</div><div class="hm-dot"></div></div>
+          <div class="hm-cell l1"><div class="hm-day">พ</div><div class="hm-dot"></div></div>
+          <div class="hm-cell l3"><div class="hm-day">พฤ</div><div class="hm-dot"></div></div>
+          <div class="hm-cell l0"><div class="hm-day">ศ</div><div class="hm-dot"></div></div>
+          <div class="hm-cell today l0"><div class="hm-day">ส</div><div class="hm-dot"></div></div>
+          <div class="hm-cell l0"><div class="hm-day">อา</div><div class="hm-dot"></div></div>
+          <!-- legend -->
+        </div>
+        <div style="display:flex;gap:6px;align-items:center;margin-top:8px">
+          <div style="font-size:8px;color:var(--t3);font-weight:700">เบา</div>
+          <div style="width:10px;height:10px;border-radius:3px;background:rgba(170,102,255,0.15);border:1px solid var(--border)"></div>
+          <div style="width:10px;height:10px;border-radius:3px;background:rgba(170,102,255,0.4)"></div>
+          <div style="width:10px;height:10px;border-radius:3px;background:var(--purple)"></div>
+          <div style="font-size:8px;color:var(--t3);font-weight:700">เยอะ</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW ACHIEVEMENT -->
+    <div>
+      <div class="sec-label">🏆 ACHIEVEMENT UNLOCKED</div>
+      <div class="achievement">
+        <div class="ach-icon">🎨</div>
+        <div class="ach-meta">
+          <div class="ach-new">✦ NEW BADGE</div>
+          <div class="ach-name">Art Apprentice</div>
+          <div class="ach-desc">วาดรูป 7 วันติดต่อกัน! Streak สำเร็จ</div>
+        </div>
+        <div class="ach-xp">+50 XP</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FAB -->
+  <div class="fab">+</div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-item"><div class="nav-ico on">🏠</div><div class="nav-lbl on">TODAY</div><div class="nav-pip"></div></div>
+    <div class="nav-item"><div class="nav-ico">⚔️</div><div class="nav-lbl">QUESTS</div></div>
+    <div class="nav-item"><div class="nav-ico">🎮</div><div class="nav-lbl">HOBBY</div></div>
+    <div class="nav-item"><div class="nav-ico">🎯</div><div class="nav-lbl">GOALS</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+  SCREEN 2 — HOBBY TRACKER (full screen)
+════════════════════════════════════════════════════════ -->
+<div class="screen" id="s2">
+
+  <!-- HEADER — Hobby mode -->
+  <div class="header">
+    <div class="header-row">
+      <div class="char-wrap">
+        <div class="char-emoji">🧙‍♀️</div>
+        <div class="lv-badge">LV.7</div>
+      </div>
+      <div class="speech-bubble">
+        <div class="speech-name">▶ SIDE QUEST BOARD</div>
+        <div class="speech-text">Skill Tree ของคุณ ✨</div>
+        <div class="speech-sub">ทำ hobby = เก็บ XP ไปเรื่อยๆ นะคะ!</div>
+      </div>
+    </div>
+    <!-- Total hobby XP + stats -->
+    <div class="xp-strip">
+      <div class="xp-cell">
+        <div class="xp-icon">🎮</div>
+        <div class="xp-val" style="color:var(--purple)">5</div>
+        <div class="xp-label">SKILLS</div>
+      </div>
+      <div class="xp-cell">
+        <div class="xp-icon">💎</div>
+        <div class="xp-val" style="color:var(--teal)">128</div>
+        <div class="xp-label">HOBBY XP</div>
+      </div>
+      <div class="xp-cell">
+        <div class="xp-icon">🔥</div>
+        <div class="xp-val" style="color:var(--orange)">7</div>
+        <div class="xp-label">BEST STK</div>
+      </div>
+      <div class="xp-cell">
+        <div class="xp-icon">📅</div>
+        <div class="xp-val" style="color:var(--blue)">23</div>
+        <div class="xp-label">SESSIONS</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── DRAWING ── -->
+    <div>
+      <div class="sec-label">🎨 CREATIVE · ART</div>
+
+      <div class="hobby-card theme-draw">
+        <div class="hc-top">
+          <div class="hc-icon">🎨</div>
+          <div class="hc-meta">
+            <div class="hc-name">Drawing / Illustration</div>
+            <div class="hc-type">CREATIVE SKILL</div>
+          </div>
+          <div class="hc-right">
+            <div class="hc-streak">🔥 7 DAYS</div>
+            <div class="hc-lv">LV. 5</div>
+          </div>
+        </div>
+        <div class="hc-bar-wrap">
+          <div class="hc-bar-row">
+            <div class="hc-bar-label">XP Progress to LV.6</div>
+            <div class="hc-bar-xp theme-draw" style="color:var(--pink)">340 / 500</div>
+          </div>
+          <div class="hc-bar">
+            <div class="hc-bar-fill" style="width:68%;background:linear-gradient(90deg,#cc4488,#ff66aa)"></div>
+          </div>
+        </div>
+        <div class="hc-bottom">
+          <div>
+            <div class="hc-dots">
+              <div class="hc-dot on theme-draw" style="background:var(--pink)"></div>
+              <div class="hc-dot on theme-draw" style="background:var(--pink)"></div>
+              <div class="hc-dot on theme-draw" style="background:var(--pink)"></div>
+              <div class="hc-dot on theme-draw" style="background:var(--pink)"></div>
+              <div class="hc-dot on theme-draw" style="background:var(--pink)"></div>
+              <div class="hc-dot on theme-draw" style="background:var(--pink)"></div>
+              <div class="hc-dot on theme-draw" style="background:var(--pink)"></div>
+              <div class="hc-dot-label">7 days streak!</div>
+            </div>
+            <div style="font-size:9px;color:var(--t3);font-weight:700;margin-top:5px">Last: วันนี้ · 14:30</div>
+          </div>
+          <button class="hc-log-btn theme-draw">+LOG SESSION</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── READING ── -->
+    <div>
+      <div class="sec-label">📚 KNOWLEDGE</div>
+
+      <div class="hobby-card theme-read">
+        <div class="hc-top">
+          <div class="hc-icon">📚</div>
+          <div class="hc-meta">
+            <div class="hc-name">Reading</div>
+            <div class="hc-type">KNOWLEDGE SKILL</div>
+          </div>
+          <div class="hc-right">
+            <div class="hc-streak">🔥 3 DAYS</div>
+            <div class="hc-lv">LV. 3</div>
+          </div>
+        </div>
+        <div class="hc-bar-wrap">
+          <div class="hc-bar-row">
+            <div class="hc-bar-label">XP Progress to LV.4</div>
+            <div class="hc-bar-xp" style="color:var(--blue)">210 / 300</div>
+          </div>
+          <div class="hc-bar">
+            <div class="hc-bar-fill" style="width:70%;background:linear-gradient(90deg,#3366cc,#5599ff)"></div>
+          </div>
+        </div>
+        <!-- What you're reading now -->
+        <div style="background:rgba(85,153,255,0.08);border:1px solid rgba(85,153,255,0.2);border-radius:8px;padding:8px 12px;display:flex;gap:10px;align-items:center">
+          <div style="font-size:20px">📖</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--t1)">Atomic Habits</div>
+            <div style="font-size:10px;color:var(--blue);font-weight:700">Chapter 12 · หน้า 187</div>
+          </div>
+          <div style="margin-left:auto;font-family:'Press Start 2P',monospace;font-size:6px;color:var(--blue)">62%</div>
+        </div>
+        <div class="hc-bottom">
+          <div>
+            <div class="hc-dots">
+              <div class="hc-dot on" style="background:var(--blue)"></div>
+              <div class="hc-dot on" style="background:var(--blue)"></div>
+              <div class="hc-dot on" style="background:var(--blue)"></div>
+              <div class="hc-dot"></div>
+              <div class="hc-dot"></div>
+              <div class="hc-dot"></div>
+              <div class="hc-dot"></div>
+            </div>
+            <div style="font-size:9px;color:var(--t3);font-weight:700;margin-top:5px">Last: เมื่อวาน · 22:00</div>
+          </div>
+          <button class="hc-log-btn theme-read">+LOG SESSION</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── EXERCISE ── -->
+    <div>
+      <div class="sec-label">🏃‍♀️ BODY · FITNESS</div>
+
+      <div class="hobby-card theme-move">
+        <div class="hc-top">
+          <div class="hc-icon">🏃‍♀️</div>
+          <div class="hc-meta">
+            <div class="hc-name">Exercise / Movement</div>
+            <div class="hc-type">BODY SKILL</div>
+          </div>
+          <div class="hc-right">
+            <div class="hc-streak" style="color:var(--green)">🔥 5 DAYS</div>
+            <div class="hc-lv">LV. 4</div>
+          </div>
+        </div>
+        <div class="hc-bar-wrap">
+          <div class="hc-bar-row">
+            <div class="hc-bar-label">XP Progress to LV.5</div>
+            <div class="hc-bar-xp" style="color:var(--green)">180 / 400</div>
+          </div>
+          <div class="hc-bar">
+            <div class="hc-bar-fill" style="width:45%;background:linear-gradient(90deg,#228855,#44dd88)"></div>
+          </div>
+        </div>
+        <div class="hc-bottom">
+          <div>
+            <div class="hc-dots">
+              <div class="hc-dot on" style="background:var(--green)"></div>
+              <div class="hc-dot on" style="background:var(--green)"></div>
+              <div class="hc-dot on" style="background:var(--green)"></div>
+              <div class="hc-dot on" style="background:var(--green)"></div>
+              <div class="hc-dot on" style="background:var(--green)"></div>
+              <div class="hc-dot"></div>
+              <div class="hc-dot"></div>
+            </div>
+            <div style="font-size:9px;color:var(--t3);font-weight:700;margin-top:5px">Last: เมื่อวาน · 07:00</div>
+          </div>
+          <button class="hc-log-btn theme-move">+LOG SESSION</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MUSIC ── -->
+    <div>
+      <div class="hobby-card theme-music">
+        <div class="hc-top">
+          <div class="hc-icon">🎵</div>
+          <div class="hc-meta">
+            <div class="hc-name">Music / Piano</div>
+            <div class="hc-type">CREATIVE SKILL</div>
+          </div>
+          <div class="hc-right">
+            <div class="hc-streak" style="color:var(--orange)">😴 2 DAYS</div>
+            <div class="hc-lv">LV. 2</div>
+          </div>
+        </div>
+        <div class="hc-bar-wrap">
+          <div class="hc-bar-row">
+            <div class="hc-bar-label">XP Progress to LV.3</div>
+            <div class="hc-bar-xp" style="color:var(--orange)">80 / 200</div>
+          </div>
+          <div class="hc-bar">
+            <div class="hc-bar-fill" style="width:40%;background:linear-gradient(90deg,#cc5500,#ff8844)"></div>
+          </div>
+        </div>
+        <div style="background:rgba(255,136,68,0.08);border:1px solid rgba(255,136,68,0.2);border-radius:8px;padding:6px 12px">
+          <div style="font-size:10px;color:var(--orange);font-weight:700">⚠️ ไม่ได้ practice 2 วันแล้ว! streak จะหาย</div>
+        </div>
+        <div class="hc-bottom">
+          <div style="font-size:9px;color:var(--t3);font-weight:700">Last: 3 วันก่อน</div>
+          <button class="hc-log-btn theme-music">+LOG SESSION</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD NEW HOBBY -->
+    <div style="border:2px dashed var(--border);border-radius:14px;padding:20px;text-align:center;cursor:pointer">
+      <div style="font-size:28px;margin-bottom:8px">✚</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--t3);letter-spacing:0.1em">ADD NEW HOBBY</div>
+      <div style="font-size:11px;color:var(--t2);margin-top:6px;font-weight:600">เลือก skill ใหม่เพื่อเก็บ XP</div>
+    </div>
+
+  </div>
+
+  <!-- FAB -->
+  <div class="fab">+</div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-item"><div class="nav-ico">🏠</div><div class="nav-lbl">TODAY</div></div>
+    <div class="nav-item"><div class="nav-ico">⚔️</div><div class="nav-lbl">QUESTS</div></div>
+    <div class="nav-item"><div class="nav-ico on">🎮</div><div class="nav-lbl on">HOBBY</div><div class="nav-pip"></div></div>
+    <div class="nav-item"><div class="nav-ico">🎯</div><div class="nav-lbl">GOALS</div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+  SCREEN 3 — LOG SESSION + LEVEL UP TOAST
+════════════════════════════════════════════════════════ -->
+<div class="screen" id="s3">
+
+  <!-- HEADER (dimmed — modal is open) -->
+  <div class="header" style="opacity:0.4">
+    <div class="header-row">
+      <div class="char-wrap">
+        <div class="char-emoji">🧙‍♀️</div>
+        <div class="lv-badge">LV.7</div>
+      </div>
+      <div class="speech-bubble">
+        <div class="speech-name">▶ SIDE QUEST BOARD</div>
+        <div class="speech-text">Skill Tree ของคุณ ✨</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL UP TOAST (appears after logging) -->
+  <div class="levelup-toast">
+    <div class="toast-icon">⬆️</div>
+    <div class="toast-meta">
+      <div class="toast-title">✦ SKILL UP!</div>
+      <div class="toast-text">Drawing → LV. 6 🎉</div>
+      <div class="toast-sub">+20 XP · Achievement: "Art Adept" unlocked</div>
+    </div>
+  </div>
+
+  <!-- LOG SESSION MODAL SHEET -->
+  <div style="
+    position:absolute;bottom:0;left:0;right:0;
+    background:var(--card2);
+    border:2px solid var(--border);
+    border-radius:24px 24px 0 0;
+    padding:20px 20px 60px;
+    box-shadow:0 -20px 60px rgba(0,0,0,0.6);
+  ">
+    <!-- Handle -->
+    <div style="width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px"></div>
+
+    <!-- Title -->
+    <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--pink);letter-spacing:0.1em;margin-bottom:4px">LOG SESSION</div>
+    <div style="font-size:18px;font-weight:800;color:var(--t1);margin-bottom:16px">🎨 Drawing</div>
+
+    <!-- Duration selector -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:800;color:var(--t2);margin-bottom:8px">ใช้เวลานานแค่ไหน?</div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;background:rgba(255,102,170,0.15);border:2px solid var(--pink);border-radius:10px;padding:10px;text-align:center;cursor:pointer">
+          <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--pink)">15</div>
+          <div style="font-size:9px;color:var(--t2);font-weight:700;margin-top:3px">นาที</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer">
+          <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--t1)">30</div>
+          <div style="font-size:9px;color:var(--t2);font-weight:700;margin-top:3px">นาที</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer">
+          <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--t1)">60</div>
+          <div style="font-size:9px;color:var(--t2);font-weight:700;margin-top:3px">นาที</div>
+        </div>
+        <div style="flex:1;background:var(--card);border:2px solid var(--border);border-radius:10px;padding:10px;text-align:center;cursor:pointer">
+          <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--t1)">···</div>
+          <div style="font-size:9px;color:var(--t2);font-weight:700;margin-top:3px">custom</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mood / Vibe -->
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:800;color:var(--t2);margin-bottom:8px">vibe วันนี้เป็นยังไง?</div>
+      <div style="display:flex;gap:8px">
+        <div style="background:rgba(255,102,170,0.15);border:2px solid var(--pink);border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer">😤</div>
+        <div style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer">😊</div>
+        <div style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer">🔥</div>
+        <div style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer">😴</div>
+        <div style="background:var(--card);border:2px solid var(--border);border-radius:10px;padding:8px 12px;font-size:18px;cursor:pointer">✨</div>
+      </div>
+    </div>
+
+    <!-- XP preview -->
+    <div style="background:rgba(255,102,170,0.08);border:1px solid rgba(255,102,170,0.2);border-radius:10px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:22px">⭐</div>
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--t1)">คุณจะได้รับ <span style="color:var(--pink)">+20 XP</span></div>
+        <div style="font-size:10px;color:var(--t2);font-weight:600">Drawing LV.5 → ต้องการอีก 160 XP</div>
+      </div>
+    </div>
+
+    <!-- Confirm button -->
+    <div style="
+      background:var(--pink);color:#fff;
+      font-family:'Press Start 2P',monospace;font-size:9px;
+      letter-spacing:0.08em;padding:16px;
+      border-radius:12px;text-align:center;cursor:pointer;
+      box-shadow:0 4px 0 #aa3366,0 8px 20px rgba(255,102,170,0.35);
+    ">✓ LOG +20 XP</div>
+  </div>
+
+</div>
+
+<script>
+function showScreen(index) {
+  document.querySelectorAll('.screen').forEach((s, i) => {
+    s.classList.toggle('visible', i === index);
+  });
+  document.querySelectorAll('.mtab').forEach((t, i) => {
+    t.classList.toggle('on', i === index);
+  });
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

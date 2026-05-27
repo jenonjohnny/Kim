@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>PIXEL v4 — Clean / 1 Accent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+
+/* ══════════════════════════════════════
+   DESIGN TOKENS — 1 Accent Only
+══════════════════════════════════════ */
+:root {
+  --bg:       #0c0e1c;
+  --surface:  #101220;
+  --card:     #14172c;
+  --card2:    #191d36;
+  --border:   #22263d;
+  --border2:  #2e3352;
+
+  --t1:    #e8e8f0;   /* primary text */
+  --t2:    #5a5e82;   /* secondary text */
+  --t3:    #2e3254;   /* disabled/dim */
+
+  --gold:      #f5c518;
+  --gold-soft: rgba(245,197,24,0.12);
+  --gold-mid:  rgba(245,197,24,0.25);
+}
+
+body {
+  background: #080917;
+  font-family: 'Nunito', sans-serif;
+  color: var(--t1);
+}
+
+/* ── Mockup Tab Nav ── */
+.mockup-tabs {
+  display: flex; gap: 6px; justify-content: center;
+  padding: 20px 16px 14px;
+  position: sticky; top: 0; z-index: 100;
+  background: #080917;
+}
+.mtab {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px; letter-spacing: 0.08em;
+  padding: 8px 10px; border-radius: 6px;
+  border: 1px solid var(--border);
+  color: var(--t3); background: var(--card);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.mtab.on { border-color: var(--gold); color: var(--gold); background: var(--gold-soft); }
+
+/* ── Screen ── */
+.screen { display: none; max-width: 390px; margin: 0 auto; background: var(--bg); min-height: 844px; position: relative; border-radius: 32px; overflow: hidden; box-shadow: 0 0 0 2px var(--border), 0 30px 80px rgba(0,0,0,0.7); }
+.screen.visible { display: block; }
+
+/* ══════════════════════════════════════
+   PIXEL ART ICONS  (inline SVG helpers)
+   All icons: 8×8 grid → rendered at 16px
+══════════════════════════════════════ */
+
+/* ── Icon wrapper ── */
+.px-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--t2);
+  flex-shrink: 0;
+}
+.px-icon.gold { color: var(--gold); }
+.px-icon.white { color: var(--t1); }
+.px-icon.dim { color: var(--t3); }
+
+/* ══════════════════════════════════════
+   HEADER
+══════════════════════════════════════ */
+.header {
+  padding: 40px 18px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+/* pixel scanline accent */
+.header::after {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 6px, transparent 6px, transparent 10px);
+  opacity: 0.7;
+}
+
+.header-top {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+}
+
+/* Pixel character — CSS art */
+.char-box {
+  width: 40px; height: 40px;
+  border: 2px solid var(--border2);
+  border-radius: 8px;
+  background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; flex-shrink: 0;
+}
+.lv-tag {
+  position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+  background: var(--gold); color: #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px; padding: 2px 4px; white-space: nowrap;
+}
+
+.header-info { flex: 1; }
+.header-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: var(--t1); letter-spacing: 0.06em;
+}
+.header-date {
+  font-size: 11px; color: var(--t2); font-weight: 700; margin-top: 4px;
+}
+.header-rank {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--gold);
+  border: 1px solid var(--gold-mid); border-radius: 4px;
+  padding: 4px 7px; white-space: nowrap;
+}
+
+/* XP bar */
+.xp-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.xp-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--t2); white-space: nowrap;
+}
+.xp-track {
+  flex: 1; height: 8px;
+  background: var(--card); border: 1px solid var(--border2); border-radius: 2px;
+  overflow: hidden;
+}
+.xp-fill {
+  height: 100%; background: var(--gold); border-radius: 2px;
+  position: relative;
+}
+.xp-fill::after {
+  content: ''; position: absolute; right: 0; top: 0; bottom: 0;
+  width: 4px; background: rgba(255,255,255,0.5);
+}
+.xp-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--gold); white-space: nowrap;
+}
+
+/* Streak strip */
+.streak-strip {
+  display: flex; gap: 0; margin-top: 10px;
+  border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
+}
+.streak-cell {
+  flex: 1; padding: 8px 4px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+.streak-cell:last-child { border-right: none; }
+.streak-num {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; color: var(--t1);
+}
+.streak-num.gold { color: var(--gold); }
+.streak-lbl { font-size: 8px; color: var(--t3); font-weight: 800; margin-top: 3px; }
+
+/* ══════════════════════════════════════
+   CONTENT
+══════════════════════════════════════ */
+.content { padding: 16px 16px 110px; display: flex; flex-direction: column; gap: 16px; }
+
+.sec-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--t2); letter-spacing: 0.12em;
+  margin-bottom: 8px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sec-label-action {
+  font-family: 'Nunito', sans-serif;
+  font-size: 10px; font-weight: 800; color: var(--t2); cursor: pointer;
+}
+
+/* ══════════════════════════════════════
+   MAIN QUEST CARD  (featured)
+══════════════════════════════════════ */
+.main-quest {
+  border: 1px solid var(--gold-mid);
+  border-radius: 10px; overflow: hidden;
+  background: var(--card);
+  position: relative;
+}
+.mq-top-bar {
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 4px, transparent 4px, transparent 7px);
+}
+.mq-body { padding: 14px 14px 12px; }
+.mq-tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 6px;
+}
+.mq-title {
+  font-size: 15px; font-weight: 800; color: var(--t1); line-height: 1.35;
+  margin-bottom: 10px;
+}
+.mq-meta {
+  display: flex; align-items: center; gap: 8px;
+}
+.tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px; padding: 3px 7px; border-radius: 4px;
+  border: 1px solid var(--border2); color: var(--t2);
+}
+.tag.urgent {
+  border-color: var(--gold-mid); color: var(--gold);
+  background: var(--gold-soft);
+}
+
+/* ══════════════════════════════════════
+   QUEST LIST  (RPG style rows)
+══════════════════════════════════════ */
+.quest-list {
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; background: var(--card);
+}
+.ql-header {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.ql-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--t2); letter-spacing: 0.1em;
+}
+.ql-count {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: var(--gold);
+}
+
+.qrow {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.qrow:last-child { border-bottom: none; }
+.qrow.done { opacity: 0.38; }
+
+/* Pixel checkbox — 16×16 */
+.qcheck {
+  width: 18px; height: 18px; flex-shrink: 0;
+  border: 2px solid var(--border2); border-radius: 3px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+.qcheck.active  { border-color: var(--gold); }
+.qcheck.checked { border-color: var(--t3); background: var(--card2); }
+
+/* Priority pip — left edge pixel */
+.qpip {
+  width: 3px; flex-shrink: 0; align-self: stretch;
+  border-radius: 2px;
+  background: var(--border);
+}
+.qpip.p1 { background: var(--gold); }
+.qpip.p2 { background: var(--border2); }
+.qpip.p3 { background: var(--t3); }
+
+.qinfo { flex: 1; min-width: 0; }
+.qname {
+  font-size: 13px; font-weight: 700; color: var(--t1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qname.done { text-decoration: line-through; color: var(--t3); }
+.qarea {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px; color: var(--t2); margin-top: 3px; letter-spacing: 0.06em;
+}
+
+.qdue {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; flex-shrink: 0;
+  color: var(--t3);
+}
+.qdue.today { color: var(--gold); }
+.qdue.done  { color: var(--t3); }
+
+/* ══════════════════════════════════════
+   SKILL CARD  (Hobby — v4, 1 color)
+══════════════════════════════════════ */
+.skill-card {
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--card); padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  cursor: pointer; transition: border-color 0.15s;
+}
+.skill-card.active-skill { border-color: var(--border2); }
+
+.sc-top { display: flex; align-items: center; gap: 12px; }
+
+.sc-icon-box {
+  width: 40px; height: 40px; flex-shrink: 0;
+  border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.sc-meta { flex: 1; }
+.sc-name { font-size: 14px; font-weight: 800; color: var(--t1); }
+.sc-type {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px; color: var(--t2); letter-spacing: 0.08em; margin-top: 3px;
+}
+.sc-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+.sc-lv {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: var(--gold);
+  border: 1px solid var(--gold-mid); border-radius: 4px;
+  padding: 3px 7px;
+}
+.sc-streak {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--t2);
+}
+.sc-streak.hot { color: var(--gold); }
+
+/* XP bar */
+.sc-bar-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.sc-bar-lbl { font-size: 10px; font-weight: 700; color: var(--t2); }
+.sc-bar-xp  { font-family: 'Press Start 2P', monospace; font-size: 6px; color: var(--gold); }
+.sc-bar {
+  height: 6px; background: var(--bg); border: 1px solid var(--border2);
+  border-radius: 2px; overflow: hidden;
+}
+.sc-bar-fill {
+  height: 100%; background: var(--gold); border-radius: 2px;
+  position: relative;
+}
+.sc-bar-fill::after {
+  content: ''; position: absolute; right: 0; top: 0; bottom: 0;
+  width: 3px; background: rgba(255,255,255,0.5);
+}
+
+/* Streak dots */
+.sc-dots { display: flex; gap: 3px; align-items: center; }
+.sc-dot {
+  width: 7px; height: 7px; border-radius: 1px;
+  background: var(--bg); border: 1px solid var(--border);
+}
+.sc-dot.on { background: var(--gold); border-color: var(--gold); }
+.sc-dot-lbl { font-size: 9px; color: var(--t3); font-weight: 700; margin-left: 5px; }
+
+.sc-bottom { display: flex; align-items: center; justify-content: space-between; }
+.sc-last { font-size: 9px; color: var(--t3); font-weight: 700; }
+
+.sc-log-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; padding: 6px 10px; border-radius: 5px;
+  border: 1px solid var(--border2); background: var(--card2);
+  color: var(--t2); cursor: pointer; letter-spacing: 0.05em;
+}
+.sc-log-btn.primary {
+  border-color: var(--gold-mid); color: var(--gold);
+  background: var(--gold-soft);
+}
+
+/* Inline extra info (e.g. book progress) */
+.sc-extra {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 10px; display: flex; gap: 10px; align-items: center;
+}
+.sc-extra-text .line1 { font-size: 12px; font-weight: 700; color: var(--t1); }
+.sc-extra-text .line2 { font-size: 10px; color: var(--t2); font-weight: 700; margin-top: 2px; }
+.sc-extra-pct {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: var(--gold); margin-left: auto;
+}
+
+/* Warning row */
+.sc-warn {
+  background: rgba(245,197,24,0.06);
+  border: 1px solid var(--gold-mid); border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 10px; font-weight: 700; color: var(--gold);
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* Add new hobby */
+.add-card {
+  border: 1px dashed var(--border); border-radius: 10px;
+  padding: 20px; text-align: center; cursor: pointer;
+}
+.add-card-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--t3); letter-spacing: 0.1em; margin-top: 8px;
+}
+.add-card-sub {
+  font-size: 10px; color: var(--t3); font-weight: 600; margin-top: 4px;
+}
+
+/* ══════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════ */
+.nav {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(12,14,28,0.97); backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border);
+  display: flex; padding: 10px 0 28px;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 5px; cursor: pointer;
+}
+.nav-lbl {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 5px; color: var(--t3); letter-spacing: 0.06em;
+}
+.nav-lbl.on { color: var(--gold); }
+.nav-pip { width: 4px; height: 3px; background: var(--gold); border-radius: 1px; margin-top: -2px; }
+
+/* FAB */
+.fab {
+  position: absolute; bottom: 84px; right: 16px;
+  width: 48px; height: 48px; border-radius: 10px;
+  background: var(--gold); color: #000;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 16px; font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #a07800, 0 8px 20px rgba(245,197,24,0.35);
+}
+
+/* ══════════════════════════════════════
+   LOG SESSION MODAL (Screen 3)
+══════════════════════════════════════ */
+.modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(8,9,23,0.75);
+}
+.modal-sheet {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--card); border: 1px solid var(--border2);
+  border-radius: 20px 20px 0 0;
+  padding: 18px 18px 60px;
+}
+.modal-handle {
+  width: 36px; height: 3px; background: var(--border2); border-radius: 2px;
+  margin: 0 auto 18px;
+}
+.modal-tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 4px;
+}
+.modal-title { font-size: 18px; font-weight: 800; color: var(--t1); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+
+.dur-label { font-size: 11px; font-weight: 800; color: var(--t2); margin-bottom: 8px; }
+.dur-row { display: flex; gap: 8px; margin-bottom: 18px; }
+.dur-btn {
+  flex: 1; padding: 10px 4px; border-radius: 6px;
+  border: 1px solid var(--border2); background: var(--card2);
+  text-align: center; cursor: pointer;
+}
+.dur-btn.on { border-color: var(--gold); background: var(--gold-soft); }
+.dur-num {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 9px; color: var(--t2);
+}
+.dur-btn.on .dur-num { color: var(--gold); }
+.dur-unit { font-size: 9px; color: var(--t3); font-weight: 700; margin-top: 3px; }
+
+.xp-preview {
+  background: var(--gold-soft); border: 1px solid var(--gold-mid);
+  border-radius: 8px; padding: 12px 14px;
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.xp-prev-text { font-size: 13px; font-weight: 700; color: var(--t1); }
+.xp-prev-text span { color: var(--gold); }
+.xp-prev-sub { font-size: 10px; color: var(--t2); margin-top: 2px; }
+
+.confirm-btn {
+  width: 100%; padding: 16px;
+  background: var(--gold); color: #0c0e1c;
+  font-family: 'Press Start 2P', monospace; font-size: 9px;
+  letter-spacing: 0.08em; border-radius: 8px; text-align: center;
+  cursor: pointer;
+  box-shadow: 0 4px 0 #a07800;
+}
+
+/* Level up toast */
+.levelup-toast {
+  position: absolute; top: 56px; left: 14px; right: 14px;
+  background: var(--card);
+  border: 1px solid var(--gold);
+  border-radius: 10px; padding: 14px 14px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 0 0 2px var(--gold-soft), 0 10px 40px rgba(245,197,24,0.3);
+  z-index: 10;
+  animation: toastIn 0.3s ease;
+}
+@keyframes toastIn { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
+.toast-content { flex: 1; }
+.toast-tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 4px;
+}
+.toast-title { font-size: 15px; font-weight: 800; color: var(--t1); }
+.toast-sub { font-size: 10px; color: var(--t2); font-weight: 600; margin-top: 2px; }
+.toast-xp {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; color: var(--gold);
+  border: 1px solid var(--gold-mid); border-radius: 4px;
+  padding: 5px 8px;
+}
+
+/* ── Pixel art dim header for modal ── */
+.header-dim { opacity: 0.25; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<!-- MOCKUP TAB SWITCHER -->
+<div class="mockup-tabs">
+  <div class="mtab on"   onclick="showScreen(0)">1 · QUEST BOARD</div>
+  <div class="mtab"      onclick="showScreen(1)">2 · SKILL TREE</div>
+  <div class="mtab"      onclick="showScreen(2)">3 · LOG SESSION</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+  SCREEN 1 — QUEST BOARD (Dashboard)
+═══════════════════════════════════════════════════════ -->
+<div class="screen visible" id="s1">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+
+      <!-- Pixel character box -->
+      <div class="char-box">
+        <!-- 8×8 pixel wizard — CSS box-shadow art, 3px per cell -->
+        <svg width="24" height="24" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+          <!-- hat -->
+          <rect x="3" y="0" width="2" height="1" fill="#f5c518"/>
+          <rect x="2" y="1" width="4" height="1" fill="#f5c518"/>
+          <rect x="1" y="2" width="6" height="1" fill="#f5c518"/>
+          <!-- head -->
+          <rect x="2" y="3" width="4" height="2" fill="#e8e8f0"/>
+          <!-- eyes -->
+          <rect x="2" y="3" width="1" height="1" fill="#0c0e1c"/>
+          <rect x="5" y="3" width="1" height="1" fill="#0c0e1c"/>
+          <!-- body -->
+          <rect x="1" y="5" width="6" height="2" fill="#22263d"/>
+          <!-- feet -->
+          <rect x="1" y="7" width="2" height="1" fill="#22263d"/>
+          <rect x="5" y="7" width="2" height="1" fill="#22263d"/>
+        </svg>
+        <div class="lv-tag">LV.7</div>
+      </div>
+
+      <div class="header-info">
+        <div class="header-name">KIM</div>
+        <div class="header-date">พุธ · 27 พ.ค. 2569</div>
+      </div>
+      <div class="header-rank">GOLD</div>
+    </div>
+
+    <!-- XP Progress -->
+    <div class="xp-row">
+      <div class="xp-label">XP</div>
+      <div class="xp-track">
+        <div class="xp-fill" style="width:68%"></div>
+      </div>
+      <div class="xp-val">340/500</div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="streak-strip" style="margin-top:10px">
+      <div class="streak-cell">
+        <!-- pixel fire icon -->
+        <svg width="14" height="14" viewBox="0 0 7 7" style="image-rendering:pixelated;display:block;margin:0 auto 3px">
+          <rect x="3" y="0" width="1" height="1" fill="#f5c518"/>
+          <rect x="2" y="1" width="3" height="1" fill="#f5c518"/>
+          <rect x="1" y="2" width="5" height="1" fill="#f5c518"/>
+          <rect x="1" y="3" width="2" height="1" fill="#f5c518"/>
+          <rect x="4" y="3" width="2" height="1" fill="#f5c518"/>
+          <rect x="0" y="4" width="7" height="2" fill="#f5c518"/>
+          <rect x="2" y="6" width="3" height="1" fill="#f5c518"/>
+        </svg>
+        <div class="streak-num gold">12</div>
+        <div class="streak-lbl">STREAK</div>
+      </div>
+      <div class="streak-cell">
+        <!-- pixel sword icon -->
+        <svg width="14" height="14" viewBox="0 0 7 7" style="image-rendering:pixelated;display:block;margin:0 auto 3px">
+          <rect x="6" y="0" width="1" height="1" fill="#5a5e82"/>
+          <rect x="5" y="1" width="1" height="1" fill="#5a5e82"/>
+          <rect x="4" y="2" width="1" height="1" fill="#5a5e82"/>
+          <rect x="3" y="3" width="1" height="1" fill="#5a5e82"/>
+          <rect x="1" y="3" width="3" height="1" fill="#5a5e82"/>
+          <rect x="2" y="4" width="1" height="1" fill="#5a5e82"/>
+          <rect x="1" y="5" width="1" height="1" fill="#5a5e82"/>
+          <rect x="0" y="6" width="2" height="1" fill="#5a5e82"/>
+        </svg>
+        <div class="streak-num">8</div>
+        <div class="streak-lbl">QUESTS</div>
+      </div>
+      <div class="streak-cell">
+        <!-- pixel checkmark box -->
+        <svg width="14" height="14" viewBox="0 0 7 7" style="image-rendering:pixelated;display:block;margin:0 auto 3px">
+          <rect x="0" y="0" width="7" height="1" fill="#5a5e82"/>
+          <rect x="0" y="6" width="7" height="1" fill="#5a5e82"/>
+          <rect x="0" y="0" width="1" height="7" fill="#5a5e82"/>
+          <rect x="6" y="0" width="1" height="7" fill="#5a5e82"/>
+          <rect x="5" y="2" width="1" height="1" fill="#5a5e82"/>
+          <rect x="4" y="3" width="1" height="1" fill="#5a5e82"/>
+          <rect x="1" y="3" width="3" height="1" fill="#5a5e82"/>
+          <rect x="2" y="4" width="1" height="1" fill="#5a5e82"/>
+        </svg>
+        <div class="streak-num">5/8</div>
+        <div class="streak-lbl">DONE</div>
+      </div>
+      <div class="streak-cell">
+        <!-- pixel game controller -->
+        <svg width="14" height="14" viewBox="0 0 7 7" style="image-rendering:pixelated;display:block;margin:0 auto 3px">
+          <rect x="0" y="1" width="7" height="1" fill="#5a5e82"/>
+          <rect x="0" y="2" width="7" height="3" fill="#5a5e82"/>
+          <rect x="1" y="5" width="2" height="1" fill="#5a5e82"/>
+          <rect x="4" y="5" width="2" height="1" fill="#5a5e82"/>
+          <rect x="3" y="2" width="1" height="3" fill="#0c0e1c"/>
+          <rect x="2" y="3" width="3" height="1" fill="#0c0e1c"/>
+          <rect x="5" y="3" width="1" height="1" fill="#5a5e82"/>
+        </svg>
+        <div class="streak-num">3</div>
+        <div class="streak-lbl">HOBBY</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- MAIN QUEST (featured) -->
+    <div>
+      <div class="sec-label">
+        <span>MAIN QUEST</span>
+        <span class="sec-label-action">ALL QUESTS →</span>
+      </div>
+      <div class="main-quest">
+        <div class="mq-top-bar"></div>
+        <div class="mq-body">
+          <div class="mq-tag">
+            <!-- pixel star -->
+            <svg width="10" height="10" viewBox="0 0 5 5" style="image-rendering:pixelated">
+              <rect x="2" y="0" width="1" height="1" fill="#f5c518"/>
+              <rect x="1" y="1" width="3" height="1" fill="#f5c518"/>
+              <rect x="0" y="2" width="5" height="1" fill="#f5c518"/>
+              <rect x="1" y="3" width="3" height="1" fill="#f5c518"/>
+              <rect x="0" y="4" width="2" height="1" fill="#f5c518"/>
+              <rect x="3" y="4" width="2" height="1" fill="#f5c518"/>
+            </svg>
+            P1 · CRITICAL QUEST
+          </div>
+          <div class="mq-title">เลือก Logo Direction (A/B/C/D) สำหรับ Digital Project</div>
+          <div class="mq-meta">
+            <span class="tag urgent">DUE TODAY</span>
+            <span class="tag">DIGITAL</span>
+            <span class="tag">OWNER</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUEST LOG -->
+    <div>
+      <div class="sec-label">QUEST LOG — TODAY</div>
+      <div class="quest-list">
+        <div class="ql-header">
+          <div class="ql-title">ACTIVE</div>
+          <div class="ql-count">3 / 8</div>
+        </div>
+
+        <div class="qrow">
+          <div class="qpip p1"></div>
+          <div class="qcheck active">
+            <!-- pixel exclamation -->
+            <svg width="8" height="8" viewBox="0 0 4 4" style="image-rendering:pixelated">
+              <rect x="1" y="0" width="2" height="2" fill="#f5c518"/>
+              <rect x="1" y="3" width="2" height="1" fill="#f5c518"/>
+            </svg>
+          </div>
+          <div class="qinfo">
+            <div class="qname">LifeBar — CI Full Review</div>
+            <div class="qarea">STS · LIFEBAR</div>
+          </div>
+          <div class="qdue today">OVERDUE</div>
+        </div>
+
+        <div class="qrow">
+          <div class="qpip p2"></div>
+          <div class="qcheck active"></div>
+          <div class="qinfo">
+            <div class="qname">Digital Project Logo A/B</div>
+            <div class="qarea">DIGITAL</div>
+          </div>
+          <div class="qdue today">TODAY</div>
+        </div>
+
+        <div class="qrow">
+          <div class="qpip p2"></div>
+          <div class="qcheck active"></div>
+          <div class="qinfo">
+            <div class="qname">Review Deck Daisi</div>
+            <div class="qarea">DAISI</div>
+          </div>
+          <div class="qdue today">TODAY</div>
+        </div>
+
+        <div class="qrow done">
+          <div class="qpip p3"></div>
+          <div class="qcheck checked">
+            <!-- pixel checkmark -->
+            <svg width="8" height="8" viewBox="0 0 4 4" style="image-rendering:pixelated">
+              <rect x="2" y="1" width="1" height="1" fill="#2e3254"/>
+              <rect x="1" y="2" width="1" height="1" fill="#2e3254"/>
+              <rect x="0" y="1" width="1" height="1" fill="#2e3254"/>
+              <rect x="3" y="0" width="1" height="1" fill="#2e3254"/>
+            </svg>
+          </div>
+          <div class="qinfo">
+            <div class="qname done">Daisi Brand Moodboard</div>
+            <div class="qarea">DAISI</div>
+          </div>
+          <div class="qdue done">+20 XP</div>
+        </div>
+
+        <div class="qrow done">
+          <div class="qpip p3"></div>
+          <div class="qcheck checked">
+            <svg width="8" height="8" viewBox="0 0 4 4" style="image-rendering:pixelated">
+              <rect x="2" y="1" width="1" height="1" fill="#2e3254"/>
+              <rect x="1" y="2" width="1" height="1" fill="#2e3254"/>
+              <rect x="0" y="1" width="1" height="1" fill="#2e3254"/>
+              <rect x="3" y="0" width="1" height="1" fill="#2e3254"/>
+            </svg>
+          </div>
+          <div class="qinfo">
+            <div class="qname done">Meeting Prep</div>
+            <div class="qarea">DIGITAL</div>
+          </div>
+          <div class="qdue done">+10 XP</div>
+        </div>
+
+        <!-- More quests indicator -->
+        <div style="padding:10px 14px;display:flex;align-items:center;justify-content:center;border-top:1px solid var(--border)">
+          <span style="font-family:'Press Start 2P',monospace;font-size:5px;color:var(--t3);letter-spacing:0.1em">+ 3 MORE QUESTS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDE QUEST PREVIEW -->
+    <div>
+      <div class="sec-label">
+        <span>SIDE QUESTS · SKILLS</span>
+        <span class="sec-label-action">SKILL TREE →</span>
+      </div>
+      <div class="quest-list">
+        <div class="qrow">
+          <div class="qpip p2"></div>
+          <div class="sc-icon-box" style="width:28px;height:28px;border-radius:5px;flex-shrink:0">
+            <!-- palette icon -->
+            <svg width="16" height="16" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+              <rect x="1" y="1" width="2" height="2" fill="#5a5e82"/>
+              <rect x="5" y="1" width="2" height="2" fill="#5a5e82"/>
+              <rect x="0" y="4" width="2" height="2" fill="#5a5e82"/>
+              <rect x="3" y="3" width="2" height="2" fill="#f5c518"/>
+              <rect x="6" y="4" width="2" height="2" fill="#5a5e82"/>
+              <rect x="2" y="6" width="4" height="1" fill="#5a5e82"/>
+            </svg>
+          </div>
+          <div class="qinfo" style="margin-left:8px">
+            <div class="qname">Drawing</div>
+            <div class="qarea">LV.5 · 7-DAY STREAK</div>
+          </div>
+          <div class="qdue today">LOG</div>
+        </div>
+
+        <div class="qrow">
+          <div class="qpip p2"></div>
+          <div class="sc-icon-box" style="width:28px;height:28px;border-radius:5px;flex-shrink:0">
+            <!-- book icon -->
+            <svg width="16" height="16" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+              <rect x="1" y="0" width="6" height="1" fill="#5a5e82"/>
+              <rect x="0" y="1" width="1" height="6" fill="#5a5e82"/>
+              <rect x="7" y="1" width="1" height="6" fill="#5a5e82"/>
+              <rect x="1" y="4" width="6" height="1" fill="#5a5e82"/>
+              <rect x="0" y="7" width="8" height="1" fill="#5a5e82"/>
+              <rect x="4" y="0" width="1" height="4" fill="#5a5e82"/>
+            </svg>
+          </div>
+          <div class="qinfo" style="margin-left:8px">
+            <div class="qname">Reading</div>
+            <div class="qarea">LV.3 · 3-DAY STREAK</div>
+          </div>
+          <div class="qdue">LOG</div>
+        </div>
+
+        <div class="qrow" style="border-bottom:none">
+          <div class="qpip p3"></div>
+          <div class="sc-icon-box" style="width:28px;height:28px;border-radius:5px;flex-shrink:0">
+            <!-- boot/run icon -->
+            <svg width="16" height="16" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+              <rect x="1" y="1" width="2" height="4" fill="#5a5e82"/>
+              <rect x="1" y="5" width="6" height="2" fill="#5a5e82"/>
+              <rect x="3" y="4" width="4" height="1" fill="#5a5e82"/>
+              <rect x="5" y="3" width="2" height="1" fill="#5a5e82"/>
+            </svg>
+          </div>
+          <div class="qinfo" style="margin-left:8px">
+            <div class="qname">Exercise</div>
+            <div class="qarea">LV.4 · 5-DAY STREAK</div>
+          </div>
+          <div class="qdue">LOG</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FAB -->
+  <div class="fab">+</div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="0" y="4" width="8" height="4" fill="#f5c518"/>
+        <rect x="1" y="2" width="6" height="2" fill="#f5c518"/>
+        <rect x="3" y="0" width="2" height="2" fill="#f5c518"/>
+        <rect x="2" y="5" width="2" height="3" fill="#0c0e1c"/>
+        <rect x="5" y="5" width="2" height="3" fill="#0c0e1c"/>
+      </svg>
+      <div class="nav-lbl on">HOME</div>
+      <div class="nav-pip"></div>
+    </div>
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="6" y="0" width="2" height="6" fill="#2e3254"/>
+        <rect x="5" y="1" width="1" height="1" fill="#2e3254"/>
+        <rect x="4" y="2" width="1" height="1" fill="#2e3254"/>
+        <rect x="3" y="3" width="1" height="1" fill="#2e3254"/>
+        <rect x="1" y="3" width="3" height="1" fill="#2e3254"/>
+        <rect x="2" y="4" width="1" height="1" fill="#2e3254"/>
+        <rect x="1" y="5" width="1" height="2" fill="#2e3254"/>
+        <rect x="0" y="7" width="3" height="1" fill="#2e3254"/>
+      </svg>
+      <div class="nav-lbl">QUESTS</div>
+    </div>
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="2" y="0" width="4" height="1" fill="#2e3254"/>
+        <rect x="1" y="1" width="6" height="2" fill="#2e3254"/>
+        <rect x="0" y="3" width="8" height="1" fill="#2e3254"/>
+        <rect x="1" y="4" width="6" height="2" fill="#2e3254"/>
+        <rect x="2" y="6" width="4" height="1" fill="#2e3254"/>
+        <rect x="3" y="7" width="2" height="1" fill="#2e3254"/>
+      </svg>
+      <div class="nav-lbl">SKILLS</div>
+    </div>
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="2" y="0" width="4" height="1" fill="#2e3254"/>
+        <rect x="0" y="1" width="8" height="1" fill="#2e3254"/>
+        <rect x="0" y="2" width="8" height="3" fill="#2e3254"/>
+        <rect x="2" y="5" width="4" height="1" fill="#2e3254"/>
+        <rect x="1" y="6" width="6" height="1" fill="#2e3254"/>
+        <rect x="0" y="7" width="8" height="1" fill="#2e3254"/>
+      </svg>
+      <div class="nav-lbl">STATS</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+  SCREEN 2 — SKILL TREE (Hobby Tracker)
+═══════════════════════════════════════════════════════ -->
+<div class="screen" id="s2">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="char-box">
+        <svg width="24" height="24" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+          <rect x="3" y="0" width="2" height="1" fill="#f5c518"/>
+          <rect x="2" y="1" width="4" height="1" fill="#f5c518"/>
+          <rect x="1" y="2" width="6" height="1" fill="#f5c518"/>
+          <rect x="2" y="3" width="4" height="2" fill="#e8e8f0"/>
+          <rect x="2" y="3" width="1" height="1" fill="#0c0e1c"/>
+          <rect x="5" y="3" width="1" height="1" fill="#0c0e1c"/>
+          <rect x="1" y="5" width="6" height="2" fill="#22263d"/>
+          <rect x="1" y="7" width="2" height="1" fill="#22263d"/>
+          <rect x="5" y="7" width="2" height="1" fill="#22263d"/>
+        </svg>
+        <div class="lv-tag">LV.7</div>
+      </div>
+      <div class="header-info">
+        <div class="header-name">SKILL TREE</div>
+        <div class="header-date">ทำ hobby = เก็บ XP</div>
+      </div>
+      <div class="header-rank">5 SKILLS</div>
+    </div>
+    <div class="xp-row">
+      <div class="xp-label">HOBBY XP</div>
+      <div class="xp-track"><div class="xp-fill" style="width:51%"></div></div>
+      <div class="xp-val">128/250</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DRAWING -->
+    <div>
+      <div class="sec-label">CREATIVE</div>
+      <div class="skill-card active-skill">
+        <div class="sc-top">
+          <div class="sc-icon-box">
+            <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+              <rect x="1" y="1" width="2" height="2" fill="#f5c518"/>
+              <rect x="5" y="0" width="2" height="2" fill="#f5c518"/>
+              <rect x="0" y="4" width="2" height="2" fill="#f5c518"/>
+              <rect x="3" y="3" width="2" height="2" fill="#f5c518"/>
+              <rect x="6" y="4" width="2" height="2" fill="#f5c518"/>
+              <rect x="2" y="6" width="4" height="1" fill="#5a5e82"/>
+            </svg>
+          </div>
+          <div class="sc-meta">
+            <div class="sc-name">Drawing</div>
+            <div class="sc-type">CREATIVE SKILL</div>
+          </div>
+          <div class="sc-right">
+            <div class="sc-lv">LV. 5</div>
+            <div class="sc-streak hot">
+              <svg width="8" height="8" viewBox="0 0 4 4" style="image-rendering:pixelated;display:inline-block;vertical-align:middle;margin-right:2px">
+                <rect x="1" y="0" width="1" height="1" fill="#f5c518"/>
+                <rect x="0" y="1" width="3" height="2" fill="#f5c518"/>
+                <rect x="1" y="3" width="2" height="1" fill="#f5c518"/>
+              </svg>
+              7 DAYS
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sc-bar-row">
+            <div class="sc-bar-lbl">Progress to LV.6</div>
+            <div class="sc-bar-xp">340 / 500</div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="width:68%"></div></div>
+        </div>
+        <div class="sc-bottom">
+          <div>
+            <div class="sc-dots">
+              <div class="sc-dot on"></div><div class="sc-dot on"></div><div class="sc-dot on"></div>
+              <div class="sc-dot on"></div><div class="sc-dot on"></div><div class="sc-dot on"></div>
+              <div class="sc-dot on"></div>
+              <span class="sc-dot-lbl">7 day streak</span>
+            </div>
+            <div class="sc-last" style="margin-top:4px">Last: วันนี้ · 14:30</div>
+          </div>
+          <button class="sc-log-btn primary">+ LOG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE -->
+    <div>
+      <div class="sec-label">KNOWLEDGE</div>
+      <div class="skill-card">
+        <div class="sc-top">
+          <div class="sc-icon-box">
+            <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+              <rect x="1" y="0" width="6" height="1" fill="#f5c518"/>
+              <rect x="0" y="1" width="1" height="6" fill="#f5c518"/>
+              <rect x="7" y="1" width="1" height="6" fill="#f5c518"/>
+              <rect x="1" y="4" width="6" height="1" fill="#f5c518"/>
+              <rect x="0" y="7" width="8" height="1" fill="#f5c518"/>
+              <rect x="4" y="0" width="1" height="4" fill="#f5c518"/>
+            </svg>
+          </div>
+          <div class="sc-meta">
+            <div class="sc-name">Reading</div>
+            <div class="sc-type">KNOWLEDGE SKILL</div>
+          </div>
+          <div class="sc-right">
+            <div class="sc-lv">LV. 3</div>
+            <div class="sc-streak hot">
+              <svg width="8" height="8" viewBox="0 0 4 4" style="image-rendering:pixelated;display:inline-block;vertical-align:middle;margin-right:2px">
+                <rect x="1" y="0" width="1" height="1" fill="#f5c518"/>
+                <rect x="0" y="1" width="3" height="2" fill="#f5c518"/>
+                <rect x="1" y="3" width="2" height="1" fill="#f5c518"/>
+              </svg>
+              3 DAYS
+            </div>
+          </div>
+        </div>
+        <!-- Reading progress extra -->
+        <div class="sc-extra">
+          <svg width="16" height="16" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block;flex-shrink:0">
+            <rect x="1" y="0" width="6" height="1" fill="#5a5e82"/>
+            <rect x="0" y="1" width="1" height="6" fill="#5a5e82"/>
+            <rect x="7" y="1" width="1" height="6" fill="#5a5e82"/>
+            <rect x="1" y="4" width="6" height="1" fill="#5a5e82"/>
+            <rect x="0" y="7" width="8" height="1" fill="#5a5e82"/>
+            <rect x="4" y="0" width="1" height="4" fill="#5a5e82"/>
+          </svg>
+          <div class="sc-extra-text">
+            <div class="line1">Atomic Habits</div>
+            <div class="line2">Chapter 12 · หน้า 187</div>
+          </div>
+          <div class="sc-extra-pct">62%</div>
+        </div>
+        <div>
+          <div class="sc-bar-row">
+            <div class="sc-bar-lbl">Progress to LV.4</div>
+            <div class="sc-bar-xp">210 / 300</div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="width:70%"></div></div>
+        </div>
+        <div class="sc-bottom">
+          <div>
+            <div class="sc-dots">
+              <div class="sc-dot on"></div><div class="sc-dot on"></div><div class="sc-dot on"></div>
+              <div class="sc-dot"></div><div class="sc-dot"></div><div class="sc-dot"></div><div class="sc-dot"></div>
+            </div>
+            <div class="sc-last" style="margin-top:4px">Last: เมื่อวาน · 22:00</div>
+          </div>
+          <button class="sc-log-btn primary">+ LOG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div>
+      <div class="sec-label">BODY</div>
+      <div class="skill-card">
+        <div class="sc-top">
+          <div class="sc-icon-box">
+            <!-- boot/run pixel icon -->
+            <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+              <rect x="1" y="1" width="2" height="4" fill="#f5c518"/>
+              <rect x="1" y="5" width="6" height="2" fill="#f5c518"/>
+              <rect x="3" y="4" width="4" height="1" fill="#f5c518"/>
+              <rect x="5" y="3" width="2" height="1" fill="#f5c518"/>
+            </svg>
+          </div>
+          <div class="sc-meta">
+            <div class="sc-name">Exercise</div>
+            <div class="sc-type">BODY SKILL</div>
+          </div>
+          <div class="sc-right">
+            <div class="sc-lv">LV. 4</div>
+            <div class="sc-streak hot">
+              <svg width="8" height="8" viewBox="0 0 4 4" style="image-rendering:pixelated;display:inline-block;vertical-align:middle;margin-right:2px">
+                <rect x="1" y="0" width="1" height="1" fill="#f5c518"/>
+                <rect x="0" y="1" width="3" height="2" fill="#f5c518"/>
+                <rect x="1" y="3" width="2" height="1" fill="#f5c518"/>
+              </svg>
+              5 DAYS
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sc-bar-row">
+            <div class="sc-bar-lbl">Progress to LV.5</div>
+            <div class="sc-bar-xp">180 / 400</div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="width:45%"></div></div>
+        </div>
+        <div class="sc-bottom">
+          <div>
+            <div class="sc-dots">
+              <div class="sc-dot on"></div><div class="sc-dot on"></div><div class="sc-dot on"></div>
+              <div class="sc-dot on"></div><div class="sc-dot on"></div><div class="sc-dot"></div><div class="sc-dot"></div>
+            </div>
+            <div class="sc-last" style="margin-top:4px">Last: เมื่อวาน · 07:00</div>
+          </div>
+          <button class="sc-log-btn primary">+ LOG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MUSIC (with warning) -->
+    <div>
+      <div class="skill-card">
+        <div class="sc-top">
+          <div class="sc-icon-box">
+            <!-- music note pixel icon -->
+            <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+              <rect x="2" y="0" width="5" height="1" fill="#5a5e82"/>
+              <rect x="2" y="1" width="5" height="1" fill="#5a5e82"/>
+              <rect x="2" y="2" width="1" height="4" fill="#5a5e82"/>
+              <rect x="6" y="2" width="1" height="1" fill="#5a5e82"/>
+              <rect x="0" y="5" width="3" height="2" fill="#5a5e82"/>
+              <rect x="5" y="5" width="2" height="2" fill="#5a5e82"/>
+            </svg>
+          </div>
+          <div class="sc-meta">
+            <div class="sc-name">Music / Piano</div>
+            <div class="sc-type">CREATIVE SKILL</div>
+          </div>
+          <div class="sc-right">
+            <div class="sc-lv">LV. 2</div>
+            <div class="sc-streak">NO STREAK</div>
+          </div>
+        </div>
+        <div class="sc-warn">
+          <!-- pixel warning triangle -->
+          <svg width="12" height="12" viewBox="0 0 6 6" style="image-rendering:pixelated;display:block;flex-shrink:0">
+            <rect x="2" y="0" width="2" height="1" fill="#f5c518"/>
+            <rect x="1" y="1" width="4" height="1" fill="#f5c518"/>
+            <rect x="0" y="2" width="6" height="1" fill="#f5c518"/>
+            <rect x="0" y="3" width="6" height="2" fill="#f5c518"/>
+            <rect x="2" y="2" width="2" height="1" fill="#0c0e1c"/>
+            <rect x="2" y="4" width="2" height="1" fill="#0c0e1c"/>
+          </svg>
+          ไม่ได้ practice 2 วันแล้ว — streak จะหาย!
+        </div>
+        <div>
+          <div class="sc-bar-row">
+            <div class="sc-bar-lbl">Progress to LV.3</div>
+            <div class="sc-bar-xp">80 / 200</div>
+          </div>
+          <div class="sc-bar"><div class="sc-bar-fill" style="width:40%"></div></div>
+        </div>
+        <div class="sc-bottom">
+          <div class="sc-last">Last: 3 วันที่แล้ว</div>
+          <button class="sc-log-btn primary">+ LOG</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add hobby -->
+    <div class="add-card">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block;margin:0 auto">
+        <rect x="3" y="0" width="2" height="8" fill="#2e3254"/>
+        <rect x="0" y="3" width="8" height="2" fill="#2e3254"/>
+      </svg>
+      <div class="add-card-label">ADD NEW SKILL</div>
+      <div class="add-card-sub">เลือก skill ใหม่เพื่อ track XP</div>
+    </div>
+
+  </div>
+
+  <!-- FAB -->
+  <div class="fab">+</div>
+
+  <!-- NAV -->
+  <div class="nav">
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="0" y="4" width="8" height="4" fill="#2e3254"/>
+        <rect x="1" y="2" width="6" height="2" fill="#2e3254"/>
+        <rect x="3" y="0" width="2" height="2" fill="#2e3254"/>
+        <rect x="2" y="5" width="2" height="3" fill="#0c0e1c"/>
+        <rect x="5" y="5" width="2" height="3" fill="#0c0e1c"/>
+      </svg>
+      <div class="nav-lbl">HOME</div>
+    </div>
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="6" y="0" width="2" height="6" fill="#2e3254"/>
+        <rect x="5" y="1" width="1" height="1" fill="#2e3254"/>
+        <rect x="4" y="2" width="1" height="1" fill="#2e3254"/>
+        <rect x="3" y="3" width="1" height="1" fill="#2e3254"/>
+        <rect x="1" y="3" width="3" height="1" fill="#2e3254"/>
+        <rect x="2" y="4" width="1" height="1" fill="#2e3254"/>
+        <rect x="1" y="5" width="1" height="2" fill="#2e3254"/>
+        <rect x="0" y="7" width="3" height="1" fill="#2e3254"/>
+      </svg>
+      <div class="nav-lbl">QUESTS</div>
+    </div>
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="2" y="0" width="4" height="1" fill="#f5c518"/>
+        <rect x="1" y="1" width="6" height="2" fill="#f5c518"/>
+        <rect x="0" y="3" width="8" height="1" fill="#f5c518"/>
+        <rect x="1" y="4" width="6" height="2" fill="#f5c518"/>
+        <rect x="2" y="6" width="4" height="1" fill="#f5c518"/>
+        <rect x="3" y="7" width="2" height="1" fill="#f5c518"/>
+      </svg>
+      <div class="nav-lbl on">SKILLS</div>
+      <div class="nav-pip"></div>
+    </div>
+    <div class="nav-item">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated">
+        <rect x="2" y="0" width="4" height="1" fill="#2e3254"/>
+        <rect x="0" y="1" width="8" height="1" fill="#2e3254"/>
+        <rect x="0" y="2" width="8" height="3" fill="#2e3254"/>
+        <rect x="2" y="5" width="4" height="1" fill="#2e3254"/>
+        <rect x="1" y="6" width="6" height="1" fill="#2e3254"/>
+        <rect x="0" y="7" width="8" height="1" fill="#2e3254"/>
+      </svg>
+      <div class="nav-lbl">STATS</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+  SCREEN 3 — LOG SESSION + LEVEL UP TOAST
+═══════════════════════════════════════════════════════ -->
+<div class="screen" id="s3">
+
+  <!-- HEADER (dimmed — modal open) -->
+  <div class="header header-dim">
+    <div class="header-top">
+      <div class="char-box">
+        <svg width="24" height="24" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+          <rect x="3" y="0" width="2" height="1" fill="#f5c518"/>
+          <rect x="2" y="1" width="4" height="1" fill="#f5c518"/>
+          <rect x="1" y="2" width="6" height="1" fill="#f5c518"/>
+          <rect x="2" y="3" width="4" height="2" fill="#e8e8f0"/>
+          <rect x="2" y="3" width="1" height="1" fill="#0c0e1c"/>
+          <rect x="5" y="3" width="1" height="1" fill="#0c0e1c"/>
+          <rect x="1" y="5" width="6" height="2" fill="#22263d"/>
+          <rect x="1" y="7" width="2" height="1" fill="#22263d"/>
+          <rect x="5" y="7" width="2" height="1" fill="#22263d"/>
+        </svg>
+        <div class="lv-tag">LV.7</div>
+      </div>
+      <div class="header-info">
+        <div class="header-name">SKILL TREE</div>
+        <div class="header-date">ทำ hobby = เก็บ XP</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL UP TOAST -->
+  <div class="levelup-toast">
+    <!-- pixel up-arrow icon -->
+    <svg width="28" height="28" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block;flex-shrink:0">
+      <rect x="3" y="0" width="2" height="1" fill="#f5c518"/>
+      <rect x="2" y="1" width="4" height="1" fill="#f5c518"/>
+      <rect x="1" y="2" width="6" height="1" fill="#f5c518"/>
+      <rect x="3" y="3" width="2" height="5" fill="#f5c518"/>
+    </svg>
+    <div class="toast-content">
+      <div class="toast-tag">SKILL UP!</div>
+      <div class="toast-title">Drawing → LV. 6</div>
+      <div class="toast-sub">Achievement "Art Adept" unlocked</div>
+    </div>
+    <div class="toast-xp">+50 XP</div>
+  </div>
+
+  <!-- OVERLAY -->
+  <div class="modal-overlay"></div>
+
+  <!-- LOG SESSION SHEET -->
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-tag">LOG SESSION</div>
+    <div class="modal-title">
+      <svg width="18" height="18" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block">
+        <rect x="1" y="1" width="2" height="2" fill="#f5c518"/>
+        <rect x="5" y="0" width="2" height="2" fill="#f5c518"/>
+        <rect x="0" y="4" width="2" height="2" fill="#f5c518"/>
+        <rect x="3" y="3" width="2" height="2" fill="#f5c518"/>
+        <rect x="6" y="4" width="2" height="2" fill="#f5c518"/>
+        <rect x="2" y="6" width="4" height="1" fill="#5a5e82"/>
+      </svg>
+      Drawing
+    </div>
+
+    <div class="dur-label">ใช้เวลานานแค่ไหน?</div>
+    <div class="dur-row">
+      <div class="dur-btn on"><div class="dur-num">15</div><div class="dur-unit">นาที</div></div>
+      <div class="dur-btn"><div class="dur-num">30</div><div class="dur-unit">นาที</div></div>
+      <div class="dur-btn"><div class="dur-num">60</div><div class="dur-unit">นาที</div></div>
+      <div class="dur-btn"><div class="dur-num">···</div><div class="dur-unit">custom</div></div>
+    </div>
+
+    <div class="xp-preview">
+      <svg width="20" height="20" viewBox="0 0 8 8" style="image-rendering:pixelated;display:block;flex-shrink:0">
+        <rect x="2" y="0" width="4" height="1" fill="#f5c518"/>
+        <rect x="0" y="1" width="8" height="1" fill="#f5c518"/>
+        <rect x="0" y="2" width="8" height="3" fill="#f5c518"/>
+        <rect x="2" y="5" width="4" height="1" fill="#f5c518"/>
+        <rect x="1" y="6" width="6" height="1" fill="#f5c518"/>
+        <rect x="0" y="7" width="8" height="1" fill="#f5c518"/>
+      </svg>
+      <div>
+        <div class="xp-prev-text">ได้รับ <span>+20 XP</span></div>
+        <div class="xp-prev-sub">Drawing LV.5 → ต้องการอีก 160 XP</div>
+      </div>
+    </div>
+
+    <div class="confirm-btn">✓ LOG +20 XP</div>
+  </div>
+
+</div>
+
+<script>
+function showScreen(index) {
+  document.querySelectorAll('.screen').forEach((s, i) => s.classList.toggle('visible', i === index));
+  document.querySelectorAll('.mtab').forEach((t, i) => t.classList.toggle('on', i === index));
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>

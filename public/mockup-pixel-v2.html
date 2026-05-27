@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Direction PIXEL v2 — Codédex Style</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; }
+
+:root {
+  --bg:     #0d0f1e;
+  --card:   #13152a;
+  --card2:  #191c33;
+  --border: #252844;
+  --t1:     #eeeef8;
+  --t2:     #8888bb;
+  --t3:     #444466;
+  --gold:   #f5c518;
+  --red:    #ff5566;
+  --green:  #44dd88;
+  --blue:   #5599ff;
+  --purple: #aa66ff;
+  --teal:   #33ddcc;
+  --orange: #ff8844;
+  --pink:   #ff66aa;
+}
+
+body {
+  background: var(--bg);
+  color: var(--t1);
+  font-family: 'Nunito', sans-serif;
+  max-width: 390px;
+  margin: 0 auto;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ══════════════════════════════════════
+   HEADER — Character + Speech Bubble
+══════════════════════════════════════ */
+.header {
+  background: linear-gradient(180deg, #0a0c1f 0%, #0d0f1e 100%);
+  padding: 52px 20px 20px;
+  position: relative;
+  border-bottom: 2px solid var(--border);
+}
+
+/* Stars bg */
+.header::before {
+  content: '★ · ✦ · ★ · ✦ · ★ · ✦';
+  position: absolute; top: 14px; left: 20px; right: 20px;
+  font-size: 10px; color: rgba(255,255,255,0.12);
+  letter-spacing: 8px; white-space: nowrap; overflow: hidden;
+}
+
+.header-row {
+  display: flex; align-items: flex-end; gap: 14px;
+}
+
+/* 32-bit style character using CSS pixel art */
+.char-wrap { position: relative; flex-shrink: 0; }
+
+.char-sprite {
+  width: 56px; height: 64px;
+  position: relative;
+  image-rendering: pixelated;
+}
+
+/* Pixel character built with box-shadow */
+.char-body {
+  width: 8px; height: 8px;
+  position: absolute;
+  image-rendering: pixelated;
+}
+
+/* Speech bubble */
+.speech-bubble {
+  background: var(--card2);
+  border: 2px solid var(--border);
+  border-radius: 12px 12px 12px 2px;
+  padding: 12px 14px;
+  flex: 1;
+  position: relative;
+}
+.speech-bubble::before {
+  content: '';
+  position: absolute; left: -8px; bottom: 16px;
+  border: 4px solid transparent;
+  border-right-color: var(--border);
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute; left: -5px; bottom: 17px;
+  border: 3px solid transparent;
+  border-right-color: var(--card2);
+}
+.speech-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; color: var(--gold);
+  letter-spacing: 0.08em; margin-bottom: 6px;
+}
+.speech-text {
+  font-size: 15px; font-weight: 700;
+  color: var(--t1); line-height: 1.3;
+}
+.speech-sub {
+  font-size: 12px; color: var(--t2);
+  margin-top: 3px; font-weight: 600;
+}
+
+/* ── XP / Streak strip ── */
+.xp-strip {
+  display: flex; gap: 0;
+  margin-top: 16px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.xp-cell {
+  flex: 1; padding: 10px 8px; text-align: center;
+  border-right: 1px solid var(--border);
+}
+.xp-cell:last-child { border-right: none; }
+.xp-icon { font-size: 18px; line-height: 1; }
+.xp-val {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px; margin-top: 4px; line-height: 1;
+}
+.xp-val.gold   { color: var(--gold); }
+.xp-val.orange { color: var(--orange); }
+.xp-val.blue   { color: var(--blue); }
+.xp-val.green  { color: var(--green); }
+.xp-label {
+  font-size: 9px; color: var(--t3); margin-top: 3px;
+  font-weight: 700; letter-spacing: 0.04em;
+}
+
+/* ══════════════════════════════════════
+   CONTENT
+══════════════════════════════════════ */
+.content {
+  padding: 20px 16px 120px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+/* Section label */
+.sec-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: var(--t2);
+  letter-spacing: 0.1em; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ══════════════════════════════════════
+   ILLUSTRATED QUEST CARD (like codedex course card)
+══════════════════════════════════════ */
+.quest-big {
+  border-radius: 14px; overflow: hidden;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.2s;
+}
+.quest-big:active { transform: scale(0.98); }
+
+/* Pixel landscape banner */
+.quest-banner {
+  height: 110px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* STS — warm sunset pixel landscape */
+.banner-sts {
+  background:
+    /* sun */
+    radial-gradient(circle 28px at 76% 40%, #ffee44 0%, #ffaa00 60%, transparent 61%),
+    /* sky gradient */
+    linear-gradient(180deg, #1a0a2e 0%, #3d1a6e 30%, #c44a1e 60%, #ff8833 80%, #ffcc44 100%);
+}
+.banner-sts::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 44px;
+  background:
+    /* ground pixel layers */
+    repeating-linear-gradient(90deg,
+      #1a3a1a 0, #1a3a1a 8px, #1f4a1f 8px, #1f4a1f 16px,
+      #162e16 16px, #162e16 24px, #1e421e 24px, #1e421e 32px
+    );
+  clip-path: polygon(0 40%, 6% 20%, 12% 35%, 18% 10%, 24% 30%, 30% 15%, 36% 25%, 42% 5%, 48% 20%, 54% 12%, 60% 28%, 66% 8%, 72% 22%, 78% 14%, 84% 30%, 90% 10%, 96% 20%, 100% 15%, 100% 100%, 0 100%);
+}
+/* pixel buildings silhouette */
+.banner-sts::after {
+  content: '';
+  position: absolute; bottom: 20px; left: 12px; right: 12px; height: 50px;
+  background: rgba(10,5,20,0.6);
+  clip-path: polygon(0 100%, 0 60%, 8% 60%, 8% 40%, 14% 40%, 14% 20%, 20% 20%, 20% 0%, 26% 0%, 26% 40%, 32% 40%, 32% 55%, 42% 55%, 42% 30%, 48% 30%, 48% 10%, 54% 10%, 54% 30%, 60% 30%, 60% 50%, 68% 50%, 68% 35%, 74% 35%, 74% 15%, 80% 15%, 80% 35%, 86% 35%, 86% 60%, 92% 60%, 92% 45%, 98% 45%, 98% 60%, 100% 60%, 100% 100%);
+}
+
+/* Daisi — night city neon */
+.banner-daisi {
+  background:
+    radial-gradient(ellipse 80px 40px at 50% 30%, rgba(180,100,255,0.3) 0%, transparent 70%),
+    linear-gradient(180deg, #05020e 0%, #0d0520 40%, #1a0840 70%, #0a0520 100%);
+}
+.banner-daisi::before {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 60px;
+  background: linear-gradient(180deg, transparent, rgba(10,5,30,0.8));
+}
+.banner-daisi::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle 2px at 15% 25%, #ff66aa 0%, transparent 3px),
+    radial-gradient(circle 2px at 30% 40%, #aa66ff 0%, transparent 3px),
+    radial-gradient(circle 2px at 55% 20%, #5599ff 0%, transparent 3px),
+    radial-gradient(circle 2px at 70% 35%, #33ddcc 0%, transparent 3px),
+    radial-gradient(circle 2px at 85% 22%, #ff66aa 0%, transparent 3px),
+    radial-gradient(circle 3px at 45% 55%, rgba(170,102,255,0.5) 0%, transparent 5px),
+    repeating-linear-gradient(90deg,
+      transparent 0, transparent 6px,
+      rgba(100,50,200,0.04) 6px, rgba(100,50,200,0.04) 7px
+    );
+}
+
+/* Digital — teal circuit board */
+.banner-digital {
+  background: linear-gradient(135deg, #020e14 0%, #031a20 50%, #041e1a 100%);
+}
+.banner-digital::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle 30px at 50% 50%, rgba(51,221,204,0.15) 0%, transparent 70%),
+    repeating-linear-gradient(0deg,
+      transparent 0, transparent 15px,
+      rgba(51,221,204,0.06) 15px, rgba(51,221,204,0.06) 16px
+    ),
+    repeating-linear-gradient(90deg,
+      transparent 0, transparent 15px,
+      rgba(51,221,204,0.06) 15px, rgba(51,221,204,0.06) 16px
+    );
+}
+.banner-digital::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(circle 3px at 20% 30%, #33ddcc 0%, transparent 3px),
+    radial-gradient(circle 3px at 50% 60%, #33ddcc 0%, transparent 3px),
+    radial-gradient(circle 3px at 75% 25%, #33ddcc 0%, transparent 3px),
+    radial-gradient(circle 3px at 88% 65%, #5599ff 0%, transparent 3px),
+    radial-gradient(circle 2px at 35% 75%, #33ddcc 0%, transparent 2px);
+}
+
+/* Quest card body */
+.quest-body {
+  padding: 14px 16px 12px;
+  background: var(--card);
+}
+.quest-category {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 6px; letter-spacing: 0.1em; margin-bottom: 8px;
+}
+.quest-title-big {
+  font-size: 15px; font-weight: 800; color: var(--t1);
+  line-height: 1.3; margin-bottom: 10px;
+}
+.quest-tags { display: flex; gap: 6px; align-items: center; }
+.badge {
+  font-size: 10px; font-weight: 800; border-radius: 6px;
+  padding: 3px 9px;
+}
+.badge-crit { color: var(--red);  background: rgba(255,85,102,0.12); border: 1px solid rgba(255,85,102,0.3); }
+.badge-gold { color: var(--gold); background: rgba(245,197,24,0.1);  border: 1px solid rgba(245,197,24,0.3); }
+.badge-teal { color: var(--teal); background: rgba(51,221,204,0.08); border: 1px solid rgba(51,221,204,0.25); }
+.badge-purple { color: var(--purple); background: rgba(170,102,255,0.1); border: 1px solid rgba(170,102,255,0.25); }
+
+/* ══════════════════════════════════════
+   MEETINGS — Timeline scroll
+══════════════════════════════════════ */
+.meetings-scroll {
+  display: flex; gap: 10px; overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.meetings-scroll::-webkit-scrollbar { display: none; }
+
+.meet-card {
+  flex-shrink: 0; width: 160px;
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 12px; padding: 12px;
+  position: relative; overflow: hidden;
+}
+.meet-card.active {
+  border-color: var(--green);
+  box-shadow: 0 0 0 1px rgba(68,221,136,0.2), 0 4px 20px rgba(68,221,136,0.1);
+}
+.meet-card.past { opacity: 0.45; }
+
+.meet-glow {
+  position: absolute; top: 0; right: 0;
+  width: 60px; height: 60px;
+  border-radius: 50%; filter: blur(20px);
+  pointer-events: none;
+}
+.meet-glow.green { background: rgba(68,221,136,0.3); }
+.meet-glow.blue  { background: rgba(85,153,255,0.2); }
+
+.meet-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px; margin-bottom: 8px;
+}
+.meet-time.active { color: var(--green); }
+.meet-time.normal { color: var(--blue); }
+.meet-name {
+  font-size: 13px; font-weight: 700; color: var(--t1);
+  line-height: 1.3;
+}
+.live-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 9px; font-weight: 800; color: var(--green);
+  background: rgba(68,221,136,0.12);
+  border: 1px solid rgba(68,221,136,0.3);
+  border-radius: 5px; padding: 2px 7px; margin-top: 6px;
+}
+.live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+/* ══════════════════════════════════════
+   QUEST LIST — Cleaner rows
+══════════════════════════════════════ */
+.quest-list {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.quest-list-header {
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.qlist-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px; color: var(--t2);
+}
+.qlist-count {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+}
+.qlist-count.red { color: var(--red); }
+.qlist-count.gold { color: var(--gold); }
+
+.qrow {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+}
+.qrow:last-child { border-bottom: none; }
+
+/* Pixel checkbox */
+.qcheck {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border: 2px solid var(--border);
+  border-radius: 6px; background: var(--bg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px;
+}
+.qcheck.urgent { border-color: var(--red); background: rgba(255,85,102,0.08); }
+.qcheck.urgent::after { content: '!'; font-family:'Press Start 2P',monospace; font-size:8px; color:var(--red); }
+
+.qtask { flex:1; min-width:0; }
+.qtask-name {
+  font-size: 14px; font-weight: 700; color: var(--t1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.qtask-area {
+  font-size: 10px; font-weight: 700; margin-top: 2px;
+}
+.qtask-area.sts  { color: var(--gold); }
+.qtask-area.daisi { color: #cc9933; }
+.qtask-area.digital { color: var(--teal); }
+
+.qdue { font-size: 10px; font-weight: 800; flex-shrink:0; }
+.qdue.overdue { color: var(--red); }
+.qdue.today   { color: var(--gold); }
+.qdue.soon    { color: var(--t2); }
+
+/* ══════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════ */
+.nav {
+  position: fixed; bottom: 0; left:50%; transform:translateX(-50%);
+  width: 390px;
+  background: rgba(13,15,30,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 2px solid var(--border);
+  display: flex; padding: 10px 0 28px;
+}
+.nav-item {
+  flex:1; display:flex; flex-direction:column;
+  align-items:center; gap:4px; cursor:pointer;
+}
+.nav-ico { font-size:22px; opacity:0.3; }
+.nav-ico.on { opacity:1; }
+.nav-lbl {
+  font-family:'Press Start 2P',monospace;
+  font-size:6px; color:var(--t3);
+}
+.nav-lbl.on { color:var(--gold); }
+.nav-pip {
+  width:4px;height:4px;border-radius:50%;
+  background:var(--gold); margin-top:-1px;
+}
+
+/* FAB */
+.fab {
+  position:fixed; bottom:88px; right:20px;
+  width:52px; height:52px; border-radius:14px;
+  background:var(--gold); color:#000;
+  font-size:28px; font-weight:800;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer;
+  box-shadow: 0 4px 0 #a07800, 0 8px 24px rgba(245,197,24,0.4);
+  transition:transform 0.08s,box-shadow 0.08s;
+}
+.fab:active { transform:translateY(3px); box-shadow:0 1px 0 #a07800,0 4px 12px rgba(245,197,24,0.3); }
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="header">
+  <div class="header-row">
+    <!-- Pixel character emoji (32-bit style) -->
+    <div class="char-wrap">
+      <div style="
+        width:56px;height:68px;
+        position:relative;
+        font-size:40px;
+        display:flex;align-items:center;justify-content:center;
+        filter:drop-shadow(0 4px 8px rgba(245,197,24,0.4));
+      ">🧙‍♀️</div>
+      <!-- Level badge -->
+      <div style="
+        position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);
+        background:var(--gold);color:#000;
+        font-family:'Press Start 2P',monospace;
+        font-size:5px;padding:2px 5px;
+        white-space:nowrap;
+      ">LV.7</div>
+    </div>
+
+    <!-- Speech bubble -->
+    <div class="speech-bubble">
+      <div class="speech-name">▶ DAISI DESIGN OS</div>
+      <div class="speech-text">สวัสดียามเย็นค่ะ!</div>
+      <div class="speech-sub">คิม · พุธ 27 พ.ค. 2569</div>
+    </div>
+  </div>
+
+  <!-- XP Strip -->
+  <div class="xp-strip">
+    <div class="xp-cell">
+      <div class="xp-icon">🔥</div>
+      <div class="xp-val orange">12</div>
+      <div class="xp-label">STREAK</div>
+    </div>
+    <div class="xp-cell">
+      <div class="xp-icon">⭐</div>
+      <div class="xp-val gold">340</div>
+      <div class="xp-label">TOTAL XP</div>
+    </div>
+    <div class="xp-cell">
+      <div class="xp-icon">✅</div>
+      <div class="xp-val green">28</div>
+      <div class="xp-label">DONE</div>
+    </div>
+    <div class="xp-cell">
+      <div class="xp-icon">🎖️</div>
+      <div class="xp-val" style="color:var(--purple)">GOLD</div>
+      <div class="xp-label">RANK</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="content">
+
+  <!-- ACTIVE QUEST — illustrated card -->
+  <div>
+    <div class="sec-label">⚔️ ACTIVE QUEST</div>
+    <div class="quest-big">
+      <div class="quest-banner banner-digital"></div>
+      <div class="quest-body">
+        <div class="quest-category" style="color:var(--teal)">DIGITAL PROJECT</div>
+        <div class="quest-title-big">[OWNER] เลือก Logo Direction (A/B/C/D)</div>
+        <div class="quest-tags">
+          <span class="badge badge-crit">P1 CRIT</span>
+          <span class="badge badge-gold">DUE TODAY</span>
+          <span class="badge badge-teal">DIGITAL</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEETINGS — horizontal scroll cards -->
+  <div>
+    <div class="sec-label">📡 วันนี้</div>
+    <div class="meetings-scroll">
+      <!-- past -->
+      <div class="meet-card past">
+        <div class="meet-time normal">10:00</div>
+        <div class="meet-name">ไปโชว์รูมเครื่องชีลกระป๋อง</div>
+      </div>
+      <!-- past -->
+      <div class="meet-card past">
+        <div class="meet-time normal">12:30</div>
+        <div class="meet-name">Meeting With Kan</div>
+      </div>
+      <!-- ACTIVE -->
+      <div class="meet-card active">
+        <div class="meet-glow green"></div>
+        <div class="meet-time active">19:00</div>
+        <div class="meet-name">Team Sync · Digital</div>
+        <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      </div>
+      <!-- upcoming -->
+      <div class="meet-card">
+        <div class="meet-time normal">21:00</div>
+        <div class="meet-name">Review Deck</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY TASKS — STS area banner -->
+  <div>
+    <div class="sec-label">🔥 ค้าง / วันนี้</div>
+    <div class="quest-big" style="margin-bottom:0">
+      <div class="quest-banner banner-sts" style="height:60px"></div>
+      <div class="quest-list" style="border-radius:0 0 12px 12px;border-top:none">
+        <div class="qrow">
+          <div class="qcheck urgent"></div>
+          <div class="qtask">
+            <div class="qtask-name">LifeBar — CI Full</div>
+            <div class="qtask-area sts">STS</div>
+          </div>
+          <div class="qdue today">TODAY</div>
+        </div>
+        <div class="qrow">
+          <div class="qcheck urgent"></div>
+          <div class="qtask">
+            <div class="qtask-name">Lean Canvas — Daisi Design</div>
+            <div class="qtask-area daisi">Daisi</div>
+          </div>
+          <div class="qdue today">TODAY</div>
+        </div>
+        <div class="qrow">
+          <div class="qcheck"></div>
+          <div class="qtask">
+            <div class="qtask-name">Comment Digital Approval</div>
+            <div class="qtask-area sts">STS</div>
+          </div>
+          <div class="qdue today">TODAY</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INCOMING — Daisi -->
+  <div>
+    <div class="sec-label">⏳ เร็วๆ นี้</div>
+    <div class="quest-big">
+      <div class="quest-banner banner-daisi" style="height:50px"></div>
+      <div class="quest-list" style="border-radius:0 0 12px 12px;border-top:none">
+        <div class="qrow">
+          <div class="qcheck"></div>
+          <div class="qtask">
+            <div class="qtask-name">Daisi Brand Assets</div>
+            <div class="qtask-area daisi">Daisi</div>
+          </div>
+          <div class="qdue soon">29/5</div>
+        </div>
+        <div class="qrow">
+          <div class="qcheck"></div>
+          <div class="qtask">
+            <div class="qtask-name">Packaging LifeBar Revision</div>
+            <div class="qtask-area sts">STS</div>
+          </div>
+          <div class="qdue soon">1/6</div>
+        </div>
+        <div class="qrow" style="justify-content:center;padding:12px;opacity:0.5">
+          <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--t3)">
+            + 4 MORE QUESTS →
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<div class="fab">+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-item">
+    <div class="nav-ico on">🏠</div>
+    <div class="nav-lbl on">TODAY</div>
+    <div class="nav-pip"></div>
+  </div>
+  <div class="nav-item">
+    <div class="nav-ico">📋</div>
+    <div class="nav-lbl">QUESTS</div>
+  </div>
+  <div class="nav-item">
+    <div class="nav-ico">🗓️</div>
+    <div class="nav-lbl">MAP</div>
+  </div>
+  <div class="nav-item">
+    <div class="nav-ico">🎯</div>
+    <div class="nav-lbl">GOALS</div>
+  </div>
+</div>
+
+</body>
+</html>

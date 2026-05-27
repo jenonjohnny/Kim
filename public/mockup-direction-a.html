@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=390, initial-scale=1">
+<title>Direction A — Editorial Mock</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+  :root {
+    --bg:      #09090f;
+    --surface: #111118;
+    --border:  #1e1e2a;
+    --t1:      #f0f0f0;
+    --t2:      #8e8e9a;
+    --t3:      #4a4a58;
+    --amber:   #d4a017;
+    --red:     #e05555;
+    --blue:    #4f7be8;
+    --teal:    #2e5860;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--t1);
+    font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif;
+    max-width: 390px;
+    margin: 0 auto;
+    padding: 0;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .header {
+    padding: 56px 24px 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 20px;
+  }
+  .brand-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--amber);
+  }
+  .brand-name {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    color: var(--amber); text-transform: uppercase;
+  }
+  .greeting {
+    font-size: 30px; font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.05;
+    color: var(--t1);
+  }
+  .greeting-sub {
+    margin-top: 8px;
+    font-size: 13px; color: var(--t2); font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Scroll content ── */
+  .content {
+    padding: 28px 24px 120px;
+    display: flex; flex-direction: column; gap: 0;
+  }
+
+  /* ── Meetings (editorial timeline) ── */
+  .meetings-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    color: var(--t3); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .meeting-row {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .meeting-row:last-child { border-bottom: none; }
+  .meeting-time {
+    font-size: 11px; color: var(--t3); font-weight: 500;
+    min-width: 40px; padding-top: 2px; font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+  .meeting-title {
+    font-size: 14px; font-weight: 500; color: var(--t2);
+    flex: 1; line-height: 1.3;
+  }
+  .meeting-title.active {
+    color: var(--t1); font-weight: 600;
+  }
+  .meeting-badge {
+    font-size: 9px; font-weight: 700; color: var(--blue);
+    background: rgba(79,123,232,0.12);
+    border-radius: 4px; padding: 2px 7px;
+    letter-spacing: 0.06em; margin-top: 2px;
+  }
+  .meetings-block {
+    margin-bottom: 36px;
+  }
+
+  /* ── Divider between sections ── */
+  .section-gap { height: 36px; }
+
+  /* ── Focus block (no label) ── */
+  .focus-block {
+    margin-bottom: 32px;
+  }
+  .focus-eyebrow {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    color: var(--t3); text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .focus-card {
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--amber);
+    border-radius: 16px;
+    cursor: pointer;
+  }
+  .focus-title {
+    font-size: 17px; font-weight: 700; line-height: 1.3;
+    color: var(--t1); margin-bottom: 10px;
+  }
+  .focus-meta {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tag {
+    font-size: 10px; font-weight: 600;
+    color: var(--t2); background: var(--border);
+    border-radius: 5px; padding: "1px 7px";
+    padding: 2px 8px;
+  }
+  .tag.urgent { color: var(--red); background: rgba(224,85,85,0.1); }
+  .tag.area-digital { color: var(--teal); filter: brightness(1.6); background: rgba(46,88,96,0.25); }
+  .tag.due-today { color: var(--amber); background: rgba(212,160,23,0.1); }
+
+  /* ── Inline stats ── */
+  .stats-line {
+    font-size: 12px; color: var(--t3);
+    margin-bottom: 28px; letter-spacing: 0.01em;
+    display: flex; gap: 4px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .stats-line span.red   { color: var(--red);   font-weight: 700; font-size: 13px; }
+  .stats-line span.amber { color: var(--amber); font-weight: 700; font-size: 13px; }
+  .stats-line .dot { color: var(--t3); margin: 0 2px; }
+
+  /* ── Section header (editorial) ── */
+  .section-head {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+    color: var(--t3); text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-head .count {
+    font-size: 11px; color: var(--t3); font-weight: 500;
+    letter-spacing: 0;
+  }
+
+  /* ── Task row (cleaner) ── */
+  .task-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+  }
+  .task-row:last-child { border-bottom: none; }
+  .checkbox {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    border: 1.5px solid var(--border);
+    background: transparent;
+  }
+  .checkbox.urgent-cb { border-color: var(--red); }
+  .task-main { flex: 1; min-width: 0; }
+  .task-title {
+    font-size: 14px; font-weight: 500; color: var(--t1);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    line-height: 1.4;
+  }
+  .task-sub {
+    font-size: 11px; color: var(--t3); margin-top: 2px;
+  }
+  .task-sub .area-sts   { color: var(--amber); }
+  .task-sub .area-daisi { color: #c99c3a; }
+  .task-due {
+    font-size: 11px; color: var(--t2); flex-shrink: 0;
+    font-weight: 500;
+  }
+  .task-due.overdue { color: var(--red); }
+  .task-due.today   { color: var(--amber); }
+
+  .tasks-section { margin-bottom: 32px; }
+
+  /* ── Review section (collapsed hint) ── */
+  .review-hint {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 0; color: var(--t3); font-size: 12px;
+    border-top: 1px solid var(--border); cursor: pointer;
+  }
+  .review-hint span { font-weight: 600; color: var(--blue); filter: brightness(1.3); }
+
+  /* ── FAB ── */
+  .fab {
+    position: fixed; bottom: 96px; right: 24px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--amber); color: #000;
+    font-size: 24px; font-weight: 300;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(212,160,23,0.4);
+    cursor: pointer;
+  }
+
+  /* ── Bottom Nav ── */
+  .nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 390px;
+    background: rgba(9,9,15,0.92);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; padding: 12px 0 28px;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; gap: 5px; cursor: pointer;
+  }
+  .nav-icon { font-size: 20px; opacity: 0.35; }
+  .nav-icon.active { opacity: 1; }
+  .nav-label { font-size: 9px; color: var(--t3); letter-spacing: 0.04em; }
+  .nav-label.active { color: var(--amber); font-weight: 700; }
+  .nav-pip {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--amber); margin-top: -3px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="brand">
+    <div class="brand-dot"></div>
+    <span class="brand-name">Daisi Design OS</span>
+  </div>
+  <div class="greeting">สวัสดียามเย็นค่ะ</div>
+  <div class="greeting-sub">คิม · พุธ 27 พ.ค. 2569</div>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- Meetings -->
+  <div class="meetings-block">
+    <div class="meetings-label">นัดหมายวันนี้</div>
+    <div class="meeting-row">
+      <div class="meeting-time">10:00</div>
+      <div class="meeting-title">ไปโชว์รูมเครื่องชีลกระป๋อง</div>
+    </div>
+    <div class="meeting-row" style="opacity:0.45">
+      <div class="meeting-time">12:30</div>
+      <div class="meeting-title">Meeting With Kan</div>
+    </div>
+    <div class="meeting-row">
+      <div class="meeting-time" style="color:#4f7be8">19:00</div>
+      <div class="meeting-title active">Team Sync · Digital</div>
+      <div class="meeting-badge">NOW</div>
+    </div>
+  </div>
+
+  <!-- Inline stats -->
+  <div class="stats-line">
+    <span class="red">7</span> ค้าง
+    <span class="dot">·</span>
+    <span class="amber">6</span> ใกล้มา
+    <span class="dot">·</span>
+    45 งาน
+  </div>
+
+  <!-- Focus -->
+  <div class="focus-block">
+    <div class="focus-eyebrow">ทำก่อนเลย</div>
+    <div class="focus-card">
+      <div class="focus-title">[OWNER] เลือก Logo Direction (A/B/C/D)</div>
+      <div class="focus-meta">
+        <span class="tag urgent">P1 · เร่งด่วน</span>
+        <span class="tag area-digital">Digital</span>
+        <span class="tag due-today">วันนี้</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ตอนนี้ section -->
+  <div class="tasks-section">
+    <div class="section-head">ค้าง / วันนี้ <span class="count">7</span></div>
+    <div class="task-row">
+      <div class="checkbox urgent-cb"></div>
+      <div class="task-main">
+        <div class="task-title">ไปยิม</div>
+        <div class="task-sub"><span class="area-sts">STS</span></div>
+      </div>
+      <div class="task-due overdue">เลย 2 วัน</div>
+    </div>
+    <div class="task-row">
+      <div class="checkbox urgent-cb"></div>
+      <div class="task-main">
+        <div class="task-title">LifeBar — CI Full</div>
+        <div class="task-sub"><span class="area-sts">STS</span></div>
+      </div>
+      <div class="task-due today">วันนี้</div>
+    </div>
+    <div class="task-row">
+      <div class="checkbox"></div>
+      <div class="task-main">
+        <div class="task-title">Lean Canvas — Daisi Design</div>
+        <div class="task-sub"><span class="area-daisi">Daisi</span></div>
+      </div>
+      <div class="task-due today">วันนี้</div>
+    </div>
+    <div class="task-row">
+      <div class="checkbox"></div>
+      <div class="task-main">
+        <div class="task-title">Comment Digital Approval</div>
+        <div class="task-sub"><span class="area-sts">STS</span></div>
+      </div>
+      <div class="task-due today">วันนี้</div>
+    </div>
+  </div>
+
+  <!-- เร็วๆนี้ section -->
+  <div class="tasks-section">
+    <div class="section-head">เร็วๆ นี้ <span class="count">6</span></div>
+    <div class="task-row">
+      <div class="checkbox"></div>
+      <div class="task-main">
+        <div class="task-title">Daisi Design — สร้าง Brand Assets</div>
+        <div class="task-sub"><span class="area-daisi">Daisi</span></div>
+      </div>
+      <div class="task-due">29 พ.ค.</div>
+    </div>
+    <div class="task-row">
+      <div class="checkbox"></div>
+      <div class="task-main">
+        <div class="task-title">Review Q2 OKR Progress</div>
+        <div class="task-sub"><span class="area-daisi">Daisi</span></div>
+      </div>
+      <div class="task-due">30 พ.ค.</div>
+    </div>
+    <div class="task-row">
+      <div class="checkbox"></div>
+      <div class="task-main">
+        <div class="task-title">Packaging LifeBar Revision</div>
+        <div class="task-sub"><span class="area-sts">STS</span></div>
+      </div>
+      <div class="task-due">1 มิ.ย.</div>
+    </div>
+  </div>
+
+  <!-- Review hint -->
+  <div class="review-hint">
+    <div>รอตรวจ</div>
+    <div><span>9 งาน</span> →</div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<div class="fab">+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <div class="nav-item">
+    <div class="nav-icon active">⌂</div>
+    <div class="nav-label active">วันนี้</div>
+    <div class="nav-pip"></div>
+  </div>
+  <div class="nav-item">
+    <div class="nav-icon">≡</div>
+    <div class="nav-label">งาน</div>
+  </div>
+  <div class="nav-item">
+    <div class="nav-icon">⊞</div>
+    <div class="nav-label">ตาราง</div>
+  </div>
+  <div class="nav-item">
+    <div class="nav-icon">◎</div>
+    <div class="nav-label">OKR</div>
+  </div>
+</div>
+
+</body>
+</html>
