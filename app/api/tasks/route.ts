@@ -9,13 +9,12 @@ const HEADERS = {
 };
 
 // Area IDs — configurable via env vars, falls back to owner defaults.
-// If NOTION_STS_AREA_ID is not set, the Areas filter is skipped entirely
-// so testers can connect any plain Notion DB without the Areas relation.
 const STS_AREA_ID             = process.env.NOTION_STS_AREA_ID             || "2a02ffbd-a6db-8096-8ee5-f4a9b6b73c02";
 const DAISI_AREA_ID           = process.env.NOTION_DAISI_AREA_ID           || "2982ffbd-a6db-8050-bf58-dfac37b527e2";
 const DIGITAL_PRODUCT_AREA_ID = process.env.NOTION_DIGITAL_PRODUCT_AREA_ID || "36b2ffbd-a6db-81c1-b644-f337f63e7738";
-// true only when the owner explicitly configured area IDs
-const USE_AREAS = !!(process.env.NOTION_STS_AREA_ID);
+// Skip area filter only when explicitly opted-out (for testers with plain DBs)
+// Default = true → owner always gets the area filter with hardcoded fallback IDs
+const USE_AREAS = process.env.NOTION_SKIP_AREAS !== "true";
 
 function parseTask(p: any) {
   const props = p.properties;
@@ -33,7 +32,8 @@ function parseTask(p: any) {
   const areaIds: string[] = (props.Areas?.relation || []).map((r: any) => r.id);
   const area = areaIds.includes(DIGITAL_PRODUCT_AREA_ID) ? "digital"
              : areaIds.includes(DAISI_AREA_ID)           ? "daisi"
-             : "sts";
+             : areaIds.includes(STS_AREA_ID)             ? "sts"
+             : undefined;  // no recognized area → don't force-assign STS
   return { id: p.id, title, status, due, endDue, urgent, priority, notes, area };
 }
 
