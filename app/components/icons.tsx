@@ -354,6 +354,55 @@ export function SparkleIcon(p: P) {
   );
 }
 
+export function StarIcon(p: P & { filled?: boolean }) {
+  return (
+    <Ic {...p}>
+      <polygon
+        points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+        fill={p.filled ? "currentColor" : "none"}
+      />
+    </Ic>
+  );
+}
+
+export function MessageSquareIcon(p: P) {
+  return (
+    <Ic {...p}>
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+    </Ic>
+  );
+}
+
+export function BugIcon(p: P) {
+  return (
+    <Ic {...p}>
+      <path d="M8 2l1.5 1.5" />
+      <path d="M14.5 3.5L16 2" />
+      <path d="M9 7.5A3 3 0 0115 7.5v5a3 3 0 01-6 0v-5z" />
+      <path d="M6.5 9.5H3M6.5 12.5H2M6.5 15.5H4" />
+      <path d="M17.5 9.5H21M17.5 12.5H22M17.5 15.5H20" />
+      <path d="M9 19.5a3 3 0 006 0" />
+    </Ic>
+  );
+}
+
+export function LightbulbIcon(p: P) {
+  return (
+    <Ic {...p}>
+      <path d="M9 18h6M10 22h4M12 2a7 7 0 017 7c0 2.5-1.3 4.7-3.3 6H8.3A7 7 0 0112 2z" />
+    </Ic>
+  );
+}
+
+export function SendIcon(p: P) {
+  return (
+    <Ic {...p}>
+      <line x1="22" y1="2" x2="11" y2="13" />
+      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+    </Ic>
+  );
+}
+
 /* ── Dot indicator (colored fill, no stroke) ─── */
 export function DotIcon({
   size = 8, color = "currentColor", outline = false,
