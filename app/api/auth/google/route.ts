@@ -5,7 +5,8 @@ export async function GET() {
     client_id: process.env.GOOGLE_CLIENT_ID!,
     redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL || "https://kim-app-theta.vercel.app"}/api/auth/callback`,
     response_type: "code",
-    scope: "https://www.googleapis.com/auth/calendar.events",
+    // calendar.readonly = read all calendars + events (enough for DayView display)
+    scope: "https://www.googleapis.com/auth/calendar.readonly",
     access_type: "offline",
     prompt: "consent",
   });

@@ -59,29 +59,47 @@ export async function GET(req: Request) {
     const timeMin = encodeURIComponent(`${date}T00:00:00+07:00`);
     const timeMax = encodeURIComponent(`${date}T23:59:59+07:00`);
 
-    const res = await fetch(
-      `https://www.googleapis.com/calendar/v3/calendars/primary/events` +
-      `?timeMin=${timeMin}&timeMax=${timeMax}&maxResults=50&singleEvents=true&orderBy=startTime`,
+    // 1. List all calendars the user has access to
+    const calListRes = await fetch(
+      "https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=50",
       { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
     );
-    const data = await res.json();
+    const calListData = await calListRes.json();
 
-    if (!data.items) {
-      console.error("GCal items missing:", JSON.stringify(data).slice(0, 200));
-      return NextResponse.json({ events: [], configured: true, error: data.error?.message });
-    }
+    // Filter to only selected/visible calendars (exclude declined/hidden)
+    const calendarIds: string[] = (calListData.items || [])
+      .filter((c: any) => c.selected !== false)
+      .map((c: any) => c.id as string);
 
-    const events = data.items
-      // Skip all-day events (no dateTime, only date)
-      .filter((e: any) => e.start?.dateTime)
+    // Fallback to primary if calendarList isn't accessible (old token scope)
+    if (calendarIds.length === 0) calendarIds.push("primary");
+
+    // 2. Fetch events from all calendars in parallel
+    const allEvents = await Promise.all(
+      calendarIds.map(async (calId) => {
+        const res = await fetch(
+          `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calId)}/events` +
+          `?timeMin=${timeMin}&timeMax=${timeMax}&maxResults=50&singleEvents=true&orderBy=startTime`,
+          { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" }
+        );
+        const data = await res.json();
+        return (data.items || []) as any[];
+      })
+    );
+
+    // 3. Flatten, deduplicate by id, filter all-day events
+    const seen = new Set<string>();
+    const events = allEvents.flat()
+      .filter((e: any) => e.start?.dateTime && !seen.has(e.id) && seen.add(e.id))
       .map((e: any) => ({
         id:      e.id,
         title:   e.summary || "(ไม่มีชื่อ)",
-        start:   toBkkHHMM(e.start.dateTime),   // properly converted to Bangkok time
+        start:   toBkkHHMM(e.start.dateTime),
         end:     toBkkHHMM(e.end?.dateTime || e.start.dateTime),
         color:   e.colorId ? GCAL_COLOR[e.colorId] : null,
         fromKim: (e.description || "").includes("จัดโดยเลขาคิม"),
-      }));
+      }))
+      .sort((a: any, b: any) => a.start.localeCompare(b.start));
 
     return NextResponse.json({ events, configured: true });
   } catch (err: any) {
