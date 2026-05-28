@@ -1249,6 +1249,8 @@ export default function Home() {
             >
               <SearchIcon size={17} color="var(--icon-tint)" />
             </button>
+            {/* Feedback */}
+            <FeedbackStrip compact />
             {/* Settings */}
             <button
               onClick={() => setShowSettings(true)}
@@ -1457,11 +1459,6 @@ export default function Home() {
             )}
           </>
         )}
-      </div>
-
-      {/* ── Feedback Strip — fixed bottom left, all tabs ── */}
-      <div style={{ position: "fixed", bottom: 90, left: 20, zIndex: 34 }}>
-        <FeedbackStrip compact />
       </div>
 
       {/* FAB — Add task only */}

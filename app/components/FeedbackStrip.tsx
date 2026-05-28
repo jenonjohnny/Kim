@@ -51,24 +51,20 @@ export default function FeedbackStrip({ compact }: Props) {
   }
 
   /* ══════════════════════════════════
-     COMPACT MODE — floating pill
+     COMPACT MODE — icon button in header
   ══════════════════════════════════ */
   if (compact) {
     return (
       <>
-        {/* Floating pill button — hidden when form is open */}
-        {step === "closed" && (
-          <button onClick={() => setStep("open")} style={{
-            display: "flex", alignItems: "center", gap: 6,
-            padding: "8px 14px", borderRadius: 20,
-            background: "var(--bg-card)", border: "1px solid var(--border)",
-            cursor: "pointer", boxShadow: "0 2px 12px rgba(0,0,0,0.3)",
-            color: "var(--text-3)", fontSize: 12, fontWeight: 500,
-          }}>
-            <MessageSquareIcon size={13} color="var(--text-3)" />
-            Feedback
-          </button>
-        )}
+        {/* Icon button — same size as search/gear buttons */}
+        <button onClick={() => setStep("open")} style={{
+          width: 38, height: 38, borderRadius: 12,
+          background: "var(--bg-card)", border: "1px solid var(--border)",
+          cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 0,
+        }}>
+          <MessageSquareIcon size={17} color="var(--icon-tint)" />
+        </button>
 
         {/* Full-screen overlay form */}
         {(step === "open" || step === "sending" || step === "done") && (

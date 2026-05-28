@@ -136,6 +136,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
   const [creating,   setCreating]   = useState(false);
   const [createTransY, setCreateTransY] = useState(0);
   const [removedIds,   setRemovedIds]   = useState<Set<string>>(new Set());
+  const [activeTrayId,   setActiveTrayId]   = useState<string|null>(null); // tap-to-highlight
+  const [createExpanded, setCreateExpanded] = useState(false);
 
   // Google Calendar read-only events
   interface GCalEvent { id:string; title:string; start:string; end:string; color:string|null; fromKim:boolean; }
@@ -366,9 +368,9 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
     latestPtrRef.current={x:e.clientX,y:e.clientY};
   };
 
-  /* ── Tray pointerdown — 400ms hold required before drag activates ── */
+  /* ── Tray pointerdown — tap = highlight, hold 400ms = drag ── */
   const onTrayPD=(e:React.PointerEvent, task:Task)=>{
-    e.preventDefault();
+    // Don't preventDefault on initial touch — allows page scroll if user just scrolls
     if(trayHoldTimerRef.current) clearTimeout(trayHoldTimerRef.current);
     const d:DragPhase={phase:"tray-hold",source:"tray",task,startX:e.clientX,startY:e.clientY,pointerId:e.pointerId};
     setDrag(d); dragRef.current=d;
@@ -381,6 +383,11 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
         activateDrag(cur,latestPtrRef.current.y,latestPtrRef.current.x);
       }
     },TRAY_HOLD_MS);
+  };
+
+  /* ── Tray tap (quick release) = toggle highlight ── */
+  const onTrayTap=(task:Task)=>{
+    setActiveTrayId(prev => prev===task.id ? null : task.id);
   };
 
   /* ── Grid tap: deselect or create ── */
@@ -411,8 +418,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
   /* ═══════════════ RENDER ═══════════════ */
   return (
     <div>
-      {/* ── Day nav — sticky so it doesn't scroll away ── */}
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",marginBottom:12,background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:14,position:"sticky",top:0,zIndex:10}}>
+      {/* ── Day nav — sticky ── */}
+      <div style={{display:"flex",alignItems:"center",gap:8,background:"var(--bg-base)",borderBottom:"1px solid var(--border)",position:"sticky",top:0,zIndex:10,margin:"0 -20px 8px",padding:"8px 20px"}}>
         <button onClick={()=>setDayOff(v=>v-1)} style={{background:"none",border:"none",cursor:"pointer",padding:4,display:"flex",flexShrink:0}}><ChevronLeftIcon size={18} color="var(--text-3)"/></button>
         <button onClick={()=>setDayOff(0)} style={{flex:1,textAlign:"center",background:"none",border:"none",cursor:dayOff!==0?"pointer":"default",padding:"4px 0"}}>
           <div style={{fontSize:13,fontWeight:700,color:isToday?"var(--amber)":"var(--text-1)"}}>
@@ -522,13 +529,20 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
               const isSelected=selectedId===b.task.id;
               const offGrid=isDrag&&draggingOffGrid;
               const pct=1/totalCols;
+              // Offset task blocks right when any GCal event overlaps the same time range
+              const gcalOverlap=gcalEvents.some(ev=>{
+                const [sh2,sm2]=ev.start.split(":").map(Number);
+                const [eh2,em2]=ev.end.split(":").map(Number);
+                return sh2*60+sm2<b.startMin+b.dur&&eh2*60+em2>b.startMin;
+              });
+              const taskOff=gcalOverlap?0.40:0;
 
               return (
                 <div key={b.task.id}
                   style={{
                     position:"absolute", top, height,
-                    left:`calc(${col*pct*100}% + 2px)`,
-                    width:`calc(${pct*100}% - 4px)`,
+                    left:`calc(${taskOff*100+col*pct*(1-taskOff)*100}% + 2px)`,
+                    width:`calc(${pct*(1-taskOff)*100}% - 4px)`,
                     background:offGrid?"rgba(255,80,80,0.22)":isSelected?fillSel:fillNorm,
                     border:`1px solid ${offGrid?"var(--red)":isSelected?ac:ac+"60"}`,
                     borderLeft:`2px solid ${offGrid?"var(--red)":ac}`,
@@ -652,21 +666,26 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
               const ac=t.area?(AREA_COLOR[t.area]??"var(--border)"):"var(--border)";
               const placed=!!blocks[t.id];
               const isDragging=activeDrag?.source==="tray"&&activeDrag.task?.id===t.id;
-              const isPending=(drag?.phase==="pending"||drag?.phase==="tray-hold")&&(drag as any).task?.id===t.id;
+              const isActive=activeTrayId===t.id;
               return (
                 <div key={t.id}
-                  style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:isPending||isDragging?ac+"20":"var(--bg-raised)",border:`1px solid ${isPending||isDragging?ac:placed?ac+"30":"var(--border)"}`,borderLeft:`3px solid ${ac}`,borderRadius:10,opacity:placed?0.35:1,transform:isDragging?"scale(1.01)":"none",transition:"transform 0.1s,background 0.15s",cursor:"grab",touchAction:"none",userSelect:"none",WebkitUserSelect:"none"} as React.CSSProperties}
-                  onPointerDown={e=>onTrayPD(e,t)}>
+                  style={{
+                    display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
+                    background:isActive?ac+"18":isDragging?ac+"20":"var(--bg-raised)",
+                    border:`1px solid ${isActive?ac:isDragging?ac:"var(--border)"}`,
+                    borderLeft:`3px solid ${ac}`,
+                    borderRadius:10,opacity:placed?0.35:1,
+                    transform:isDragging?"scale(1.01)":"none",
+                    transition:"transform 0.1s,background 0.15s,border-color 0.15s",
+                    cursor:"grab",userSelect:"none",WebkitUserSelect:"none",
+                  } as React.CSSProperties}
+                  onPointerDown={e=>onTrayPD(e,t)}
+                  onClick={()=>onTrayTap(t)}>
                   {t.priority==="P1"?<FlagIcon size={11} color="var(--red)"/>:<DotIcon size={8} color={ac}/>}
-                  <span style={{flex:1,fontSize:13,fontWeight:500,color:"var(--text-1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.title}</span>
+                  <span style={{flex:1,fontSize:13,fontWeight:isActive?600:500,color:isActive?"var(--text-1)":"var(--text-2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.title}</span>
                   {t.due&&t.due.split("T")[0]<curDate&&<span style={{fontSize:9,fontWeight:700,color:"var(--red)",background:"rgba(255,80,80,0.12)",borderRadius:4,padding:"1px 5px",flexShrink:0}}>เลย</span>}
                   {t.area&&<span style={{fontSize:9,fontWeight:700,color:ac,background:ac+"18",borderRadius:4,padding:"1px 5px",flexShrink:0}}>{AREA_LABEL[t.area]}</span>}
-                  <button
-                    onPointerDown={e=>e.stopPropagation()}
-                    onClick={e=>{e.stopPropagation();setPickTask(t);}}
-                    style={{flexShrink:0,padding:"5px 10px",background:"var(--bg-card)",border:`1px solid ${ac}50`,borderRadius:8,cursor:"pointer",color:ac,fontSize:10,fontWeight:700,display:"flex",alignItems:"center",gap:4}}>
-                    <ClockIcon size={10} color={ac}/>เลือก
-                  </button>
+                  {isActive&&<span style={{fontSize:9,color:ac,flexShrink:0,opacity:0.7}}>กดค้างเพื่อลาก</span>}
                 </div>
               );
             })}
@@ -788,9 +807,10 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
         </div>
       )}
 
-      {/* ── Create sheet — compact, swipeable ── */}
+      {/* ── Create sheet — mini peek → full form ── */}
       {createSheet&&(
-        <div style={{position:"fixed",inset:0,zIndex:90,background:"rgba(0,0,0,0.5)",display:"flex",alignItems:"flex-end"}} onClick={()=>setCreateSheet(null)}>
+        <div style={{position:"fixed",inset:0,zIndex:90,background:createExpanded?"rgba(0,0,0,0.5)":"transparent",display:"flex",alignItems:"flex-end",pointerEvents:createExpanded?"auto":"none"}}
+          onClick={()=>{ if(createExpanded){setCreateSheet(null);setCreateExpanded(false);} }}>
           <div
             style={{
               width:"100%", background:"var(--bg-card)",
@@ -799,17 +819,44 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
               boxShadow:"0 -8px 40px rgba(0,0,0,0.5)",
               transform:`translateY(${Math.max(0,createTransY)}px)`,
               transition:createDragRef.current?"none":"transform 0.22s ease-out",
+              pointerEvents:"auto",
             }}
             onClick={e=>e.stopPropagation()}>
 
-            {/* Swipe handle */}
-            <div style={{display:"flex",justifyContent:"center",paddingTop:14,paddingBottom:10,cursor:"s-resize",touchAction:"none",userSelect:"none"} as React.CSSProperties}
+            {/* Swipe handle — drag up=expand, drag down=dismiss */}
+            <div style={{display:"flex",justifyContent:"center",paddingTop:12,paddingBottom:8,cursor:"ns-resize",touchAction:"none",userSelect:"none"} as React.CSSProperties}
               onPointerDown={e=>{ e.currentTarget.setPointerCapture(e.pointerId); createDragRef.current={startY:e.clientY}; }}
               onPointerMove={e=>{ if(!createDragRef.current) return; setCreateTransY(e.clientY-createDragRef.current.startY); }}
-              onPointerUp={()=>{ if(!createDragRef.current) return; if(createTransY>80) setCreateSheet(null); else setCreateTransY(0); createDragRef.current=null; }}>
-              <div style={{width:40,height:5,borderRadius:3,background:"var(--border)"}}/>
+              onPointerUp={()=>{
+                if(!createDragRef.current) return;
+                if(createTransY<-40){ setCreateExpanded(true); setCreateTransY(0); } // swipe up → expand
+                else if(createTransY>80){ setCreateSheet(null); setCreateExpanded(false); } // swipe down → dismiss
+                else setCreateTransY(0);
+                createDragRef.current=null;
+              }}>
+              <div style={{width:40,height:4,borderRadius:3,background:"var(--border)"}}/>
             </div>
 
+            {/* ── MINI state — time only ── */}
+            {!createExpanded&&(
+              <div style={{padding:"4px 20px calc(28px + env(safe-area-inset-bottom))",display:"flex",alignItems:"center",gap:12}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:11,color:"var(--text-3)",marginBottom:2}}>เวลาที่เลือก</div>
+                  <div style={{fontSize:20,fontWeight:800,color:"var(--amber)"}}>{fmt(createSheet.startMin)} – {fmt(createSheet.endMin)}</div>
+                </div>
+                <button onClick={()=>setCreateExpanded(true)}
+                  style={{padding:"10px 18px",borderRadius:12,background:"var(--amber)",border:"none",color:"#000",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+                  สร้างงาน →
+                </button>
+                <button onClick={()=>{ setCreateSheet(null); setCreateExpanded(false); }}
+                  style={{padding:"10px 14px",borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:13,cursor:"pointer",flexShrink:0}}>
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* ── FULL state ── */}
+            {createExpanded&&(
             <div style={{padding:"0 20px calc(24px + env(safe-area-inset-bottom))"}}>
               <div style={{fontSize:11,fontWeight:700,color:"var(--text-3)",letterSpacing:"0.1em",marginBottom:14}}>สร้าง BLOCK ใหม่</div>
 
@@ -870,20 +917,21 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
 
               {/* Buttons */}
               <div style={{display:"flex",gap:10}}>
-                <button onClick={()=>setCreateSheet(null)} style={{flex:1,padding:13,borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:14,cursor:"pointer"}}>ยกเลิก</button>
+                <button onClick={()=>{ setCreateSheet(null); setCreateExpanded(false); }} style={{flex:1,padding:13,borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:14,cursor:"pointer"}}>ยกเลิก</button>
                 <button disabled={!createTitle.trim()||creating}
                   onClick={async()=>{
                     if(!createTitle.trim())return;
                     setCreating(true);
                     const task=await createTaskApi(createTitle.trim(),createNote.trim(),curDate,createSheet.startMin,createSheet.endMin,createArea);
                     setBlocks(prev=>({...prev,[task.id]:{task,startMin:createSheet.startMin,dur:createSheet.endMin-createSheet.startMin}}));
-                    setCreateSheet(null); setCreating(false); setCreateTitle(""); setCreateNote(""); setCreateArea(null);
+                    setCreateSheet(null); setCreateExpanded(false); setCreating(false); setCreateTitle(""); setCreateNote(""); setCreateArea(null);
                   }}
                   style={{flex:2,padding:13,borderRadius:12,background:createTitle.trim()?"var(--amber)":"var(--bg-raised)",border:"none",color:createTitle.trim()?"#000":"var(--text-3)",fontSize:14,fontWeight:700,cursor:createTitle.trim()?"pointer":"default"}}>
                   {creating?"กำลังบันทึก...":"สร้าง"}
                 </button>
               </div>
             </div>
+            )}
           </div>
         </div>
       )}

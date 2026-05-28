@@ -554,15 +554,6 @@ export default function QuickActionsView({
       {/* ═══ Morning Brief — always visible ═══ */}
       <MorningBrief tasks={tasks} />
 
-      {/* ═══ Work section label ═══ */}
-      <div style={{ fontSize: 9, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.12em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-        <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          <BriefcaseIcon size={10} color="var(--text-3)" /> DAISI DESIGN
-        </span>
-        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-      </div>
-
       {/* ═══ Personal section label ═══ */}
       <div style={{ fontSize: 9, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.12em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
