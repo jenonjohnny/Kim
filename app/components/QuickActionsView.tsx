@@ -563,26 +563,6 @@ export default function QuickActionsView({
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
       </div>
 
-      {/* ── Work stats compact (ไม่มี accordion ให้กระชับ) ── */}
-      <div style={{
-        marginBottom: 16, padding: "12px 16px",
-        background: "var(--bg-card)", border: "1px solid var(--border)",
-        borderRadius: 14,
-        display: "flex", gap: 0,
-      }}>
-        {[
-          { label: "ด่วน",   n: tasks.urgent.length, color: "var(--red)"        },
-          { label: "ใกล้มา", n: tasks.soon.length,   color: "var(--amber)"      },
-          { label: "ถัดไป",  n: tasks.normal.length, color: "var(--text-3)"     },
-          { label: "รวม",    n: tasks.total,          color: "var(--steel-teal)" },
-        ].map((s, i) => (
-          <div key={s.label} style={{ flex: 1, textAlign: "center", borderLeft: i > 0 ? "1px solid var(--border)" : "none" }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.n}</div>
-            <div style={{ fontSize: 9, color: "var(--text-3)", marginTop: 3 }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
-
       {/* ═══ Personal section label ═══ */}
       <div style={{ fontSize: 9, fontWeight: 700, color: "var(--text-3)", letterSpacing: "0.12em", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{ flex: 1, height: 1, background: "var(--border)" }} />

@@ -177,7 +177,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
   const isToday = curDate===todayStr;
 
   /* ── Task categorisation ── */
-  const urgentIds=new Set(urgent.map(t=>t.id)), soonIds=new Set(soon.map(t=>t.id));
+  const urgentIds=new Set(urgent.map(t=>t.id)), soonIds=new Set(soon.map(t=>t.id)), normalIds=new Set(normal.map(t=>t.id));
   const seen=new Set<string>();
   const all=[...urgent,...soon,...normal,...review].filter(t=>{ if(seen.has(t.id)) return false; seen.add(t.id); return true; });
 
@@ -194,7 +194,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
     else if(dateOnly&&dateOnly<curDate&&endDateOnly&&endDateOnly>=curDate) tray.push(t);
     // Overdue date-only (no end date)
     else if(dateOnly&&dateOnly<curDate&&!endDateOnly&&!(t.due?.includes("T"))) tray.push(t);
-    else if(!t.due&&(urgentIds.has(t.id)||soonIds.has(t.id))) tray.push(t);
+    else if(!t.due&&(urgentIds.has(t.id)||soonIds.has(t.id)||normalIds.has(t.id))) tray.push(t);
   });
   tray.sort((a,b)=>{ const ap=a.priority==="P1"?0:1,bp=b.priority==="P1"?0:1; if(ap!==bp)return ap-bp; return (a.due??"")<(b.due??"") ?-1:1; });
 
@@ -411,8 +411,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
   /* ═══════════════ RENDER ═══════════════ */
   return (
     <div>
-      {/* ── Day nav ── */}
-      <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",marginBottom:12,background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:14}}>
+      {/* ── Day nav — sticky so it doesn't scroll away ── */}
+      <div style={{display:"flex",alignItems:"center",gap:8,padding:"10px 12px",marginBottom:12,background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:14,position:"sticky",top:0,zIndex:10}}>
         <button onClick={()=>setDayOff(v=>v-1)} style={{background:"none",border:"none",cursor:"pointer",padding:4,display:"flex",flexShrink:0}}><ChevronLeftIcon size={18} color="var(--text-3)"/></button>
         <button onClick={()=>setDayOff(0)} style={{flex:1,textAlign:"center",background:"none",border:"none",cursor:dayOff!==0?"pointer":"default",padding:"4px 0"}}>
           <div style={{fontSize:13,fontWeight:700,color:isToday?"var(--amber)":"var(--text-1)"}}>
@@ -476,6 +476,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
               const endMin  =eh*60+em;
               const dur     =Math.max(endMin-startMin,15);
               if(startMin<H_START*60||startMin>=H_END*60) return null;
+              // Check if any task block overlaps this time — if so, shrink GCal to left column
+              const hasTaskBlock=Object.values(blocks).some(b=>b.startMin<endMin&&(b.startMin+b.dur)>startMin);
               const top   =minToY(startMin);
               const height=Math.max(dur*PX_MIN,MIN_DUR*PX_MIN);
               const short =dur<=30;
@@ -484,10 +486,12 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
               const gcBorder="rgba(84,132,237,0.45)";
               const gcText  ="rgba(160,196,255,0.90)";
               const gcSub   ="rgba(130,168,255,0.60)";
+              // GCal events occupy left 38% — task blocks use right 62% to avoid overlap
+              const gcWidth = hasTaskBlock ? "38%" : "100%";
               return (
                 <div key={ev.id} style={{
                   position:"absolute", top, height,
-                  left:2, right:2,
+                  left:2, width:`calc(${gcWidth} - 4px)`,
                   background:gcFill,
                   border:`1px solid ${gcBorder}`,
                   borderLeft:`2px solid rgba(84,132,237,0.75)`,
@@ -657,7 +661,10 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
                   <span style={{flex:1,fontSize:13,fontWeight:500,color:"var(--text-1)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.title}</span>
                   {t.due&&t.due.split("T")[0]<curDate&&<span style={{fontSize:9,fontWeight:700,color:"var(--red)",background:"rgba(255,80,80,0.12)",borderRadius:4,padding:"1px 5px",flexShrink:0}}>เลย</span>}
                   {t.area&&<span style={{fontSize:9,fontWeight:700,color:ac,background:ac+"18",borderRadius:4,padding:"1px 5px",flexShrink:0}}>{AREA_LABEL[t.area]}</span>}
-                  <button onClick={e=>{e.stopPropagation();setPickTask(t);}} style={{flexShrink:0,padding:"5px 10px",background:"var(--bg-card)",border:`1px solid ${ac}50`,borderRadius:8,cursor:"pointer",color:ac,fontSize:10,fontWeight:700,display:"flex",alignItems:"center",gap:4}}>
+                  <button
+                    onPointerDown={e=>e.stopPropagation()}
+                    onClick={e=>{e.stopPropagation();setPickTask(t);}}
+                    style={{flexShrink:0,padding:"5px 10px",background:"var(--bg-card)",border:`1px solid ${ac}50`,borderRadius:8,cursor:"pointer",color:ac,fontSize:10,fontWeight:700,display:"flex",alignItems:"center",gap:4}}>
                     <ClockIcon size={10} color={ac}/>เลือก
                   </button>
                 </div>
