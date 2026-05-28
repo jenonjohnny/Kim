@@ -48,6 +48,7 @@ export async function GET() {
         { property: "Areas", relation: { contains: STS_AREA_ID } },
         { property: "Areas", relation: { contains: DAISI_AREA_ID } },
         { property: "Areas", relation: { contains: DIGITAL_PRODUCT_AREA_ID } },
+        { property: "Areas", relation: { is_empty: true } },  // งานไม่มี area (ส่วนตัว) ก็ fetch มาด้วย
       ]}]
     : [];
 

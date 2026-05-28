@@ -232,7 +232,8 @@ function TaskRow({
     if (diff < 0) return { text: `เลย ${Math.abs(diff)} วัน`, color: "var(--red)" };
     if (diff === 0) return { text: "วันนี้", color: "var(--amber)" };
     if (diff === 1) return { text: "พรุ่งนี้", color: "var(--amber)" };
-    const d = new Date(task.due + "T00:00:00");
+    const dateOnly = task.due.includes("T") ? task.due.split("T")[0] : task.due;
+    const d = new Date(dateOnly + "T00:00:00");
     return { text: `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`, color: "var(--text-3)" };
   };
   const due = dueLabel();
@@ -448,7 +449,8 @@ function TodoItem({
     if (diff < 0) return { text: `เลย ${Math.abs(diff)} วัน`, color: "var(--red)" };
     if (diff === 0) return { text: "วันนี้!", color: "var(--amber)" };
     if (diff === 1) return { text: "พรุ่งนี้", color: "var(--amber)" };
-    const d = new Date(task.due + "T00:00:00");
+    const dateOnly = task.due.includes("T") ? task.due.split("T")[0] : task.due;
+    const d = new Date(dateOnly + "T00:00:00");
     return { text: `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`, color: "var(--text-3)" };
   };
   const due = dueLabel();
@@ -573,13 +575,20 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
     if (!task.due) return null;
     const today = new Date().toISOString().split("T")[0];
     const diff = Math.ceil((new Date(task.due).getTime() - new Date(today).getTime()) / 86400000);
-    const d = new Date(task.due + "T00:00:00");
+    const dateOnly = task.due.includes("T") ? task.due.split("T")[0] : task.due;
+    const d = new Date(dateOnly + "T00:00:00");
     const text = diff < 0 ? `เลย ${Math.abs(diff)} วัน` : diff === 0 ? "วันนี้" : diff === 1 ? "พรุ่งนี้" : `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`;
     const color = diff <= 0 ? "var(--red)" : diff <= 1 ? "var(--amber)" : "var(--text-3)";
     return { text, color };
   })();
 
   return (
+    <div style={{
+      overflow: "hidden",
+      maxHeight: done ? 0 : 300,
+      marginBottom: done ? 0 : 16,
+      transition: "max-height 0.35s ease-in-out, margin-bottom 0.35s",
+    }}>
     <div
       onClick={onClick}
       style={{
@@ -587,7 +596,7 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
         background: "var(--bg-card)",
         border: `1px solid ${accentColor}40`,
         borderLeft: `2px solid ${accentColor}`,
-        borderRadius: 16, marginBottom: 16, cursor: "pointer",
+        borderRadius: 16, cursor: "pointer",
         opacity: done ? 0 : 1,
         transform: done ? "translateY(-6px)" : "none",
         transition: "opacity 0.3s, transform 0.3s",
@@ -636,6 +645,7 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
           <ChevronRightIcon size={14} color="var(--text-3)" />
         </span>
       </div>
+    </div>
     </div>
   );
 }
@@ -1294,7 +1304,7 @@ export default function Home() {
         ref={scrollRef}
         style={{
           flex: 1, overflowY: "auto", overflowX: "hidden",
-          padding: "16px 20px 80px",
+          padding: tab === "calendar" && calView === "agenda" ? "16px 20px 80px" : "16px 20px 80px",
         }}
       >
         {/* Pull-to-refresh indicator */}
@@ -1311,8 +1321,10 @@ export default function Home() {
 
         {loading ? <LoadingState /> : !data ? null : (
           <>
-            {/* Page label — same position, same style, every tab */}
-            <PageLabel tab={tab} data={data} />
+            {/* Page label — hide for calendar/agenda (day nav is its own header) */}
+            {!(tab === "calendar" && calView === "agenda") && (
+              <PageLabel tab={tab} data={data} />
+            )}
 
             {/* ── HOME — วันนี้ ── */}
             {tab === "home" && (
@@ -1424,6 +1436,7 @@ export default function Home() {
                     normal={data.normal}
                     review={data.review}
                     onTaskClick={openDetail}
+                    onDone={markDone}
                     scrollContainer={scrollRef}
                     resetKey={calDayReset}
                   />

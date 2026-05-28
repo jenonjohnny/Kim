@@ -83,6 +83,8 @@ export default function FeedbackStrip({ compact }: Props) {
                 borderBottom: "none",
                 padding: "20px 20px calc(24px + env(safe-area-inset-bottom))",
                 boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
+                maxHeight: "85vh",
+                overflowY: "auto",
               }}
             >
               {step === "done" ? (

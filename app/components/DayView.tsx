@@ -113,11 +113,12 @@ type DragPhase =
 interface Props {
   urgent:Task[]; soon:Task[]; normal:Task[]; review:Task[];
   onTaskClick:(t:Task)=>void;
+  onDone?: (id:string)=>void;
   scrollContainer?: React.RefObject<HTMLDivElement|null>;
   resetKey?: number;
 }
 
-export default function DayView({ urgent, soon, normal, review, onTaskClick, scrollContainer, resetKey }:Props) {
+export default function DayView({ urgent, soon, normal, review, onTaskClick, onDone, scrollContainer, resetKey }:Props) {
   const today    = new Date();
   const todayStr = dStr(today);
 
@@ -138,6 +139,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
   const [removedIds,   setRemovedIds]   = useState<Set<string>>(new Set());
   const [activeTrayId,   setActiveTrayId]   = useState<string|null>(null); // tap-to-highlight
   const [createExpanded, setCreateExpanded] = useState(false);
+  const [doneTrayIds,    setDoneTrayIds]    = useState<Set<string>>(new Set());
 
   // Google Calendar read-only events
   interface GCalEvent { id:string; title:string; start:string; end:string; color:string|null; fromKim:boolean; }
@@ -390,6 +392,14 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
     setActiveTrayId(prev => prev===task.id ? null : task.id);
   };
 
+  /* ── Tray done — mark complete & remove from tray ── */
+  const onTrayDone=useCallback(async(task:Task)=>{
+    setDoneTrayIds(prev=>new Set([...prev,task.id]));
+    setActiveTrayId(prev=>prev===task.id?null:prev);
+    onDone?.(task.id);
+    await fetch(`/api/tasks/${task.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"Done"})});
+  },[onDone]);
+
   /* ── Grid tap: deselect or create ── */
   const onGridClick=(e:React.MouseEvent)=>{
     if(drag) return;
@@ -419,7 +429,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
   return (
     <div>
       {/* ── Day nav — sticky ── */}
-      <div style={{display:"flex",alignItems:"center",gap:8,background:"var(--bg-base)",borderBottom:"1px solid var(--border)",position:"sticky",top:0,zIndex:10,margin:"0 -20px 8px",padding:"8px 20px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,background:"var(--bg-base)",borderBottom:"1px solid var(--border)",position:"sticky",top:-16,zIndex:10,margin:"-16px -20px 8px",padding:"8px 20px"}}>
         <button onClick={()=>setDayOff(v=>v-1)} style={{background:"none",border:"none",cursor:"pointer",padding:4,display:"flex",flexShrink:0}}><ChevronLeftIcon size={18} color="var(--text-3)"/></button>
         <button onClick={()=>setDayOff(0)} style={{flex:1,textAlign:"center",background:"none",border:"none",cursor:dayOff!==0?"pointer":"default",padding:"4px 0"}}>
           <div style={{fontSize:13,fontWeight:700,color:isToday?"var(--amber)":"var(--text-1)"}}>
@@ -662,17 +672,20 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
             <span style={{fontSize:11,fontWeight:700,color:"var(--text-3)",background:"var(--bg-raised)",borderRadius:6,padding:"2px 8px"}}>{tray.length}</span>
           </div>
           <div style={{padding:"0 12px 12px",display:"flex",flexDirection:"column",gap:6}}>
-            {tray.map(t=>{
-              const ac=t.area?(AREA_COLOR[t.area]??"var(--border)"):"var(--border)";
+            {tray.filter(t=>!doneTrayIds.has(t.id)).map(t=>{
+              const ac=t.area?(AREA_COLOR[t.area]??"var(--text-3)"):"var(--text-3)";
               const placed=!!blocks[t.id];
               const isDragging=activeDrag?.source==="tray"&&activeDrag.task?.id===t.id;
               const isActive=activeTrayId===t.id;
+              const borderSide=isActive?ac:isDragging?ac:"var(--border)";
               return (
                 <div key={t.id}
                   style={{
                     display:"flex",alignItems:"center",gap:10,padding:"10px 12px",
                     background:isActive?ac+"18":isDragging?ac+"20":"var(--bg-raised)",
-                    border:`1px solid ${isActive?ac:isDragging?ac:"var(--border)"}`,
+                    borderTop:`1px solid ${borderSide}`,
+                    borderRight:`1px solid ${borderSide}`,
+                    borderBottom:`1px solid ${borderSide}`,
                     borderLeft:`3px solid ${ac}`,
                     borderRadius:10,opacity:placed?0.35:1,
                     transform:isDragging?"scale(1.01)":"none",
@@ -681,6 +694,18 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
                   } as React.CSSProperties}
                   onPointerDown={e=>onTrayPD(e,t)}
                   onClick={()=>onTrayTap(t)}>
+                  {/* Done button */}
+                  <button
+                    onPointerDown={e=>e.stopPropagation()}
+                    onClick={e=>{e.stopPropagation();onTrayDone(t);}}
+                    style={{
+                      width:20,height:20,borderRadius:"50%",flexShrink:0,
+                      border:`1.5px solid ${isActive?ac:"var(--border)"}`,
+                      background:"transparent",cursor:"pointer",
+                      display:"flex",alignItems:"center",justifyContent:"center",
+                      transition:"all 0.15s",
+                    }}>
+                  </button>
                   {t.priority==="P1"?<FlagIcon size={11} color="var(--red)"/>:<DotIcon size={8} color={ac}/>}
                   <span style={{flex:1,fontSize:13,fontWeight:isActive?600:500,color:isActive?"var(--text-1)":"var(--text-2)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.title}</span>
                   {t.due&&t.due.split("T")[0]<curDate&&<span style={{fontSize:9,fontWeight:700,color:"var(--red)",background:"rgba(255,80,80,0.12)",borderRadius:4,padding:"1px 5px",flexShrink:0}}>เลย</span>}
@@ -823,33 +848,36 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
             }}
             onClick={e=>e.stopPropagation()}>
 
-            {/* Swipe handle — drag up=expand, drag down=dismiss */}
-            <div style={{display:"flex",justifyContent:"center",paddingTop:12,paddingBottom:8,cursor:"ns-resize",touchAction:"none",userSelect:"none"} as React.CSSProperties}
-              onPointerDown={e=>{ e.currentTarget.setPointerCapture(e.pointerId); createDragRef.current={startY:e.clientY}; }}
-              onPointerMove={e=>{ if(!createDragRef.current) return; setCreateTransY(e.clientY-createDragRef.current.startY); }}
+            {/* Swipe handle — drag up=expand, drag down=dismiss (whole top area is draggable) */}
+            <div style={{display:"flex",justifyContent:"center",paddingTop:10,paddingBottom:10,cursor:"ns-resize",touchAction:"none",userSelect:"none",WebkitUserSelect:"none"} as React.CSSProperties}
+              onPointerDown={e=>{ e.currentTarget.setPointerCapture(e.pointerId); createDragRef.current={startY:e.clientY}; setCreateTransY(0); }}
+              onPointerMove={e=>{ if(!createDragRef.current) return; const dy=e.clientY-createDragRef.current.startY; setCreateTransY(dy); }}
               onPointerUp={()=>{
                 if(!createDragRef.current) return;
-                if(createTransY<-40){ setCreateExpanded(true); setCreateTransY(0); } // swipe up → expand
-                else if(createTransY>80){ setCreateSheet(null); setCreateExpanded(false); } // swipe down → dismiss
+                if(createTransY<-30){ setCreateExpanded(true); setCreateTransY(0); } // swipe up → expand
+                else if(createTransY>60){ setCreateSheet(null); setCreateExpanded(false); } // swipe down → dismiss
                 else setCreateTransY(0);
                 createDragRef.current=null;
               }}>
-              <div style={{width:40,height:4,borderRadius:3,background:"var(--border)"}}/>
+              <div style={{width:44,height:5,borderRadius:3,background:"var(--border)"}}/>
             </div>
 
-            {/* ── MINI state — time only ── */}
+            {/* ── MINI state — time only, swipe whole area to expand ── */}
             {!createExpanded&&(
-              <div style={{padding:"4px 20px calc(28px + env(safe-area-inset-bottom))",display:"flex",alignItems:"center",gap:12}}>
+              <div style={{padding:"4px 20px calc(28px + env(safe-area-inset-bottom))",display:"flex",alignItems:"center",gap:12,touchAction:"none",userSelect:"none"} as React.CSSProperties}
+                onPointerDown={e=>{ if((e.target as HTMLElement).tagName==="BUTTON") return; e.currentTarget.setPointerCapture(e.pointerId); createDragRef.current={startY:e.clientY}; setCreateTransY(0); }}
+                onPointerMove={e=>{ if(!createDragRef.current) return; const dy=e.clientY-createDragRef.current.startY; setCreateTransY(dy); }}
+                onPointerUp={()=>{ if(!createDragRef.current) return; if(createTransY<-30){setCreateExpanded(true);setCreateTransY(0);} else if(createTransY>60){setCreateSheet(null);setCreateExpanded(false);} else setCreateTransY(0); createDragRef.current=null; }}>
                 <div style={{flex:1}}>
-                  <div style={{fontSize:11,color:"var(--text-3)",marginBottom:2}}>เวลาที่เลือก</div>
+                  <div style={{fontSize:10,color:"var(--text-3)",marginBottom:2}}>แตะ "สร้างงาน" หรือเลื่อนขึ้น</div>
                   <div style={{fontSize:20,fontWeight:800,color:"var(--amber)"}}>{fmt(createSheet.startMin)} – {fmt(createSheet.endMin)}</div>
                 </div>
                 <button onClick={()=>setCreateExpanded(true)}
-                  style={{padding:"10px 18px",borderRadius:12,background:"var(--amber)",border:"none",color:"#000",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0}}>
+                  style={{padding:"10px 18px",borderRadius:12,background:"var(--amber)",border:"none",color:"#000",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0,touchAction:"auto"}}>
                   สร้างงาน →
                 </button>
                 <button onClick={()=>{ setCreateSheet(null); setCreateExpanded(false); }}
-                  style={{padding:"10px 14px",borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:13,cursor:"pointer",flexShrink:0}}>
+                  style={{padding:"10px 14px",borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:13,cursor:"pointer",flexShrink:0,touchAction:"auto"}}>
                   ✕
                 </button>
               </div>
@@ -860,42 +888,40 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, scr
             <div style={{padding:"0 20px calc(24px + env(safe-area-inset-bottom))"}}>
               <div style={{fontSize:11,fontWeight:700,color:"var(--text-3)",letterSpacing:"0.1em",marginBottom:14}}>สร้าง BLOCK ใหม่</div>
 
-              {/* Time range with +/- controls */}
+              {/* Time range — native time inputs (scroll wheel on iOS) */}
               <div style={{background:"var(--bg-raised)",borderRadius:12,padding:"12px 14px",marginBottom:14}}>
-                <div style={{fontSize:10,color:"var(--text-3)",fontWeight:600,marginBottom:10,letterSpacing:"0.06em"}}>ช่วงเวลา</div>
-                <div style={{display:"flex",alignItems:"center",gap:6}}>
-                  {/* Start time */}
-                  <div style={{display:"flex",alignItems:"center",gap:4}}>
-                    <button onClick={()=>setCreateSheet(s=>s?{...s,startMin:clamp(s.startMin-SNAP,H_START*60,s.endMin-MIN_DUR)}:s)}
-                      style={{width:28,height:28,borderRadius:8,background:"var(--bg-card)",border:"1px solid var(--border)",cursor:"pointer",fontSize:14,color:"var(--text-2)",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
-                    <div style={{textAlign:"center",minWidth:46}}>
-                      <div style={{fontSize:16,fontWeight:800,color:"var(--amber)"}}>{fmt(createSheet.startMin)}</div>
-                      <div style={{fontSize:9,color:"var(--text-3)"}}>เริ่ม</div>
-                    </div>
-                    <button onClick={()=>setCreateSheet(s=>s?{...s,startMin:clamp(s.startMin+SNAP,H_START*60,s.endMin-MIN_DUR)}:s)}
-                      style={{width:28,height:28,borderRadius:8,background:"var(--bg-card)",border:"1px solid var(--border)",cursor:"pointer",fontSize:14,color:"var(--text-2)",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+                <div style={{fontSize:10,color:"var(--text-3)",fontWeight:600,marginBottom:10,letterSpacing:"0.06em"}}>
+                  ช่วงเวลา · {durLabel(createSheet.endMin-createSheet.startMin)}
+                </div>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>เริ่ม</div>
+                    <input type="time" value={fmt(createSheet.startMin)}
+                      onChange={e=>{
+                        if(!e.target.value) return;
+                        const [h,m]=e.target.value.split(":").map(Number);
+                        const sm=clamp(h*60+m,H_START*60,createSheet.endMin-MIN_DUR);
+                        setCreateSheet(s=>s?{...s,startMin:sm}:s);
+                      }}
+                      style={{width:"100%",padding:"10px 12px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:18,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
                   </div>
-                  <div style={{flex:1,height:2,background:"var(--amber)40",borderRadius:1,position:"relative"}}>
-                    <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",fontSize:9,color:"var(--text-3)",background:"var(--bg-raised)",padding:"0 4px"}}>
-                      {durLabel(createSheet.endMin-createSheet.startMin)}
-                    </div>
-                  </div>
-                  {/* End time */}
-                  <div style={{display:"flex",alignItems:"center",gap:4}}>
-                    <button onClick={()=>setCreateSheet(s=>s?{...s,endMin:clamp(s.endMin-SNAP,s.startMin+MIN_DUR,H_END*60)}:s)}
-                      style={{width:28,height:28,borderRadius:8,background:"var(--bg-card)",border:"1px solid var(--border)",cursor:"pointer",fontSize:14,color:"var(--text-2)",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>−</button>
-                    <div style={{textAlign:"center",minWidth:46}}>
-                      <div style={{fontSize:16,fontWeight:800,color:"var(--amber)"}}>{fmt(createSheet.endMin)}</div>
-                      <div style={{fontSize:9,color:"var(--text-3)"}}>สิ้นสุด</div>
-                    </div>
-                    <button onClick={()=>setCreateSheet(s=>s?{...s,endMin:clamp(s.endMin+SNAP,s.startMin+MIN_DUR,H_END*60)}:s)}
-                      style={{width:28,height:28,borderRadius:8,background:"var(--bg-card)",border:"1px solid var(--border)",cursor:"pointer",fontSize:14,color:"var(--text-2)",fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>+</button>
+                  <div style={{fontSize:14,color:"var(--text-3)",paddingTop:18}}>—</div>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>สิ้นสุด</div>
+                    <input type="time" value={fmt(createSheet.endMin)}
+                      onChange={e=>{
+                        if(!e.target.value) return;
+                        const [h,m]=e.target.value.split(":").map(Number);
+                        const em=clamp(h*60+m,createSheet.startMin+MIN_DUR,H_END*60);
+                        setCreateSheet(s=>s?{...s,endMin:em}:s);
+                      }}
+                      style={{width:"100%",padding:"10px 12px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:18,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
                   </div>
                 </div>
               </div>
 
-              {/* Title */}
-              <input autoFocus value={createTitle} onChange={e=>setCreateTitle(e.target.value)}
+              {/* Title — no autoFocus to prevent keyboard bounce */}
+              <input value={createTitle} onChange={e=>setCreateTitle(e.target.value)}
                 placeholder="ชื่องาน..."
                 style={{width:"100%",padding:"13px 14px",background:"var(--bg-raised)",border:"1px solid var(--border)",borderRadius:12,fontSize:15,fontWeight:600,color:"var(--text-1)",fontFamily:"inherit",outline:"none",marginBottom:8,boxSizing:"border-box"}}/>
 
