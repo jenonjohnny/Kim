@@ -11,7 +11,7 @@ const CATEGORIES = [
 type Step = "closed" | "open" | "sending" | "done";
 
 interface Props {
-  /** compact=true → floating pill button, click to expand modal */
+  /** compact=true → icon button in header, click to expand bottom sheet */
   compact?: boolean;
 }
 
@@ -54,9 +54,10 @@ export default function FeedbackStrip({ compact }: Props) {
      COMPACT MODE — icon button in header
   ══════════════════════════════════ */
   if (compact) {
+    const sheetOpen = step === "open" || step === "sending" || step === "done";
     return (
       <>
-        {/* Icon button — same size as search/gear buttons */}
+        {/* Icon button */}
         <button onClick={() => setStep("open")} style={{
           width: 38, height: 38, borderRadius: 12,
           background: "var(--bg-card)", border: "1px solid var(--border)",
@@ -66,43 +67,75 @@ export default function FeedbackStrip({ compact }: Props) {
           <MessageSquareIcon size={17} color="var(--icon-tint)" />
         </button>
 
-        {/* Full-screen overlay form */}
-        {(step === "open" || step === "sending" || step === "done") && (
-          <div style={{
-            position: "fixed", inset: 0, zIndex: 200,
-            background: "rgba(0,0,0,0.6)",
-            display: "flex", alignItems: "flex-end",
-          }} onClick={step !== "sending" ? reset : undefined}>
-            <div
-              onClick={e => e.stopPropagation()}
-              style={{
-                width: "100%",
-                background: "var(--bg-card)",
-                borderRadius: "20px 20px 0 0",
-                border: "1px solid var(--border)",
-                borderBottom: "none",
-                padding: "20px 20px calc(24px + env(safe-area-inset-bottom))",
-                boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
-                maxHeight: "85vh",
-                overflowY: "auto",
-              }}
-            >
-              {step === "done" ? (
-                <div style={{ textAlign: "center", padding: "20px 0" }}>
-                  <CheckCircle />
-                  <div style={{ color: "var(--text-1)", fontWeight: 700, fontSize: 15, marginTop: 12 }}>ขอบคุณมากค่ะ!</div>
-                  <div style={{ color: "var(--text-3)", fontSize: 12, marginTop: 4 }}>feedback ของคุณช่วยพัฒนา app ค่ะ</div>
+        {/* Backdrop — separate from sheet so sheet uses fixed bottom:0 */}
+        {sheetOpen && (
+          <div
+            style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.6)" }}
+            onClick={step !== "sending" ? reset : undefined}
+          />
+        )}
+
+        {/* Sheet — position:fixed bottom:0 directly, NOT inside a flex parent */}
+        {sheetOpen && (
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 200,
+              background: "var(--bg-card)",
+              borderRadius: "20px 20px 0 0",
+              border: "1px solid var(--border)",
+              borderBottom: "none",
+              boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
+              /* Flex column: scrollable content area + pinned submit */
+              display: "flex", flexDirection: "column",
+              maxHeight: "88dvh",
+            }}
+          >
+            {step === "done" ? (
+              <div style={{ padding: "40px 20px calc(28px + env(safe-area-inset-bottom))", textAlign: "center" }}>
+                <CheckCircle />
+                <div style={{ color: "var(--text-1)", fontWeight: 700, fontSize: 15, marginTop: 12 }}>ขอบคุณมากค่ะ!</div>
+                <div style={{ color: "var(--text-3)", fontSize: 12, marginTop: 4 }}>feedback ของคุณช่วยพัฒนา app ค่ะ</div>
+              </div>
+            ) : (
+              <>
+                {/* Scrollable form content (without submit button) */}
+                <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" as any, padding: "20px 20px 8px" }}>
+                  <FormBody
+                    step={step} rating={rating} hovered={hovered}
+                    category={category} comment={comment} error=""
+                    onClose={reset} onRate={setRating} onHover={setHovered}
+                    onCategory={setCategory} onComment={setComment}
+                    onSubmit={submit}
+                    hideSubmit
+                  />
                 </div>
-              ) : (
-                <FormBody
-                  step={step} rating={rating} hovered={hovered}
-                  category={category} comment={comment} error={error}
-                  onClose={reset} onRate={setRating} onHover={setHovered}
-                  onCategory={setCategory} onComment={setComment}
-                  onSubmit={submit}
-                />
-              )}
-            </div>
+
+                {/* Pinned bottom — error + submit button always visible */}
+                <div style={{
+                  flexShrink: 0,
+                  padding: "8px 20px calc(env(safe-area-inset-bottom) + 16px)",
+                  borderTop: "1px solid var(--border-soft)",
+                  background: "var(--bg-card)",
+                }}>
+                  {error && (
+                    <div style={{ fontSize: 12, color: "var(--red)", marginBottom: 10 }}>{error}</div>
+                  )}
+                  <button onClick={submit} disabled={step === "sending"} style={{
+                    width: "100%", padding: "14px 0",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    background: step === "sending" ? "var(--border)" : "var(--amber)",
+                    color: step === "sending" ? "var(--text-3)" : "#000",
+                    border: "none", borderRadius: 12,
+                    fontSize: 14, fontWeight: 700,
+                    cursor: step === "sending" ? "default" : "pointer",
+                    transition: "all 0.15s",
+                  }}>
+                    {step === "sending" ? "กำลังส่ง..." : <><SendIcon size={14} color="#000" />ส่ง Feedback</>}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )}
       </>
@@ -160,13 +193,13 @@ export default function FeedbackStrip({ compact }: Props) {
 /* ── Shared form body ── */
 function FormBody({
   step, rating, hovered, category, comment, error,
-  onClose, onRate, onHover, onCategory, onComment, onSubmit, inline,
+  onClose, onRate, onHover, onCategory, onComment, onSubmit, inline, hideSubmit,
 }: {
   step: Step; rating: number; hovered: number;
   category: string; comment: string; error: string;
   onClose: () => void; onRate: (n: number) => void; onHover: (n: number) => void;
   onCategory: (s: string) => void; onComment: (s: string) => void;
-  onSubmit: () => void; inline?: boolean;
+  onSubmit: () => void; inline?: boolean; hideSubmit?: boolean;
 }) {
   const displayRating = hovered || rating;
   return (
@@ -245,20 +278,23 @@ function FormBody({
         <div style={{ textAlign: "right", fontSize: 10, color: "var(--text-3)", marginTop: 3 }}>{comment.length}/500</div>
       </div>
 
-      {error && <div style={{ fontSize: 12, color: "var(--red)", marginTop: -8 }}>{error}</div>}
-
-      {/* Submit */}
-      <button onClick={onSubmit} disabled={step === "sending"} style={{
-        width: "100%", padding: "13px 0",
-        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-        background: step === "sending" ? "var(--border)" : "var(--amber)",
-        color: step === "sending" ? "var(--text-3)" : "#000",
-        border: "none", borderRadius: 12,
-        fontSize: 13, fontWeight: 700, cursor: step === "sending" ? "default" : "pointer",
-        transition: "all 0.15s",
-      }}>
-        {step === "sending" ? "กำลังส่ง..." : <><SendIcon size={14} color="#000" />ส่ง Feedback</>}
-      </button>
+      {/* Inline mode: show error + submit inside FormBody */}
+      {!hideSubmit && (
+        <>
+          {error && <div style={{ fontSize: 12, color: "var(--red)", marginTop: -8 }}>{error}</div>}
+          <button onClick={onSubmit} disabled={step === "sending"} style={{
+            width: "100%", padding: "13px 0",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+            background: step === "sending" ? "var(--border)" : "var(--amber)",
+            color: step === "sending" ? "var(--text-3)" : "#000",
+            border: "none", borderRadius: 12,
+            fontSize: 13, fontWeight: 700, cursor: step === "sending" ? "default" : "pointer",
+            transition: "all 0.15s",
+          }}>
+            {step === "sending" ? "กำลังส่ง..." : <><SendIcon size={14} color="#000" />ส่ง Feedback</>}
+          </button>
+        </>
+      )}
     </div>
   );
 }
