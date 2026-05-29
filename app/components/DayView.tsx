@@ -3,7 +3,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { Task } from "./types";
 import {
   ChevronLeftIcon, ChevronRightIcon, ClockIcon,
-  FlagIcon, DotIcon, ChevronDownIcon,
+  FlagIcon, DotIcon, ChevronDownIcon, GoogleIcon,
 } from "./icons";
 
 /* ═══════════════════════════════  CONSTANTS  ═══════════════════════════════ */
@@ -151,6 +151,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
   const blocksRef      = useRef<Record<string,Block>>({});
   const holdTimerRef     = useRef<ReturnType<typeof setTimeout>|null>(null);
   const trayHoldTimerRef = useRef<ReturnType<typeof setTimeout>|null>(null);
+  const trayHoldElemRef  = useRef<HTMLElement|null>(null);
   const latestPtrRef   = useRef({x:0,y:0});
   const rafRef         = useRef<number|null>(null);
   const peekDragRef    = useRef<{startY:number; dy:number}|null>(null);
@@ -373,8 +374,9 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
 
   /* ── Tray pointerdown — tap = highlight, hold 400ms = drag ── */
   const onTrayPD=(e:React.PointerEvent, task:Task)=>{
-    // Don't preventDefault on initial touch — allows page scroll if user just scrolls
+    // Don't preventDefault — allows vertical scroll if user just swipes
     if(trayHoldTimerRef.current) clearTimeout(trayHoldTimerRef.current);
+    trayHoldElemRef.current = e.currentTarget as HTMLElement;
     const d:DragPhase={phase:"tray-hold",source:"tray",task,startX:e.clientX,startY:e.clientY,pointerId:e.pointerId};
     setDrag(d); dragRef.current=d;
     latestPtrRef.current={x:e.clientX,y:e.clientY};
@@ -383,6 +385,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       const cur=dragRef.current;
       if(cur?.phase==="tray-hold"){
         try{ navigator.vibrate(18); }catch{}
+        // Capture pointer now so browser hands us the gesture (overrides scroll)
+        try{ trayHoldElemRef.current?.setPointerCapture(cur.pointerId); }catch{}
         activateDrag(cur,latestPtrRef.current.y,latestPtrRef.current.x);
       }
     },TRAY_HOLD_MS);
@@ -390,6 +394,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
 
   /* ── Tray tap (quick release) = toggle highlight ── */
   const onTrayTap=(task:Task)=>{
+    // Dismiss any open create sheet so actions don't conflict
+    if(createSheet||createExpanded){ setCreateSheet(null); setCreateExpanded(false); setCreatePriority(null); }
     setActiveTrayId(prev => prev===task.id ? null : task.id);
   };
 
@@ -517,9 +523,9 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                   pointerEvents:"none", overflow:"hidden",
                 } as React.CSSProperties}>
                   <div style={{padding:short?"3px 7px":"5px 8px 4px",height:"100%",display:"flex",flexDirection:"column",gap:2,overflow:"hidden"}}>
-                    <div style={{display:"flex",alignItems:"center",gap:4}}>
-                      <span style={{fontSize:8,fontWeight:700,color:"rgba(84,132,237,0.9)",background:"rgba(84,132,237,0.2)",borderRadius:3,padding:"1px 4px",flexShrink:0}}>G</span>
-                      <span style={{fontSize:11,fontWeight:600,color:gcText,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ev.title}</span>
+                    <div style={{display:"flex",alignItems:"center",gap:4,overflow:"hidden"}}>
+                      <GoogleIcon size={10} />
+                      <span style={{fontSize:11,fontWeight:600,color:gcText,flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{ev.title}</span>
                     </div>
                     {!short&&<div style={{fontSize:9,color:gcSub}}>{ev.start} – {ev.end}</div>}
                   </div>
@@ -571,7 +577,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                   onClick={e=>{
                     e.stopPropagation();
                     if(!isSelected){
-                      // First tap = select + open peek
+                      // First tap = select + open peek; clear any open create sheet
+                      if(createSheet||createExpanded){ setCreateSheet(null); setCreateExpanded(false); setCreatePriority(null); }
                       setSelectedId(b.task.id);
                       setPeekTask({task:b.task,startMin:b.startMin,dur:b.dur});
                       setPeekTransY(0);
@@ -692,7 +699,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                     transform:isDragging?"scale(1.01)":"none",
                     transition:"transform 0.1s,background 0.15s,border-color 0.15s",
                     cursor:"grab",userSelect:"none",WebkitUserSelect:"none",
-                    touchAction:"none",  /* prevent browser scroll during hold-to-drag */
+                    touchAction:"pan-y",  /* pan-y = allow scroll; hold 400ms grabs pointer for drag */
                   } as React.CSSProperties}
                   onPointerDown={e=>onTrayPD(e,t)}
                   onClick={()=>onTrayTap(t)}>
@@ -907,7 +914,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                           const sm=clamp(h*60+m,H_START*60,createSheet.endMin-MIN_DUR);
                           setCreateSheet(s=>s?{...s,startMin:sm}:s);
                         }}
-                        style={{width:"100%",padding:"8px 10px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:15,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
+                        style={{width:"100%",minWidth:0,padding:"8px 6px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:14,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
                     </div>
                     <div style={{fontSize:14,color:"var(--text-3)",paddingTop:16,flexShrink:0}}>—</div>
                     <div style={{flex:1,minWidth:0}}>
@@ -919,7 +926,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                           const em=clamp(h*60+m,createSheet.startMin+MIN_DUR,H_END*60);
                           setCreateSheet(s=>s?{...s,endMin:em}:s);
                         }}
-                        style={{width:"100%",padding:"8px 10px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:15,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
+                        style={{width:"100%",minWidth:0,padding:"8px 6px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:14,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
                     </div>
                   </div>
                 </div>

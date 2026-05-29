@@ -112,17 +112,17 @@ function Greeting() {
       <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
         <Image
           src="/logo-mark.png"
-          alt="Logo"
-          width={74} height={97}
+          alt="Norte"
+          width={22} height={22}
           style={{
-            height: 14,
+            height: 18,
             width: "auto",
             flexShrink: 0,
             animation: "pulse-dot 2.5s ease-in-out infinite",
           }}
         />
         <span style={{ fontSize: 11, color: "var(--amber)", fontWeight: 700, letterSpacing: "0.12em" }}>
-          DAISI DESIGN OS
+          NORTE
         </span>
       </div>
       <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.02em" }}>{greeting}</div>
@@ -1322,8 +1322,19 @@ export default function Home() {
         {loading ? <LoadingState /> : !data ? null : (
           <>
             {/* Page label — hide for calendar/agenda (day nav is its own header) */}
+            {/* OKR gets a sticky version so the label stays visible while scrolling */}
             {!(tab === "calendar" && calView === "agenda") && (
-              <PageLabel tab={tab} data={data} />
+              tab === "okr"
+                ? <div style={{
+                    position: "sticky", top: -16, zIndex: 5,
+                    background: "var(--bg-base)",
+                    margin: "-16px -20px 0",
+                    padding: "12px 20px",
+                    borderBottom: "1px solid var(--border-soft)",
+                  }}>
+                    <PageLabel tab={tab} data={data} />
+                  </div>
+                : <PageLabel tab={tab} data={data} />
             )}
 
             {/* ── HOME — วันนี้ ── */}

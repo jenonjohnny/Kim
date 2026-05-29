@@ -89,6 +89,7 @@ export default function FeedbackStrip({ compact }: Props) {
               /* Flex column: scrollable content area + pinned submit */
               display: "flex", flexDirection: "column",
               maxHeight: "88dvh",
+              overflow: "hidden",
             }}
           >
             {step === "done" ? (
@@ -100,7 +101,7 @@ export default function FeedbackStrip({ compact }: Props) {
             ) : (
               <>
                 {/* Scrollable form content (without submit button) */}
-                <div style={{ flex: 1, overflowY: "auto", WebkitOverflowScrolling: "touch" as any, padding: "20px 20px 8px" }}>
+                <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" as any, padding: "20px 20px 8px" }}>
                   <FormBody
                     step={step} rating={rating} hovered={hovered}
                     category={category} comment={comment} error=""
