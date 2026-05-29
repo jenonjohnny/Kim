@@ -115,7 +115,7 @@ function Greeting() {
           alt="Norte"
           width={22} height={22}
           style={{
-            height: 18,
+            height: 14,
             width: "auto",
             flexShrink: 0,
             animation: "pulse-dot 2.5s ease-in-out infinite",

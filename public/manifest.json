@@ -1,7 +1,7 @@
 {
-  "name": "Kim — Daisi Design OS",
-  "short_name": "คิม",
-  "description": "เลขาส่วนตัว Daisi Design",
+  "name": "Norte",
+  "short_name": "Norte",
+  "description": "Personal OS — Norte",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0f",
