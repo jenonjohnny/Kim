@@ -5,6 +5,7 @@ import {
   ChevronLeftIcon, ChevronRightIcon, ClockIcon,
   FlagIcon, DotIcon, ChevronDownIcon, GoogleIcon,
 } from "./icons";
+import { AreaItem, getVisibleAreaIds } from "./SettingsSheet";
 
 /* ═══════════════════════════════  CONSTANTS  ═══════════════════════════════ */
 const HOUR_H    = 72;
@@ -62,10 +63,9 @@ async function clearTime(id:string) {
   await fetch(`/api/tasks/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"},
     body:JSON.stringify({ due:null }) });
 }
-async function createTaskApi(title:string, notes:string, day:string, start:number, end:number, areaKey:string|null, priority:string|null) {
-  const areaId = areaKey ? AREA_IDS[areaKey] : undefined;
+async function createTaskApi(title:string, notes:string, day:string, start:number, end:number, areaId:string|undefined, priority:string|null) {
   const res = await fetch("/api/tasks", { method:"POST", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ title, notes:notes||undefined, due:`${day}T${fmt(start)}:00`, endDue:`${day}T${fmt(end)}:00`, areaId, priority:priority||undefined }) });
+    body:JSON.stringify({ title, notes:notes||undefined, due:`${day}T${fmt(start)}:00`, endDue:`${day}T${fmt(end)}:00`, areaId:areaId||undefined, priority:priority||undefined }) });
   return res.json();
 }
 
@@ -133,7 +133,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
   const [createSheet,   setCreateSheet]   = useState<CreateSheet|null>(null);
   const [createTitle,   setCreateTitle]   = useState("");
   const [createNote,    setCreateNote]    = useState("");
-  const [createArea,    setCreateArea]    = useState<typeof AREAS[number]|null>(null);
+  const [createAreaId,  setCreateAreaId]  = useState("");
+  const [createAreas,   setCreateAreas]   = useState<AreaItem[]>([]);
   const [createPriority,setCreatePriority]= useState<"P1"|"P2"|"P3"|"P4"|null>(null);
   const [creating,      setCreating]      = useState(false);
   const [createTransY, setCreateTransY] = useState(0);
@@ -177,6 +178,21 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       .then(data=>{ if(data.events) setGcalEvents(data.events); })
       .catch(()=>{}); // silent fail — GCal is optional
   },[dayOff]);
+
+  // Fetch Notion areas for create form (once on mount)
+  useEffect(()=>{
+    fetch("/api/areas").then(r=>r.json()).then(d=>{
+      const all: AreaItem[] = d.areas || [];
+      setCreateAreas(all.filter((a:AreaItem)=>getVisibleAreaIds(all).includes(a.id)));
+    }).catch(()=>{});
+  },[]);
+
+  // Non-passive touchmove — prevent browser scroll during active drag phase only
+  useEffect(()=>{
+    const handler=(e:TouchEvent)=>{ if(dragRef.current?.phase==="active") e.preventDefault(); };
+    document.addEventListener("touchmove",handler,{passive:false});
+    return()=>document.removeEventListener("touchmove",handler);
+  },[]);
 
   const curDay  = addD(today, dayOff);
   const curDate = dStr(curDay);
@@ -283,6 +299,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       return;
     }
 
+    const prevY=latestPtrRef.current.y;
     latestPtrRef.current={x:e.clientX,y:e.clientY};
     const d=dragRef.current;
     if(d){
@@ -292,9 +309,12 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
         return;
       }
       if(d.phase==="tray-hold"){
+        // Proxy scroll — tray items use touchAction:"none" so we manually scroll the container
+        const sc=scrollContainer?.current;
+        if(sc) sc.scrollTop += prevY - e.clientY;
         const dy=Math.abs(e.clientY-d.startY);
-        // Cancel hold if user is scrolling vertically
-        if(dy>10){ if(trayHoldTimerRef.current){ clearTimeout(trayHoldTimerRef.current); trayHoldTimerRef.current=null; } setDrag(null); dragRef.current=null; }
+        // Cancel hold if user moved more than 12px from start (intent = scroll, not drag)
+        if(dy>12){ if(trayHoldTimerRef.current){ clearTimeout(trayHoldTimerRef.current); trayHoldTimerRef.current=null; } setDrag(null); dragRef.current=null; }
         return;
       }
       if(d.phase==="pending"){
@@ -416,7 +436,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
     const y=getGridY(e.clientY);
     const sm=snapM(clamp(yToMin(y),H_START*60,H_END*60-60));
     setCreateSheet({startMin:sm,endMin:sm+DEF_DUR});
-    setCreateTitle(""); setCreateNote(""); setCreateArea(null); setCreatePriority(null); setCreateTransY(0);
+    setCreateTitle(""); setCreateNote(""); setCreateAreaId(""); setCreatePriority(null); setCreateTransY(0);
   };
 
   const dismissPeek=useCallback(()=>{ setPeekTask(null); setPeekTransY(0); setSelectedId(null); },[]);
@@ -699,7 +719,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                     transform:isDragging?"scale(1.01)":"none",
                     transition:"transform 0.1s,background 0.15s,border-color 0.15s",
                     cursor:"grab",userSelect:"none",WebkitUserSelect:"none",
-                    touchAction:"pan-y",  /* pan-y = allow scroll; hold 400ms grabs pointer for drag */
+                    touchAction:"none",  /* none = proxy scroll in onPM handles swipe; hold 400ms activates drag */
                   } as React.CSSProperties}
                   onPointerDown={e=>onTrayPD(e,t)}
                   onClick={()=>onTrayTap(t)}>
@@ -853,8 +873,9 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
               boxShadow:"0 -8px 40px rgba(0,0,0,0.5)",
               transform:`translateY(${Math.max(0,createTransY)}px)`,
               transition:createDragRef.current?"none":"transform 0.22s ease-out",
+              animation:"sheetIn 0.35s cubic-bezier(0.32,0.72,0,1)",
               pointerEvents:"auto",
-            }}
+            } as React.CSSProperties}
             onClick={e=>e.stopPropagation()}>
 
             {/* Swipe handle — drag up=expand, drag down=dismiss (whole top area is draggable) */}
@@ -905,7 +926,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                     ช่วงเวลา · {durLabel(createSheet.endMin-createSheet.startMin)}
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:10}}>
-                    <div style={{flex:1,minWidth:0}}>
+                    <div style={{flex:1,minWidth:0,overflow:"hidden"}}>
                       <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>เริ่ม</div>
                       <input type="time" value={fmt(createSheet.startMin)}
                         onChange={e=>{
@@ -917,7 +938,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                         style={{width:"100%",minWidth:0,padding:"8px 6px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:14,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
                     </div>
                     <div style={{fontSize:14,color:"var(--text-3)",paddingTop:16,flexShrink:0}}>—</div>
-                    <div style={{flex:1,minWidth:0}}>
+                    <div style={{flex:1,minWidth:0,overflow:"hidden"}}>
                       <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>สิ้นสุด</div>
                       <input type="time" value={fmt(createSheet.endMin)}
                         onChange={e=>{
@@ -942,15 +963,25 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                   rows={2}
                   style={{width:"100%",padding:"11px 14px",background:"var(--bg-raised)",border:"1px solid var(--border)",borderRadius:12,fontSize:13,color:"var(--text-2)",fontFamily:"inherit",outline:"none",marginBottom:12,boxSizing:"border-box",resize:"none",lineHeight:1.5}}/>
 
-                {/* Area */}
+                {/* Area — from Notion via /api/areas, same system as AddTaskModal */}
                 <div style={{fontSize:10,color:"var(--text-3)",fontWeight:600,marginBottom:8,letterSpacing:"0.06em"}}>AREA</div>
-                <div style={{display:"flex",gap:6,marginBottom:12}}>
-                  {AREAS.map(a=>(
-                    <button key={a} onClick={()=>setCreateArea(createArea===a?null:a)}
-                      style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:700,background:createArea===a?AREA_COLOR[a]+"22":"var(--bg-raised)",border:`1.5px solid ${createArea===a?AREA_COLOR[a]:"var(--border)"}`,color:createArea===a?AREA_COLOR[a]:"var(--text-3)",transition:"all 0.15s"}}>
-                      {AREA_LABEL[a]}
-                    </button>
-                  ))}
+                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
+                  {createAreas.map(a=>{
+                    const sel=createAreaId===a.id;
+                    return (
+                      <button key={a.id} onClick={()=>setCreateAreaId(sel?"":a.id)}
+                        style={{
+                          padding:"8px 12px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:sel?700:500,
+                          background:sel?"var(--brand-soft)":"var(--bg-raised)",
+                          border:`1.5px solid ${sel?"var(--amber)":"var(--border)"}`,
+                          color:sel?"var(--amber)":"var(--text-3)",
+                          transition:"all 0.15s",
+                        }}>
+                        {a.emoji||"📁"} {a.name}
+                      </button>
+                    );
+                  })}
+                  {createAreas.length===0&&<div style={{fontSize:12,color:"var(--text-3)"}}>โหลด...</div>}
                 </div>
 
                 {/* Priority */}
@@ -972,14 +1003,14 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
               {/* Pinned action buttons */}
               <div style={{flexShrink:0,padding:"8px 20px calc(env(safe-area-inset-bottom) + 16px)",borderTop:"1px solid var(--border-soft)",background:"var(--bg-card)"}}>
                 <div style={{display:"flex",gap:10}}>
-                  <button onClick={()=>{ setCreateSheet(null); setCreateExpanded(false); setCreatePriority(null); }} style={{flex:1,padding:13,borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:14,cursor:"pointer"}}>ยกเลิก</button>
+                  <button onClick={()=>{ setCreateSheet(null); setCreateExpanded(false); setCreateAreaId(""); setCreatePriority(null); }} style={{flex:1,padding:13,borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:14,cursor:"pointer"}}>ยกเลิก</button>
                   <button disabled={!createTitle.trim()||creating}
                     onClick={async()=>{
                       if(!createTitle.trim())return;
                       setCreating(true);
-                      const task=await createTaskApi(createTitle.trim(),createNote.trim(),curDate,createSheet.startMin,createSheet.endMin,createArea,createPriority);
+                      const task=await createTaskApi(createTitle.trim(),createNote.trim(),curDate,createSheet.startMin,createSheet.endMin,createAreaId||undefined,createPriority);
                       setBlocks(prev=>({...prev,[task.id]:{task,startMin:createSheet.startMin,dur:createSheet.endMin-createSheet.startMin}}));
-                      setCreateSheet(null); setCreateExpanded(false); setCreating(false); setCreateTitle(""); setCreateNote(""); setCreateArea(null); setCreatePriority(null);
+                      setCreateSheet(null); setCreateExpanded(false); setCreating(false); setCreateTitle(""); setCreateNote(""); setCreateAreaId(""); setCreatePriority(null);
                     }}
                     style={{flex:2,padding:13,borderRadius:12,background:createTitle.trim()?"var(--amber)":"var(--bg-raised)",border:"none",color:createTitle.trim()?"#000":"var(--text-3)",fontSize:14,fontWeight:700,cursor:createTitle.trim()?"pointer":"default"}}>
                     {creating?"กำลังบันทึก...":"สร้าง"}

@@ -88,6 +88,7 @@ export default function FeedbackStrip({ compact }: Props) {
               boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
               /* Flex column: scrollable content area + pinned submit */
               display: "flex", flexDirection: "column",
+              minHeight: "60vh",
               maxHeight: "88dvh",
               overflow: "hidden",
             }}

@@ -1326,9 +1326,9 @@ export default function Home() {
             {!(tab === "calendar" && calView === "agenda") && (
               tab === "okr"
                 ? <div style={{
-                    position: "sticky", top: -16, zIndex: 5,
+                    position: "sticky", top: 0, zIndex: 5,
                     background: "var(--bg-base)",
-                    margin: "-16px -20px 0",
+                    margin: "0 -20px",
                     padding: "12px 20px",
                     borderBottom: "1px solid var(--border-soft)",
                   }}>
