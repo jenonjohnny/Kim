@@ -181,6 +181,7 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
   const [theme, setTheme]       = useState<"dark" | "light">("dark");
   const [iconTint, setIconTint] = useState("#949597");
   const [loading, setLoading]   = useState(true);
+  const [areasError, setAreasError] = useState(false);
   const [areasOpen, setAreasOpen] = useState(false);
   const [profileName, setProfileName] = useState("คิม");
   const [editingName, setEditingName] = useState(false);
@@ -202,8 +203,10 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
     const savedName = localStorage.getItem("profile_name");
     if (savedName) setProfileName(savedName);
     fetch("/api/areas")
-      .then(r => r.json())
-      .then(d => { setAreas(d.areas || []); setLoading(false); });
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(d => { setAreas(d.areas || []); })
+      .catch(() => { setAreasError(true); })
+      .finally(() => { setLoading(false); });
   }, []);
 
   const toggleHidden = (id: string) =>
@@ -419,6 +422,10 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
 
         {areasOpen && (loading ? (
           <div style={{ color: "var(--text-3)", fontSize: 13, padding: "0 20px 12px" }}>กำลังโหลด...</div>
+        ) : areasError ? (
+          <div style={{ color: "var(--text-3)", fontSize: 13, padding: "0 20px 12px" }}>
+            ไม่สามารถโหลด Areas ได้ · ตรวจสอบ Notion token ค่ะ
+          </div>
         ) : (() => {
           const visibleAreas = sorted.filter(a => !hidden.includes(a.id));
           const hiddenAreas  = sorted.filter(a =>  hidden.includes(a.id));
