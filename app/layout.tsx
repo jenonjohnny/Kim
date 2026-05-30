@@ -2,13 +2,16 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kim — Daisi Design OS",
-  description: "เลขาส่วนตัวของ Daisi Design",
+  title: "Norte",
+  description: "Personal OS — Norte",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "คิม",
+    title: "Norte",
+  },
+  icons: {
+    apple: "/icon-512.png",
   },
 };
 
