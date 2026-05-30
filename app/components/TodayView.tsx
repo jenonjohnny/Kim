@@ -162,41 +162,49 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
 
 /* ─── Zone card wrapper ─── */
 function ZoneCard({
-  accentColor, label, labelIcon, count, children, defaultOpen = true,
+  accentColor, label, labelIcon, count, children, defaultOpen = true, isUrgent = false,
 }: {
   accentColor: string; label: string; labelIcon: React.ReactNode;
-  count: number; children: React.ReactNode; defaultOpen?: boolean;
+  count: number; children: React.ReactNode; defaultOpen?: boolean; isUrgent?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div style={{
-      background: "var(--bg-card)",
-      border: `1px solid ${accentColor}30`,
-      borderLeft: `2px solid ${accentColor}`,
-      borderRadius: 16, marginBottom: 10, overflow: "hidden",
-    }}>
+    <div style={{ marginBottom: 4 }}>
       <button
         onClick={() => setOpen(v => !v)}
         style={{
-          display: "flex", alignItems: "center", gap: 8,
-          width: "100%", padding: "12px 14px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          width: "100%", padding: "20px 0 10px",
           background: "transparent", border: "none", cursor: "pointer",
         }}
       >
-        <span style={{ display: "flex", alignItems: "center" }}>{labelIcon}</span>
-        <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: accentColor, letterSpacing: "0.1em", textAlign: "left" }}>
-          {label}
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {isUrgent ? (
+            <span style={{
+              display: "inline-block", width: 6, height: 6, borderRadius: "50%",
+              background: accentColor, flexShrink: 0,
+              animation: "pulse-red 2s ease-in-out infinite",
+            }} />
+          ) : (
+            <span style={{ display: "flex" }}>{labelIcon}</span>
+          )}
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+            {label}
+          </span>
         </span>
-        <span style={{
-          fontSize: 12, fontWeight: 800, color: accentColor,
-          background: accentColor + "18", borderRadius: 6, padding: "2px 9px",
-        }}>{count}</span>
-        <span style={{ display: "flex", transform: open ? "none" : "rotate(-90deg)", transition: "transform 0.2s" }}>
-          <ChevronDownIcon size={13} color="var(--text-3)" />
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{
+            fontSize: 10, fontWeight: 700, color: accentColor,
+            background: accentColor + "18", borderRadius: 20,
+            padding: "2px 9px", border: `1px solid ${accentColor}30`,
+          }}>{count} งาน</span>
+          <span style={{ display: "flex", transform: open ? "none" : "rotate(-90deg)", transition: "transform 0.2s" }}>
+            <ChevronDownIcon size={12} color="var(--text-3)" />
+          </span>
         </span>
       </button>
       {open && (
-        <div style={{ padding: "0 12px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {children}
         </div>
       )}
@@ -268,20 +276,42 @@ export function TodoItem({
   const due = dueLabel();
   const swipePct = Math.min(swipeX / SWIPE_THRESHOLD, 1);
 
+  // Time-left chip — Norte style
+  const timeLeftChip = (() => {
+    if (!task.due) return null;
+    const today = new Date().toISOString().split("T")[0];
+    const diff = Math.ceil((new Date(task.due).getTime() - new Date(today).getTime()) / 86400000);
+    if (diff < 0) return { text: "เลยกำหนด!", color: "#ff3b30", bg: "rgba(255,59,48,0.12)", border: "rgba(255,59,48,0.3)" };
+    if (diff === 0) return { text: "เหลือวันนี้", color: "#ff9500", bg: "rgba(255,149,0,0.10)", border: "rgba(255,149,0,0.25)" };
+    if (diff === 1) return { text: "พรุ่งนี้", color: "var(--text-3)", bg: "var(--bg-raised)", border: "var(--border)" };
+    return null;
+  })();
+
+  // Priority badge
+  const pBadge = (() => {
+    const p = task.priority;
+    if (p === "P1") return { label: "P1", color: "white", bg: "#ff3b30", border: "none" };
+    if (p === "P2") return { label: "P2", color: "#ff9500", bg: "rgba(255,149,0,0.12)", border: "1px solid rgba(255,149,0,0.3)" };
+    if (p === "P3") return { label: "P3", color: "var(--text-3)", bg: "transparent", border: "1px solid var(--border)" };
+    return null;
+  })();
+
+  const isOverdue = task.due && task.due < new Date().toISOString().split("T")[0];
+  const isP1 = task.priority === "P1" || task.urgent;
+
   return (
     <div style={{ position: "relative", borderRadius: 14, overflow: "hidden" }}>
-      {/* Reveal layer */}
+      {/* Swipe reveal layer */}
       <div style={{
         position: "absolute", inset: 0,
-        background: swipePct >= 1 ? "var(--amber)" : "var(--brand-dim)",
+        background: swipePct >= 1 ? "var(--brand)" : "var(--brand-dim)",
         display: "flex", alignItems: "center", paddingLeft: 20,
         transition: swipeX === 0 ? "background 0.2s" : "none",
       }}>
-        <span style={{
-          fontSize: 18, fontWeight: 800,
-          color: swipePct >= 1 ? "#000" : "var(--amber)",
-          opacity: swipePct, transition: swipeX === 0 ? "opacity 0.2s" : "none",
-        }}>✓</span>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ opacity: swipePct, transition: swipeX === 0 ? "opacity 0.2s" : "none" }}>
+          <path d="M3 9l5 5 7-8"/>
+        </svg>
       </div>
 
       {/* Card */}
@@ -293,44 +323,73 @@ export function TodoItem({
         style={{
           position: "relative",
           display: "flex", alignItems: "center", gap: 12,
-          padding: "13px 16px",
+          padding: "13px 14px",
           background: "var(--bg-card)",
-          border: "1px solid var(--border)",
-          borderLeft: `2px solid ${accent}`,
+          border: `1px solid ${isOverdue ? "rgba(255,59,48,0.35)" : isP1 ? "rgba(255,59,48,0.2)" : "var(--border)"}`,
           borderRadius: 14,
+          boxShadow: isOverdue
+            ? "inset 2px 0 0 #ff3b30"
+            : isP1
+              ? "inset 2px 0 0 rgba(255,59,48,0.5)"
+              : "none",
           cursor: "pointer",
           opacity: done ? 0 : 1,
           transform: done ? "translateX(20px)" : `translateX(${swipeX}px)`,
           transition: swipeX === 0 ? "transform 0.32s cubic-bezier(0.32,0.72,0,1), opacity 0.25s" : "none",
         }}
       >
-        {/* Checkbox */}
+        {/* Checkbox — rounded square */}
         <button
           onClick={handleDone}
           disabled={loading}
           style={{
-            width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
-            border: `2.5px solid ${loading ? accent : "var(--border)"}`,
+            width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+            border: `1.5px solid ${loading ? accent : "var(--border)"}`,
             background: loading ? accent + "22" : "transparent",
             cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
             transition: "all 0.2s",
           }}
         >
-          {loading && <span style={{ color: accent, fontSize: 12, fontWeight: 800 }}>✓</span>}
+          {loading && (
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke={accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1.5 5l3 3 4-4"/>
+            </svg>
+          )}
         </button>
 
         {/* Title + meta */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: "var(--text-1)", lineHeight: 1.3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div style={{
+            fontSize: 14,
+            fontWeight: isP1 ? 700 : task.priority === "P2" ? 600 : 500,
+            color: "var(--text-1)", lineHeight: 1.3,
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            marginBottom: 4,
+          }}>
             {task.title}
           </div>
-          <TaskMeta task={task} />
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+            <TaskMeta task={task} />
+            {timeLeftChip && (
+              <span style={{
+                fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 5,
+                background: timeLeftChip.bg, color: timeLeftChip.color,
+                border: `1px solid ${timeLeftChip.border}`, flexShrink: 0,
+              }}>{timeLeftChip.text}</span>
+            )}
+          </div>
         </div>
 
-        {/* Due badge */}
-        {due && <span style={{ fontSize: 11, color: due.color, flexShrink: 0, fontWeight: 600 }}>{due.text}</span>}
-        <ChevronRightIcon size={14} color="var(--text-3)" />
+        {/* Priority badge */}
+        {pBadge && (
+          <span style={{
+            width: 24, height: 24, borderRadius: 7, flexShrink: 0,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: 10, fontWeight: 800,
+            background: pBadge.bg, color: pBadge.color, border: pBadge.border,
+          }}>{pBadge.label}</span>
+        )}
       </div>
     </div>
   );
@@ -393,45 +452,38 @@ export default function TodayView({
         <FocusCard task={focusTask} onDone={onDone} onClick={() => onTaskClick(focusTask)} />
       )}
 
-      {/* ── Stats strip ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
+      {/* ── Stats — 3 cards ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
         {[
           {
-            label: "ด่วน", n: now.length,
+            label: "ด่วนมาก", n: now.length,
             color: now.length > 0 ? "#ff3b30" : "var(--text-3)",
             barColor: now.length > 0 ? "#ff3b30" : "var(--border)",
-            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M6 2v4m0 2.5v.5"/><circle cx="6" cy="6" r="5"/></svg>,
+            icon: (c: string) => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M6 2v4m0 2.5v.5"/><circle cx="6" cy="6" r="5"/></svg>,
           },
           {
             label: "วันนี้", n: soon.length,
             color: soon.length > 0 ? "#ff9500" : "var(--text-3)",
             barColor: soon.length > 0 ? "#ff9500" : "var(--border)",
-            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="5"/><path d="M6 3.5V6l1.5 1.5"/></svg>,
+            icon: (c: string) => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="5"/><path d="M6 3.5V6l1.5 1.5"/></svg>,
           },
           {
-            label: "ถัดไป", n: later.length,
-            color: "var(--brand)",
-            barColor: "rgba(0,129,255,0.25)",
-            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M2 9h8M2 6h6M2 3h4"/></svg>,
-          },
-          {
-            label: "รอตรวจ", n: review.length,
+            label: "ทั้งหมด", n: total,
             color: "var(--text-2)",
-            barColor: "var(--border)",
-            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="5"/><path d="M6 3.5V6l1.5 1.5"/></svg>,
+            barColor: "rgba(0,129,255,0.2)",
+            icon: (c: string) => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M2 9h8M2 6h6M2 3h4"/></svg>,
           },
         ].map(s => (
           <div key={s.label} style={{
             background: "var(--bg-card)", border: "1px solid var(--border)",
-            borderRadius: 14, padding: "12px 10px",
+            borderRadius: 16, padding: "14px 12px",
             display: "flex", flexDirection: "column", gap: 2,
             position: "relative", overflow: "hidden",
           }}>
-            {/* top color bar */}
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.barColor, borderRadius: "14px 14px 0 0" }} />
-            <div style={{ marginBottom: 4, opacity: 0.6 }}>{s.icon(s.color)}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: s.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{s.n}</div>
-            <div style={{ fontSize: 9, color: "var(--text-3)", fontWeight: 500 }}>{s.label}</div>
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.barColor, borderRadius: "16px 16px 0 0" }} />
+            <div style={{ marginBottom: 5, opacity: 0.6 }}>{s.icon(s.color)}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: s.color, lineHeight: 1, letterSpacing: "-0.03em" }}>{s.n}</div>
+            <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 500, marginTop: 1 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -440,7 +492,7 @@ export default function TodayView({
       {now.length > 0 && (
         <ZoneCard
           accentColor="#ff3b30" label="ด่วนมาก — P1" count={now.length}
-          labelIcon={<DotIcon size={9} color="#ff3b30" />}
+          labelIcon={<DotIcon size={9} color="#ff3b30" />} isUrgent={true}
         >
           {now.map(t => (
             <TodoItem key={t.id} task={t} onDone={onDone}
