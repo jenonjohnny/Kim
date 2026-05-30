@@ -5,6 +5,7 @@ import {
   LightningIcon, ClockIcon, FileTextIcon, ChevronDownIcon, ChevronRightIcon, DotIcon,
 } from "./icons";
 import { AREA_STYLE, AreaBadge, TaskMeta } from "./TaskRow";
+import MorningBriefCard from "./MorningBriefCard";
 
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
@@ -376,6 +377,9 @@ export default function TodayView({
 
   return (
     <div>
+      {/* ── Morning Brief Card ── */}
+      <MorningBriefCard data={data} />
+
       {/* ── Meetings Strip (GCal) ── */}
       <MeetingsStrip events={gcalEvents} />
 
