@@ -1,0 +1,2068 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Norte App — V1 Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-base: #0a0a0f;
+    --bg-card: #111118;
+    --bg-raised: #1a1a24;
+    --border: #1e1e2a;
+    --border-soft: #16161e;
+    --text-1: #f2f2f2;
+    --text-2: #a0a0b0;
+    --text-3: #606070;
+    --brand: #0081ff;
+    --brand-dark: #0066cc;
+    --brand-soft: rgba(0,129,255,0.10);
+    --brand-glow: rgba(0,129,255,0.25);
+    --red: #ff5252; /* kept only for current-time indicator */
+    --lm-bg: #f0f4fa;
+    --lm-card: #ffffff;
+    --lm-text-1: #0a0a0f;
+    --lm-text-2: #4a4a5a;
+    --lm-border: #e0e4f0;
+  }
+
+  body {
+    background: #070709;
+    font-family: -apple-system, 'Inter', 'SF Pro Display', BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* PAGE HEADER */
+  .page-title {
+    color: #f2f2f2;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    opacity: 0.4;
+    text-align: center;
+  }
+
+  /* SCREEN WRAPPER */
+  .screen-wrap {
+    width: 390px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 80px;
+  }
+
+  .screen-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-self: flex-start;
+  }
+
+  .screen-label-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand);
+  }
+
+  .screen-label-text {
+    color: var(--brand);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  /* PHONE FRAME */
+  .phone {
+    width: 390px;
+    min-height: 844px;
+    background: var(--bg-base);
+    border-radius: 44px;
+    overflow: hidden;
+    position: relative;
+    border: 1.5px solid #222230;
+    box-shadow:
+      0 0 0 1px #0a0a0f,
+      0 40px 80px rgba(0,0,0,0.7),
+      0 0 60px rgba(0,129,255,0.06);
+  }
+
+  .phone.light {
+    background: var(--lm-bg);
+    border-color: #d0d8ee;
+    box-shadow:
+      0 0 0 1px #f0f0f5,
+      0 40px 80px rgba(0,0,0,0.12),
+      0 0 60px rgba(0,129,255,0.08);
+  }
+
+  /* NOTCH */
+  .notch {
+    width: 126px;
+    height: 34px;
+    background: #0a0a0f;
+    border-radius: 0 0 20px 20px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .phone.light .notch {
+    background: #f0f4fa;
+  }
+
+  .notch-camera {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #1e1e2a;
+  }
+
+  .phone.light .notch-camera {
+    background: #c8cce0;
+  }
+
+  .screen-content {
+    padding: 8px 0 100px;
+    overflow: hidden;
+  }
+
+  /* ============================
+     COMPONENTS
+  ============================ */
+
+  /* Status bar */
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 24px 10px;
+  }
+
+  .status-time {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-1);
+  }
+
+  .phone.light .status-time { color: var(--lm-text-1); }
+
+  .status-icons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .status-icon {
+    width: 16px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--text-1);
+    opacity: 0.7;
+    position: relative;
+  }
+
+  .phone.light .status-icon { background: var(--lm-text-1); }
+
+  .status-wifi {
+    width: 15px;
+    height: 11px;
+    background: none;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .wifi-bar {
+    background: var(--text-1);
+    opacity: 0.7;
+    border-radius: 1px;
+    width: 3px;
+  }
+
+  .phone.light .wifi-bar { background: var(--lm-text-1); }
+
+  /* App Header */
+  .app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 4px 20px 0;
+    margin-bottom: 4px;
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .logo-gem {
+    width: 28px;
+    height: 28px;
+    background: var(--brand);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-text {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text-1);
+    letter-spacing: -0.02em;
+  }
+
+  .phone.light .logo-text { color: var(--lm-text-1); }
+
+  .header-greeting {
+    text-align: right;
+  }
+
+  .greeting-main {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-1);
+    display: block;
+    line-height: 1.3;
+  }
+
+  .phone.light .greeting-main { color: var(--lm-text-1); }
+
+  .greeting-date {
+    font-size: 11px;
+    color: var(--text-3);
+    display: block;
+    font-weight: 400;
+  }
+
+  .phone.light .greeting-date { color: var(--lm-text-2); }
+
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 0 20px;
+    margin-bottom: 8px;
+    margin-top: 20px;
+    display: block;
+  }
+
+  .phone.light .section-label { color: var(--lm-text-2); }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 0 20px;
+    margin-bottom: 16px;
+  }
+
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phone.light .stat-card {
+    background: var(--lm-card);
+    border-color: var(--lm-border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    border-radius: 16px 16px 0 0;
+  }
+
+  /* All stat card top bars: shades of brand blue */
+  .stat-card.urgent::before { background: var(--brand); }
+  .stat-card.soon::before   { background: rgba(0,129,255,0.45); }
+  .stat-card.total::before  { background: rgba(0,129,255,0.2); }
+
+  .stat-num {
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-card.urgent .stat-num { color: var(--brand); }
+  .stat-card.soon .stat-num   { color: var(--text-2); }
+  .stat-card.total .stat-num  { color: var(--text-2); }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-3);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .phone.light .stat-label { color: var(--lm-text-2); }
+
+  /* MORNING BRIEF CARD */
+  .brief-card {
+    margin: 0 20px 16px;
+    background: linear-gradient(135deg, #0066cc 0%, #0081ff 60%, #0099ff 100%);
+    border-radius: 16px;
+    padding: 16px 18px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  /* Geometric ring decorations instead of emoji */
+  .brief-card::before {
+    content: '';
+    position: absolute;
+    right: -28px;
+    top: -28px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.10);
+    pointer-events: none;
+  }
+
+  .brief-card::after {
+    content: '';
+    position: absolute;
+    right: 18px;
+    bottom: -22px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.07);
+    pointer-events: none;
+  }
+
+  .brief-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .brief-tag {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .brief-chevron {
+    width: 20px;
+    height: 20px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  .brief-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 4px;
+  }
+
+  .brief-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.65);
+  }
+
+  /* TASK CARD */
+  .task-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    margin-bottom: 10px;
+    margin-top: 20px;
+  }
+
+  .task-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .phone.light .task-section-title { color: var(--lm-text-2); }
+
+  .task-count-badge {
+    background: var(--brand-soft);
+    color: var(--brand);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(0,129,255,0.2);
+  }
+
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0 20px;
+  }
+
+  .task-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 13px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .phone.light .task-item {
+    background: var(--lm-card);
+    border-color: var(--lm-border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  /* No .task-left-bar — removed */
+
+  .task-check {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .phone.light .task-check { border-color: var(--lm-border); }
+
+  .task-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .task-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+  }
+
+  .phone.light .task-title { color: var(--lm-text-1); }
+
+  .task-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .task-area-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+
+  .task-time {
+    font-size: 10px;
+    color: var(--text-3);
+    font-weight: 500;
+  }
+
+  .phone.light .task-time { color: var(--lm-text-2); }
+
+  .task-priority {
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 88px;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-around;
+    padding: 10px 8px 0;
+  }
+
+  .phone.light .bottom-nav {
+    background: rgba(240,244,250,0.9);
+    border-color: var(--lm-border);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 12px;
+    min-width: 52px;
+  }
+
+  .nav-item.active {
+    background: var(--brand-soft);
+  }
+
+  /* Nav icon: SVG-based, responds to color */
+  .nav-icon {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-3);
+  }
+
+  .nav-item.active .nav-icon {
+    color: var(--brand);
+  }
+
+  .phone.light .nav-icon {
+    color: var(--lm-text-2);
+  }
+
+  .phone.light .nav-item.active .nav-icon {
+    color: var(--brand);
+  }
+
+  .nav-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-3);
+  }
+
+  .phone.light .nav-label { color: var(--lm-text-2); }
+
+  .nav-item.active .nav-label {
+    color: var(--brand);
+  }
+
+  /* ============================
+     SCREEN 2 — OKR
+  ============================ */
+
+  .okr-hero {
+    padding: 16px 20px 20px;
+  }
+
+  .okr-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brand);
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .okr-hero-title {
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--text-1);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 4px;
+  }
+
+  .okr-hero-sub {
+    font-size: 13px;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+
+  /* OKR STATS GRID */
+  .okr-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 0 20px;
+    margin-bottom: 20px;
+  }
+
+  .okr-stat-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+
+  .okr-stat-num {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-1);
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .okr-stat-num.brand { color: var(--brand); }
+
+  .okr-stat-unit {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* OKR CARD */
+  .okr-card {
+    margin: 0 20px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .okr-card-glow {
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 80px; height: 80px;
+    border-radius: 50%;
+    background: var(--brand-glow);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .okr-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .okr-card-left {}
+
+  .okr-card-emoji {
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    line-height: 1;
+  }
+
+  .okr-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-1);
+    margin-bottom: 2px;
+    line-height: 1.3;
+  }
+
+  .okr-card-sub {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  .okr-pct-badge {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--brand);
+    letter-spacing: -0.03em;
+    text-align: right;
+  }
+
+  .okr-pct-label {
+    font-size: 9px;
+    color: var(--text-3);
+    text-align: right;
+    display: block;
+    margin-top: 1px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* PROGRESS BAR */
+  .progress-track {
+    height: 6px;
+    background: var(--bg-raised);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--brand-dark) 0%, var(--brand) 100%);
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 50%;
+    transform: translate(50%, -50%);
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 0 8px var(--brand-glow);
+  }
+
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 6px;
+  }
+
+  .progress-current {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-2);
+  }
+
+  .progress-target {
+    font-size: 11px;
+    color: var(--text-3);
+  }
+
+  /* MILESTONE LIST */
+  .milestone-section {
+    padding: 0 20px;
+    margin-top: 4px;
+  }
+
+  .milestone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .milestone-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+  }
+
+  .milestone-all {
+    font-size: 11px;
+    color: var(--brand);
+    font-weight: 600;
+  }
+
+  .milestone-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .milestone-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* Milestones: blue only */
+  .milestone-dot.done    { background: var(--brand); opacity: 0.5; }
+  .milestone-dot.active  { background: var(--brand); box-shadow: 0 0 6px var(--brand-glow); opacity: 1; }
+  .milestone-dot.pending { background: var(--text-3); }
+
+  .milestone-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-1);
+    flex: 1;
+  }
+
+  .milestone-text.done {
+    text-decoration: line-through;
+    color: var(--text-3);
+  }
+
+  .milestone-date {
+    font-size: 10px;
+    color: var(--text-3);
+    font-weight: 500;
+  }
+
+  /* ============================
+     SCREEN 3 — CALENDAR
+  ============================ */
+
+  .day-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 20px 14px;
+  }
+
+  .day-nav-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-2);
+  }
+
+  .day-nav-center {
+    text-align: center;
+  }
+
+  .day-nav-label {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-1);
+    letter-spacing: -0.01em;
+  }
+
+  .day-nav-sub {
+    font-size: 11px;
+    color: var(--text-3);
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* WEEK STRIP */
+  .week-strip {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+    margin-bottom: 16px;
+    gap: 4px;
+  }
+
+  .week-day {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 6px;
+    border-radius: 12px;
+    flex: 1;
+  }
+
+  .week-day.active {
+    background: var(--brand);
+  }
+
+  .week-day-name {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .week-day.active .week-day-name { color: rgba(255,255,255,0.75); }
+
+  .week-day-num {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-2);
+  }
+
+  .week-day.active .week-day-num { color: white; }
+
+  .week-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: transparent;
+  }
+
+  .week-day.has-event .week-dot { background: var(--brand); }
+  .week-day.active .week-dot { background: rgba(255,255,255,0.5); }
+
+  /* TIME GRID */
+  .time-grid {
+    padding: 0 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .time-row {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    min-height: 54px;
+    position: relative;
+  }
+
+  .time-row::after {
+    content: '';
+    position: absolute;
+    left: 44px; right: 0;
+    bottom: 0;
+    height: 1px;
+    background: var(--border-soft);
+  }
+
+  .time-label {
+    font-size: 10px;
+    color: var(--text-3);
+    font-weight: 500;
+    padding-top: 4px;
+    flex-shrink: 0;
+    letter-spacing: 0.03em;
+  }
+
+  .time-slot {
+    position: relative;
+    min-height: 54px;
+  }
+
+  /* TASK BLOCK */
+  .time-block {
+    border-radius: 10px;
+    padding: 8px 10px;
+    position: absolute;
+    left: 4px; right: 4px;
+  }
+
+  .time-block-title {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+
+  .time-block-sub {
+    font-size: 10px;
+    opacity: 0.75;
+    font-weight: 500;
+  }
+
+  /* All blocks are blue family */
+  .time-block.blue {
+    background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand) 100%);
+    color: white;
+    top: 4px;
+  }
+
+  /* Outline is light blue */
+  .time-block.outline {
+    background: var(--brand-soft);
+    border: 1px solid rgba(0,129,255,0.25);
+    color: var(--brand);
+    top: 4px;
+  }
+
+  /* Dim blue (used for lower priority/soft events) */
+  .time-block.dim {
+    background: rgba(0,129,255,0.08);
+    border: 1px solid rgba(0,129,255,0.15);
+    color: var(--text-2);
+    top: 4px;
+  }
+
+  /* CURRENT TIME LINE — stays red for visibility */
+  .time-current {
+    position: absolute;
+    left: 44px; right: 0;
+    height: 2px;
+    background: var(--red);
+    border-radius: 2px;
+    z-index: 5;
+  }
+
+  .time-current::before {
+    content: '';
+    position: absolute;
+    left: -4px; top: 50%;
+    transform: translateY(-50%);
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--red);
+  }
+
+  /* TASK TRAY */
+  .task-tray {
+    margin: 16px 20px 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 14px 16px;
+  }
+
+  .tray-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .tray-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .tray-add {
+    width: 24px; height: 24px;
+    background: var(--brand-soft);
+    border: 1px solid rgba(0,129,255,0.2);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--brand);
+    font-weight: 700;
+  }
+
+  .tray-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-soft);
+  }
+
+  .tray-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .tray-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .tray-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-2);
+    flex: 1;
+  }
+
+  .tray-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* DECORATIVE GEOMETRIC */
+  .deco-geo {
+    position: absolute;
+    user-select: none;
+    pointer-events: none;
+  }
+
+  /* AREA BADGE COLORS — all blue, just different text */
+  .area-blue,
+  .area-purple,
+  .area-green,
+  .area-orange,
+  .area-red {
+    background: var(--brand-soft);
+    color: var(--brand);
+    border: 1px solid rgba(0,129,255,0.2);
+  }
+
+  /* Light mode area badges */
+  .phone.light .area-blue,
+  .phone.light .area-purple,
+  .phone.light .area-green,
+  .phone.light .area-orange,
+  .phone.light .area-red {
+    background: rgba(0,129,255,0.08);
+    color: var(--brand-dark);
+    border: 1px solid rgba(0,129,255,0.2);
+  }
+
+  /* Priority badges — blue only, 3 intensities */
+  .p1 {
+    background: var(--brand);
+    color: white;
+    border: none;
+  }
+
+  .p2 {
+    background: var(--brand-soft);
+    color: var(--brand);
+    border: 1px solid rgba(0,129,255,0.25);
+  }
+
+  .p3 {
+    background: transparent;
+    color: var(--text-3);
+    border: 1px solid var(--border);
+  }
+
+  /* SEPARATOR */
+  .screen-divider {
+    width: 390px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #1e1e2a, transparent);
+    margin: 12px 0 0;
+  }
+
+  /* GEOMETRIC DECORATION rings */
+  .geo-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid var(--brand-soft);
+    pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<p class="page-title">NORTE APP — V1 — MOCKUP</p>
+
+<!-- ============================
+     SCREEN 1 — HOME DARK
+============================ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <div class="screen-label-dot"></div>
+    <span class="screen-label-text">Screen 1 — Home (วันนี้) — Dark Mode</span>
+  </div>
+
+  <div class="phone">
+    <!-- Decorative geometric rings -->
+    <div class="deco-geo" style="right: -30px; top: 160px; opacity: 0.35;">
+      <svg width="130" height="130" viewBox="0 0 130 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="65" cy="65" r="60" stroke="rgba(0,129,255,0.12)" stroke-width="1"/>
+        <circle cx="65" cy="65" r="42" stroke="rgba(0,129,255,0.08)" stroke-width="1"/>
+        <circle cx="65" cy="65" r="24" stroke="rgba(0,129,255,0.06)" stroke-width="1"/>
+        <line x1="65" y1="2" x2="65" y2="128" stroke="rgba(0,129,255,0.05)" stroke-width="0.5"/>
+        <line x1="2" y1="65" x2="128" y2="65" stroke="rgba(0,129,255,0.05)" stroke-width="0.5"/>
+        <line x1="20" y1="20" x2="110" y2="110" stroke="rgba(0,129,255,0.04)" stroke-width="0.5"/>
+        <line x1="110" y1="20" x2="20" y2="110" stroke="rgba(0,129,255,0.04)" stroke-width="0.5"/>
+      </svg>
+    </div>
+
+    <div class="notch">
+      <div class="notch-camera"></div>
+    </div>
+
+    <div class="screen-content">
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <div class="status-wifi">
+            <div class="wifi-bar" style="height:4px;"></div>
+            <div class="wifi-bar" style="height:7px;"></div>
+            <div class="wifi-bar" style="height:10px;"></div>
+            <div class="wifi-bar" style="height:13px;"></div>
+          </div>
+          <div class="status-icon" style="width:12px;height:12px;border-radius:50%;background:none;border:1.5px solid var(--text-1);opacity:0.6;"></div>
+          <div class="status-icon" style="width:22px;height:11px;border-radius:3px;border:1.5px solid var(--text-1);background:none;opacity:0.6;position:relative;">
+            <div style="position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:3px;height:6px;background:var(--text-1);opacity:0.6;border-radius:0 2px 2px 0;"></div>
+            <div style="position:absolute;left:2px;top:2px;bottom:2px;right:6px;background:var(--text-1);border-radius:1px;opacity:0.8;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="logo-mark">
+          <div class="logo-gem">N</div>
+          <span class="logo-text">Norte</span>
+        </div>
+        <div class="header-greeting">
+          <span class="greeting-main">สวัสดีค่ะ คิม</span>
+          <span class="greeting-date">ศุกร์ 30 พ.ค. 2569</span>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <span class="section-label" style="margin-top:18px;">ภาพรวมวันนี้</span>
+      <div class="stats-bar">
+        <div class="stat-card urgent">
+          <span class="stat-num">3</span>
+          <span class="stat-label">ด่วนมาก</span>
+        </div>
+        <div class="stat-card soon">
+          <span class="stat-num">7</span>
+          <span class="stat-label">วันนี้</span>
+        </div>
+        <div class="stat-card total">
+          <span class="stat-num">18</span>
+          <span class="stat-label">ทั้งหมด</span>
+        </div>
+      </div>
+
+      <!-- Morning Brief -->
+      <div class="brief-card">
+        <div class="brief-header">
+          <span class="brief-tag">
+            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" fill="rgba(255,255,255,0.7)"><path d="M4 0.5l.65 2.2 2.35.3-1.7 1.6.4 2.3L4 5.7 2.3 6.9l.4-2.3L1 3l2.35-.3z"/></svg>
+            Morning Brief
+          </span>
+          <div class="brief-chevron">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5l3 3 3-3"/></svg>
+          </div>
+        </div>
+        <div class="brief-title">วันนี้มีงาน P1 ค้างอยู่ 3 อย่าง</div>
+        <div class="brief-sub">แนะนำ: เริ่มจาก mockup ก่อน deadline พรุ่งนี้</div>
+      </div>
+
+      <!-- Task Section -->
+      <div class="task-section-header">
+        <span class="task-section-title">ด่วนมาก — P1</span>
+        <span class="task-count-badge">3 งาน</span>
+      </div>
+
+      <div class="task-list">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-body">
+            <div class="task-title">ส่ง mockup blue direction ให้ทีม</div>
+            <div class="task-meta">
+              <span class="task-area-badge area-blue">Product</span>
+              <span class="task-time">ครบ 18:00</span>
+            </div>
+          </div>
+          <div class="task-priority p1">P1</div>
+        </div>
+
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-body">
+            <div class="task-title">Review deck STS Q2 ก่อนส่งลูกค้า</div>
+            <div class="task-meta">
+              <span class="task-area-badge area-orange">Daisi</span>
+              <span class="task-time">ครบ 14:00</span>
+            </div>
+          </div>
+          <div class="task-priority p1">P1</div>
+        </div>
+
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-body">
+            <div class="task-title">ตอบ email sponsor board game</div>
+            <div class="task-meta">
+              <span class="task-area-badge area-purple">Personal</span>
+              <span class="task-time">ครบ 12:00</span>
+            </div>
+          </div>
+          <div class="task-priority p1">P1</div>
+        </div>
+      </div>
+
+      <div class="task-section-header" style="margin-top:16px;">
+        <span class="task-section-title">วันนี้ — P2</span>
+        <span class="task-count-badge">4 งาน</span>
+      </div>
+
+      <div class="task-list">
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-body">
+            <div class="task-title">เขียน OKR update สัปดาห์นี้</div>
+            <div class="task-meta">
+              <span class="task-area-badge area-green">Growth</span>
+              <span class="task-time">ทั้งวัน</span>
+            </div>
+          </div>
+          <div class="task-priority p2">P2</div>
+        </div>
+
+        <div class="task-item">
+          <div class="task-check"></div>
+          <div class="task-body">
+            <div class="task-title">Post Instagram Lifebar วันศุกร์</div>
+            <div class="task-meta">
+              <span class="task-area-badge area-orange">Daisi</span>
+              <span class="task-time">16:00</span>
+            </div>
+          </div>
+          <div class="task-priority p3">P3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="nav-item active">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H13v-4H7v4H4a1 1 0 01-1-1V9.5z"/></svg>
+        </span>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M7 10l2.5 2.5L13 8"/></svg>
+        </span>
+        <span class="nav-label">Tasks</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v1.5m0 5V14m-4-4h1.5m5 0H14"/><circle cx="10" cy="10" r="2" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label">Norte</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4m6-4v4"/></svg>
+        </span>
+        <span class="nav-label">Calendar</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label">OKR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     SCREEN 2 — OKR DARK
+============================ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <div class="screen-label-dot"></div>
+    <span class="screen-label-text">Screen 2 — OKR Dashboard — Dark Mode</span>
+  </div>
+
+  <div class="phone">
+    <!-- Decorative geometric rings -->
+    <div class="deco-geo" style="left: -40px; bottom: 180px; opacity: 0.3;">
+      <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="80" cy="80" r="74" stroke="rgba(0,129,255,0.10)" stroke-width="1"/>
+        <circle cx="80" cy="80" r="52" stroke="rgba(0,129,255,0.07)" stroke-width="1"/>
+        <circle cx="80" cy="80" r="30" stroke="rgba(0,129,255,0.05)" stroke-width="1"/>
+        <line x1="80" y1="4" x2="80" y2="156" stroke="rgba(0,129,255,0.04)" stroke-width="0.5"/>
+        <line x1="4" y1="80" x2="156" y2="80" stroke="rgba(0,129,255,0.04)" stroke-width="0.5"/>
+      </svg>
+    </div>
+
+    <div class="notch">
+      <div class="notch-camera"></div>
+    </div>
+
+    <div class="screen-content">
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <div class="status-wifi">
+            <div class="wifi-bar" style="height:4px;"></div>
+            <div class="wifi-bar" style="height:7px;"></div>
+            <div class="wifi-bar" style="height:10px;"></div>
+            <div class="wifi-bar" style="height:13px;"></div>
+          </div>
+          <div class="status-icon" style="width:22px;height:11px;border-radius:3px;border:1.5px solid var(--text-1);background:none;opacity:0.6;position:relative;">
+            <div style="position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:3px;height:6px;background:var(--text-1);opacity:0.6;border-radius:0 2px 2px 0;"></div>
+            <div style="position:absolute;left:2px;top:2px;bottom:2px;right:6px;background:var(--text-1);border-radius:1px;opacity:0.8;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OKR Hero -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;padding:4px 20px 0;">
+        <div class="logo-mark">
+          <div class="logo-gem">N</div>
+          <span class="logo-text">Norte</span>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:6px 10px;display:flex;align-items:center;gap:6px;">
+          <span style="font-size:10px;color:var(--text-3);font-weight:600;">Q2 2569</span>
+          <span style="width:6px;height:6px;border-radius:50%;background:var(--brand);box-shadow:0 0 6px var(--brand-glow);display:block;"></span>
+          <span style="font-size:10px;color:var(--brand);font-weight:700;">ACTIVE</span>
+        </div>
+      </div>
+
+      <div class="okr-hero" style="margin-top:12px;">
+        <span class="okr-eyebrow">Objectives & Key Results</span>
+        <div class="okr-hero-title">OKR<br>Q2 2569</div>
+        <div class="okr-hero-sub">พ.ค. — ก.ค. 2569 · 92 วัน</div>
+      </div>
+
+      <!-- OKR Stats Grid -->
+      <div class="okr-stats-grid">
+        <div class="okr-stat-box">
+          <div class="okr-stat-num brand">17</div>
+          <div class="okr-stat-unit">วันผ่าน</div>
+        </div>
+        <div class="okr-stat-box">
+          <div class="okr-stat-num" style="color:var(--text-2);">75</div>
+          <div class="okr-stat-unit">วันเหลือ</div>
+        </div>
+        <div class="okr-stat-box">
+          <div class="okr-stat-num brand">38<span style="font-size:16px;">%</span></div>
+          <div class="okr-stat-unit">โดยรวม</div>
+        </div>
+      </div>
+
+      <!-- OKR Card 1 — Art Direction -->
+      <div class="okr-card">
+        <div class="okr-card-glow"></div>
+        <div class="okr-card-header">
+          <div class="okr-card-left">
+            <div class="okr-card-emoji">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18l-9 10z"/><path d="M3 11l3.5-7h11L21 11"/></svg>
+            </div>
+            <div class="okr-card-title">Art Direction ครบวงจร</div>
+            <div class="okr-card-sub">Product Design · 3 เดือน</div>
+          </div>
+          <div>
+            <div class="okr-pct-badge">45%</div>
+            <span class="okr-pct-label">complete</span>
+          </div>
+        </div>
+
+        <!-- Sub KRs -->
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <span style="font-size:11px;color:var(--text-3);font-weight:600;">KR1 · สร้าง Design System ครบ</span>
+            <span style="font-size:11px;color:var(--brand);font-weight:700;">60%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:60%;"></div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <span style="font-size:11px;color:var(--text-3);font-weight:600;">KR2 · Launch 3 Brand Identity</span>
+            <span style="font-size:11px;color:var(--brand);font-weight:700;">33%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:33%;"></div>
+          </div>
+        </div>
+
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <span style="font-size:11px;color:var(--text-3);font-weight:600;">KR3 · Case Study 2 ชิ้น</span>
+            <span style="font-size:11px;color:var(--text-3);font-weight:700;">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OKR Card 2 — Income -->
+      <div class="okr-card" style="border-color: rgba(0,129,255,0.18);">
+        <div class="okr-card-glow"></div>
+
+        <div class="okr-card-header">
+          <div class="okr-card-left">
+            <div class="okr-card-emoji">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v1.5m0 5V16m-2.5-7h4c.8 0 1.5.7 1.5 1.5s-.7 1.5-1.5 1.5h-3c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5H15"/></svg>
+            </div>
+            <div class="okr-card-title">รายได้เสริม 20k/เดือน</div>
+            <div class="okr-card-sub">Income · Stretch 50k</div>
+          </div>
+          <div>
+            <div class="okr-pct-badge">30%</div>
+            <span class="okr-pct-label">complete</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <span style="font-size:11px;color:var(--text-3);font-weight:600;">KR1 · รายได้รวม</span>
+            <span style="font-size:11px;color:var(--brand);font-weight:700;">6,200 / 20,000 ฿</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" style="width:31%;"></div>
+          </div>
+          <div class="progress-labels">
+            <span class="progress-current" style="color:var(--brand);">฿6,200 ได้แล้ว</span>
+            <span class="progress-target">เป้า ฿20,000</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+          <div style="background:var(--bg-raised);border-radius:10px;padding:10px 8px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:var(--brand);">3,500</div>
+            <div style="font-size:9px;color:var(--text-3);margin-top:2px;font-weight:600;">Freelance</div>
+          </div>
+          <div style="background:var(--bg-raised);border-radius:10px;padding:10px 8px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:var(--brand);">2,700</div>
+            <div style="font-size:9px;color:var(--text-3);margin-top:2px;font-weight:600;">Digital</div>
+          </div>
+          <div style="background:var(--bg-raised);border-radius:10px;padding:10px 8px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:var(--text-3);">—</div>
+            <div style="font-size:9px;color:var(--text-3);margin-top:2px;font-weight:600;">Board Game</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Milestones -->
+      <div class="milestone-section">
+        <div class="milestone-header">
+          <span class="milestone-title">Milestones</span>
+          <span class="milestone-all">ดูทั้งหมด</span>
+        </div>
+
+        <div class="milestone-item">
+          <div class="milestone-dot done"></div>
+          <span class="milestone-text done">เริ่ม norte-app development</span>
+          <span class="milestone-date">1 พ.ค.</span>
+        </div>
+
+        <div class="milestone-item">
+          <div class="milestone-dot done"></div>
+          <span class="milestone-text done">สร้าง Design System เบื้องต้น</span>
+          <span class="milestone-date">15 พ.ค.</span>
+        </div>
+
+        <div class="milestone-item" style="background:linear-gradient(90deg,rgba(0,129,255,0.06) 0%,var(--bg-card) 100%);border-color:rgba(0,129,255,0.2);">
+          <div class="milestone-dot active"></div>
+          <span class="milestone-text">Blue mockup + redesign Norte</span>
+          <span class="milestone-date" style="color:var(--brand);">30 พ.ค.</span>
+        </div>
+
+        <div class="milestone-item">
+          <div class="milestone-dot pending"></div>
+          <span class="milestone-text" style="color:var(--text-3);">Launch MVP app จริง</span>
+          <span class="milestone-date">30 มิ.ย.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H13v-4H7v4H4a1 1 0 01-1-1V9.5z"/></svg>
+        </span>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M7 10l2.5 2.5L13 8"/></svg>
+        </span>
+        <span class="nav-label">Tasks</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v1.5m0 5V14m-4-4h1.5m5 0H14"/><circle cx="10" cy="10" r="2" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label">Norte</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4m6-4v4"/></svg>
+        </span>
+        <span class="nav-label">Calendar</span>
+      </div>
+      <div class="nav-item active">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label">OKR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     SCREEN 3 — CALENDAR DARK
+============================ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <div class="screen-label-dot"></div>
+    <span class="screen-label-text">Screen 3 — Calendar / Day View — Dark Mode</span>
+  </div>
+
+  <div class="phone">
+    <div class="notch">
+      <div class="notch-camera"></div>
+    </div>
+
+    <div class="screen-content">
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <div class="status-wifi">
+            <div class="wifi-bar" style="height:4px;"></div>
+            <div class="wifi-bar" style="height:7px;"></div>
+            <div class="wifi-bar" style="height:10px;"></div>
+            <div class="wifi-bar" style="height:13px;"></div>
+          </div>
+          <div class="status-icon" style="width:22px;height:11px;border-radius:3px;border:1.5px solid var(--text-1);background:none;opacity:0.6;position:relative;">
+            <div style="position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:3px;height:6px;background:var(--text-1);opacity:0.6;border-radius:0 2px 2px 0;"></div>
+            <div style="position:absolute;left:2px;top:2px;bottom:2px;right:6px;background:var(--text-1);border-radius:1px;opacity:0.8;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 20px 0;">
+        <div class="logo-mark">
+          <div class="logo-gem">N</div>
+          <span class="logo-text">Norte</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:6px 10px;font-size:11px;color:var(--text-2);font-weight:600;">Day</div>
+          <div style="background:var(--brand-soft);border:1px solid rgba(0,129,255,0.25);border-radius:10px;padding:6px 10px;font-size:11px;color:var(--brand);font-weight:700;">Week</div>
+        </div>
+      </div>
+
+      <!-- Day Nav -->
+      <div class="day-nav" style="margin-top:12px;">
+        <div class="day-nav-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+        </div>
+        <div class="day-nav-center">
+          <span class="day-nav-label">ศุกร์ 30 พ.ค.</span>
+          <span class="day-nav-sub">วันนี้ · 7 งาน</span>
+        </div>
+        <div class="day-nav-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3l5 5-5 5"/></svg>
+        </div>
+      </div>
+
+      <!-- Week Strip -->
+      <div class="week-strip">
+        <div class="week-day">
+          <span class="week-day-name">จ</span>
+          <span class="week-day-num">26</span>
+          <div class="week-dot"></div>
+        </div>
+        <div class="week-day has-event">
+          <span class="week-day-name">อ</span>
+          <span class="week-day-num">27</span>
+          <div class="week-dot"></div>
+        </div>
+        <div class="week-day has-event">
+          <span class="week-day-name">พ</span>
+          <span class="week-day-num">28</span>
+          <div class="week-dot"></div>
+        </div>
+        <div class="week-day has-event">
+          <span class="week-day-name">พฤ</span>
+          <span class="week-day-num">29</span>
+          <div class="week-dot"></div>
+        </div>
+        <div class="week-day active has-event">
+          <span class="week-day-name">ศ</span>
+          <span class="week-day-num">30</span>
+          <div class="week-dot"></div>
+        </div>
+        <div class="week-day">
+          <span class="week-day-name">ส</span>
+          <span class="week-day-num">31</span>
+          <div class="week-dot"></div>
+        </div>
+        <div class="week-day">
+          <span class="week-day-name">อา</span>
+          <span class="week-day-num">1</span>
+          <div class="week-dot"></div>
+        </div>
+      </div>
+
+      <!-- Time Grid -->
+      <div class="time-grid" style="max-height:430px;overflow:hidden;">
+
+        <div class="time-row">
+          <span class="time-label">06:00</span>
+          <div class="time-slot"></div>
+        </div>
+
+        <div class="time-row">
+          <span class="time-label">07:00</span>
+          <div class="time-slot">
+            <!-- dim blue instead of green -->
+            <div class="time-block dim" style="height:44px;">
+              <div class="time-block-title">Morning Workout</div>
+              <div class="time-block-sub">07:00 — 07:45</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="time-row">
+          <span class="time-label">08:00</span>
+          <div class="time-slot"></div>
+        </div>
+
+        <div class="time-row" style="position:relative;">
+          <span class="time-label" style="color:var(--brand);font-weight:700;">09:00</span>
+          <div class="time-slot">
+            <div class="time-current" style="top:28px;"></div>
+            <div class="time-block blue" style="height:90px;top:30px;">
+              <div class="time-block-title">Norte App — Mockup Revision</div>
+              <div class="time-block-sub">09:00 — 11:00 · Product</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="time-row">
+          <span class="time-label">10:00</span>
+          <div class="time-slot"></div>
+        </div>
+
+        <div class="time-row">
+          <span class="time-label">11:00</span>
+          <div class="time-slot"></div>
+        </div>
+
+        <div class="time-row">
+          <span class="time-label">12:00</span>
+          <div class="time-slot">
+            <div class="time-block outline" style="height:44px;">
+              <div class="time-block-title">ตอบ Email sponsor</div>
+              <div class="time-block-sub">12:00 — 12:30 · P1</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="time-row">
+          <span class="time-label">13:00</span>
+          <div class="time-slot"></div>
+        </div>
+
+        <div class="time-row">
+          <span class="time-label">14:00</span>
+          <div class="time-slot">
+            <!-- solid blue instead of orange -->
+            <div class="time-block blue" style="height:44px;">
+              <div class="time-block-title">Review deck STS Q2</div>
+              <div class="time-block-sub">14:00 — 15:30 · Daisi</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Task Tray -->
+      <div class="task-tray">
+        <div class="tray-header">
+          <span class="tray-title">Unscheduled · 3</span>
+          <div class="tray-add">+</div>
+        </div>
+
+        <div class="tray-item">
+          <div class="tray-dot" style="background:var(--brand);"></div>
+          <span class="tray-text">เขียน OKR weekly update</span>
+          <span class="tray-badge area-green">Growth</span>
+        </div>
+
+        <div class="tray-item">
+          <div class="tray-dot" style="background:rgba(0,129,255,0.5);"></div>
+          <span class="tray-text">Post IG Lifebar</span>
+          <span class="tray-badge area-orange">Daisi</span>
+        </div>
+
+        <div class="tray-item">
+          <div class="tray-dot" style="background:var(--text-3);"></div>
+          <span class="tray-text">Sync Notion personal</span>
+          <span class="tray-badge area-purple">Personal</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H13v-4H7v4H4a1 1 0 01-1-1V9.5z"/></svg>
+        </span>
+        <span class="nav-label">Home</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M7 10l2.5 2.5L13 8"/></svg>
+        </span>
+        <span class="nav-label">Tasks</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v1.5m0 5V14m-4-4h1.5m5 0H14"/><circle cx="10" cy="10" r="2" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label">Norte</span>
+      </div>
+      <div class="nav-item active">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4m6-4v4"/></svg>
+        </span>
+        <span class="nav-label">Calendar</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label">OKR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================
+     SCREEN 4 — HOME LIGHT
+============================ -->
+<div class="screen-wrap">
+  <div class="screen-label">
+    <div class="screen-label-dot" style="background:#0081ff;"></div>
+    <span class="screen-label-text" style="color:#6699cc;">Screen 4 — Home (วันนี้) — Light Mode</span>
+  </div>
+
+  <div class="phone light">
+    <div class="notch" style="background:#f0f4fa;">
+      <div class="notch-camera" style="background:#c8cce0;"></div>
+    </div>
+
+    <div class="screen-content">
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time" style="color:var(--lm-text-1);">9:41</span>
+        <div class="status-icons">
+          <div class="status-wifi">
+            <div class="wifi-bar" style="height:4px;background:var(--lm-text-1);opacity:0.5;"></div>
+            <div class="wifi-bar" style="height:7px;background:var(--lm-text-1);opacity:0.5;"></div>
+            <div class="wifi-bar" style="height:10px;background:var(--lm-text-1);opacity:0.5;"></div>
+            <div class="wifi-bar" style="height:13px;background:var(--lm-text-1);opacity:0.5;"></div>
+          </div>
+          <div style="width:22px;height:11px;border-radius:3px;border:1.5px solid var(--lm-text-1);background:none;opacity:0.5;position:relative;">
+            <div style="position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:3px;height:6px;background:var(--lm-text-1);opacity:0.5;border-radius:0 2px 2px 0;"></div>
+            <div style="position:absolute;left:2px;top:2px;bottom:2px;right:6px;background:var(--lm-text-1);border-radius:1px;opacity:0.8;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Header -->
+      <div class="app-header">
+        <div class="logo-mark">
+          <div class="logo-gem">N</div>
+          <span class="logo-text" style="color:var(--lm-text-1);">Norte</span>
+        </div>
+        <div class="header-greeting">
+          <span class="greeting-main" style="color:var(--lm-text-1);">สวัสดีค่ะ คิม</span>
+          <span class="greeting-date" style="color:var(--lm-text-2);">ศุกร์ 30 พ.ค. 2569</span>
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <span class="section-label" style="margin-top:18px;color:var(--lm-text-2);">ภาพรวมวันนี้</span>
+      <div class="stats-bar">
+        <div class="stat-card urgent" style="background:var(--lm-card);border-color:var(--lm-border);box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span class="stat-num" style="color:var(--brand);">3</span>
+          <span class="stat-label" style="color:var(--lm-text-2);">ด่วนมาก</span>
+        </div>
+        <div class="stat-card soon" style="background:var(--lm-card);border-color:var(--lm-border);box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span class="stat-num" style="color:#6699bb;">7</span>
+          <span class="stat-label" style="color:var(--lm-text-2);">วันนี้</span>
+        </div>
+        <div class="stat-card total" style="background:var(--lm-card);border-color:var(--lm-border);box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+          <span class="stat-num" style="color:#99aabb;">18</span>
+          <span class="stat-label" style="color:var(--lm-text-2);">ทั้งหมด</span>
+        </div>
+      </div>
+
+      <!-- Morning Brief — Light -->
+      <div style="margin:0 20px 16px;background:linear-gradient(135deg,#0062cc 0%,#0081ff 60%,#339dff 100%);border-radius:16px;padding:16px 18px;position:relative;overflow:hidden;">
+        <!-- Circle decorations -->
+        <div style="position:absolute;right:-28px;top:-28px;width:100px;height:100px;border-radius:50%;border:1.5px solid rgba(255,255,255,0.10);pointer-events:none;"></div>
+        <div style="position:absolute;right:18px;bottom:-22px;width:56px;height:56px;border-radius:50%;border:1px solid rgba(255,255,255,0.07);pointer-events:none;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span style="font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:rgba(255,255,255,0.75);display:flex;align-items:center;gap:5px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8" fill="rgba(255,255,255,0.7)"><path d="M4 0.5l.65 2.2 2.35.3-1.7 1.6.4 2.3L4 5.7 2.3 6.9l.4-2.3L1 3l2.35-.3z"/></svg>
+            Morning Brief
+          </span>
+          <div style="width:20px;height:20px;background:rgba(255,255,255,0.15);border-radius:6px;display:flex;align-items:center;justify-content:center;color:white;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.5l3 3 3-3"/></svg>
+          </div>
+        </div>
+        <div style="font-size:15px;font-weight:700;color:white;margin-bottom:4px;">วันนี้มีงาน P1 ค้างอยู่ 3 อย่าง</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.65);">แนะนำ: เริ่มจาก mockup ก่อน deadline พรุ่งนี้</div>
+      </div>
+
+      <!-- Task Section — Light P1 -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin-bottom:10px;margin-top:20px;">
+        <span style="font-size:12px;font-weight:700;color:var(--lm-text-2);text-transform:uppercase;letter-spacing:0.1em;">ด่วนมาก — P1</span>
+        <span style="background:rgba(0,129,255,0.1);color:var(--brand);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid rgba(0,129,255,0.2);">3 งาน</span>
+      </div>
+
+      <div class="task-list">
+        <!-- P1 task 1 -->
+        <div style="background:var(--lm-card);border:1px solid var(--lm-border);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="width:20px;height:20px;border-radius:6px;border:1.5px solid var(--lm-border);flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--lm-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">ส่ง mockup blue direction ให้ทีม</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,129,255,0.08);color:var(--brand-dark);border:1px solid rgba(0,129,255,0.2);">Product</span>
+              <span style="font-size:10px;color:var(--lm-text-2);font-weight:500;">ครบ 18:00</span>
+            </div>
+          </div>
+          <div style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;background:var(--brand);color:white;flex-shrink:0;">P1</div>
+        </div>
+
+        <!-- P1 task 2 -->
+        <div style="background:var(--lm-card);border:1px solid var(--lm-border);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="width:20px;height:20px;border-radius:6px;border:1.5px solid var(--lm-border);flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--lm-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">Review deck STS Q2 ก่อนส่งลูกค้า</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,129,255,0.08);color:var(--brand-dark);border:1px solid rgba(0,129,255,0.2);">Daisi</span>
+              <span style="font-size:10px;color:var(--lm-text-2);font-weight:500;">ครบ 14:00</span>
+            </div>
+          </div>
+          <div style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;background:var(--brand);color:white;flex-shrink:0;">P1</div>
+        </div>
+
+        <!-- P1 task 3 -->
+        <div style="background:var(--lm-card);border:1px solid var(--lm-border);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="width:20px;height:20px;border-radius:6px;border:1.5px solid var(--lm-border);flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--lm-text-1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;">ตอบ email sponsor board game</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,129,255,0.08);color:var(--brand-dark);border:1px solid rgba(0,129,255,0.2);">Personal</span>
+              <span style="font-size:10px;color:var(--lm-text-2);font-weight:500;">ครบ 12:00</span>
+            </div>
+          </div>
+          <div style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;background:var(--brand);color:white;flex-shrink:0;">P1</div>
+        </div>
+      </div>
+
+      <!-- P2 tasks light -->
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:0 20px;margin:16px 0 10px;">
+        <span style="font-size:12px;font-weight:700;color:var(--lm-text-2);text-transform:uppercase;letter-spacing:0.1em;">วันนี้ — P2</span>
+        <span style="background:rgba(0,129,255,0.1);color:var(--brand);font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid rgba(0,129,255,0.2);">4 งาน</span>
+      </div>
+
+      <div class="task-list">
+        <!-- P2 task 1 -->
+        <div style="background:var(--lm-card);border:1px solid var(--lm-border);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="width:20px;height:20px;border-radius:6px;border:1.5px solid var(--lm-border);flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--lm-text-1);margin-bottom:4px;">เขียน OKR update สัปดาห์นี้</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,129,255,0.08);color:var(--brand-dark);border:1px solid rgba(0,129,255,0.2);">Growth</span>
+              <span style="font-size:10px;color:var(--lm-text-2);font-weight:500;">ทั้งวัน</span>
+            </div>
+          </div>
+          <div style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;background:rgba(0,129,255,0.1);color:var(--brand);border:1px solid rgba(0,129,255,0.25);flex-shrink:0;">P2</div>
+        </div>
+
+        <!-- P3 task 1 -->
+        <div style="background:var(--lm-card);border:1px solid var(--lm-border);border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+          <div style="width:20px;height:20px;border-radius:6px;border:1.5px solid var(--lm-border);flex-shrink:0;"></div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--lm-text-1);margin-bottom:4px;">Post Instagram Lifebar วันศุกร์</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:6px;background:rgba(0,129,255,0.08);color:var(--brand-dark);border:1px solid rgba(0,129,255,0.2);">Daisi</span>
+              <span style="font-size:10px;color:var(--lm-text-2);font-weight:500;">16:00</span>
+            </div>
+          </div>
+          <div style="width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;background:transparent;color:#99aabb;border:1px solid var(--lm-border);flex-shrink:0;">P3</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Nav — Light -->
+    <div class="bottom-nav" style="background:rgba(240,244,250,0.92);border-color:var(--lm-border);">
+      <div class="nav-item active">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L10 3l7 6.5V17a1 1 0 01-1 1H13v-4H7v4H4a1 1 0 01-1-1V9.5z"/></svg>
+        </span>
+        <span class="nav-label" style="color:var(--brand);">Home</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="14" height="14" rx="3"/><path d="M7 10l2.5 2.5L13 8"/></svg>
+        </span>
+        <span class="nav-label" style="color:var(--lm-text-2);">Tasks</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v1.5m0 5V14m-4-4h1.5m5 0H14"/><circle cx="10" cy="10" r="2" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label" style="color:var(--lm-text-2);">Norte</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M3 9h14M7 2v4m6-4v4"/></svg>
+        </span>
+        <span class="nav-label" style="color:var(--lm-text-2);">Calendar</span>
+      </div>
+      <div class="nav-item">
+        <span class="nav-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/><circle cx="10" cy="10" r="4"/><circle cx="10" cy="10" r="1.5" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <span class="nav-label" style="color:var(--lm-text-2);">OKR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div style="text-align:center;padding:40px 0 20px;">
+  <span style="font-size:11px;color:#2a2a35;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;">NORTE APP · V1 · 2026</span>
+</div>
+
+</body>
+</html>
