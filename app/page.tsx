@@ -1,12 +1,15 @@
 "use client";
 import { useState, useEffect, useCallback, useRef } from "react";
 import Nav, { Tab } from "./components/Nav";
+import KimChat from "./components/KimChat";
 import AddTaskModal from "./components/AddTaskModal";
 import TaskDetailModal from "./components/TaskDetailModal";
 import QuickActionsView from "./components/QuickActionsView";
 import WeekView from "./components/WeekView";
 import MonthView from "./components/MonthView";
 import DayView from "./components/DayView";
+import TimeBlockView from "./components/TimeBlockView";
+import WeekendScheduleView from "./components/WeekendScheduleView";
 import SettingsSheet from "./components/SettingsSheet";
 import FeedbackStrip from "./components/FeedbackStrip";
 import TodayView, { GCalEvent } from "./components/TodayView";
@@ -79,6 +82,7 @@ function Greeting() {
 const PAGE_LABELS: Record<Tab, string> = {
   home:     "◈  วันนี้",
   tasks:    "≡  งานทั้งหมด",
+  chat:     "🤖  คุยกับคิม",
   calendar: "⊞  ตารางงาน",
   okr:      "◎  เป้าหมาย & OKR",
 };
@@ -200,6 +204,8 @@ function SearchSheet({
   onClose: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [searchArea, setSearchArea] = useState<"all"|"sts"|"daisi"|"digital">("all");
+  const [searchP1, setSearchP1] = useState(false);
   useEffect(() => { setTimeout(() => inputRef.current?.focus(), 60); }, []);
 
   const allTasks = [
@@ -207,10 +213,12 @@ function SearchSheet({
     ...data.review, ...data.onhold,
   ];
   const q = query.trim().toLowerCase();
-  const results = q
+  const hasFilter = searchArea !== "all" || searchP1;
+  const results = q || hasFilter
     ? allTasks.filter(t =>
-        t.title.toLowerCase().includes(q) ||
-        (t.notes || "").toLowerCase().includes(q)
+        (searchArea === "all" || t.area === searchArea) &&
+        (!searchP1 || t.priority === "P1") &&
+        (!q || t.title.toLowerCase().includes(q) || (t.notes || "").toLowerCase().includes(q))
       )
     : [];
 
@@ -276,16 +284,48 @@ function SearchSheet({
             }}>ยกเลิก</button>
           )}
         </div>
+
+        {/* ── Filter chips ── */}
+        <div style={{ display: "flex", gap: 6, marginTop: 10, overflowX: "auto", paddingBottom: 2 }}>
+          {([
+            { id: "all",     label: "ทั้งหมด", color: "var(--text-2)"     },
+            { id: "sts",     label: "STS",     color: "var(--amber)"      },
+            { id: "daisi",   label: "Daisi",   color: "var(--warm-gold)"  },
+            { id: "digital", label: "Digital", color: "var(--steel-teal)" },
+          ] as { id: typeof searchArea; label: string; color: string }[]).map(f => {
+            const on = searchArea === f.id;
+            return (
+              <button key={f.id} onClick={() => setSearchArea(f.id)} style={{
+                flexShrink: 0, padding: "6px 12px", borderRadius: 9, cursor: "pointer",
+                border: `1.5px solid ${on ? f.color : "var(--border)"}`,
+                background: on ? f.color + "18" : "transparent",
+                color: on ? f.color : "var(--text-3)",
+                fontSize: 11, fontWeight: on ? 700 : 400, transition: "all 0.12s",
+              }}>
+                {f.label}
+              </button>
+            );
+          })}
+          <button onClick={() => setSearchP1(v => !v)} style={{
+            flexShrink: 0, padding: "6px 12px", borderRadius: 9, cursor: "pointer",
+            border: `1.5px solid ${searchP1 ? "var(--red)" : "var(--border)"}`,
+            background: searchP1 ? "rgba(255,82,82,0.12)" : "transparent",
+            color: searchP1 ? "var(--red)" : "var(--text-3)",
+            fontSize: 11, fontWeight: searchP1 ? 700 : 400, transition: "all 0.12s",
+          }}>
+            🚩 P1 เท่านั้น
+          </button>
+        </div>
       </div>
 
       {/* ── Results — scroll ── */}
       <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px 40px" }}>
-        {!q && (
+        {!q && !hasFilter && (
           <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-3)", fontSize: 13 }}>
             พิมพ์ชื่องานหรือ note เพื่อค้นหา
           </div>
         )}
-        {q && results.length === 0 && (
+        {(q || hasFilter) && results.length === 0 && (
           <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-3)", fontSize: 13 }}>
             ไม่พบงานที่ตรงกัน ✨
           </div>
@@ -293,7 +333,7 @@ function SearchSheet({
         {results.length > 0 && (
           <>
             <div style={{ fontSize: 10, color: "var(--text-3)", marginBottom: 12, fontWeight: 600, letterSpacing: "0.08em" }}>
-              พบ {results.length} รายการ
+              พบ {results.length} รายการ{hasFilter ? " (filtered)" : ""}
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {results.map(t => {
@@ -342,7 +382,7 @@ function SearchSheet({
 export default function Home() {
   const [tab, setTab] = useState<Tab>("home");
   const [areaFilter, setAreaFilter] = useState<"all"|"sts"|"daisi"|"digital">("all");
-  const [calView, setCalView] = useState<"agenda"|"week"|"month">("agenda");
+  const [calView, setCalView] = useState<"agenda"|"week"|"month"|"timeblock"|"weekend">("agenda");
   const [calDayReset, setCalDayReset] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [showSettings, setShowSettings] = useState(false);
@@ -541,12 +581,14 @@ export default function Home() {
 
         {/* Calendar sub-tab — pinned inside header so it never scrolls away */}
         {tab === "calendar" && (
-          <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
+          <div style={{ display: "flex", gap: 6, marginTop: 12, overflowX: "auto", paddingBottom: 2 }}>
             {([
-              { id: "agenda", label: "วันนี้"  },
-              { id: "week",   label: "สัปดาห์" },
-              { id: "month",  label: "เดือน"   },
-            ] as const).map(v => {
+              { id: "agenda",    label: "วันนี้"   },
+              { id: "week",      label: "สัปดาห์"  },
+              { id: "month",     label: "เดือน"    },
+              { id: "timeblock", label: "แผนงาน"   },
+              { id: "weekend",   label: "วีคเอนด์" },
+            ] as { id: "agenda"|"week"|"month"|"timeblock"|"weekend"; label: string }[]).map(v => {
               const on = calView === v.id;
               return (
                 <button key={v.id} onClick={() => { setCalView(v.id); if(v.id==="agenda") setCalDayReset(k=>k+1); }} style={{
@@ -589,6 +631,11 @@ export default function Home() {
             {/* Page label — hide for calendar/agenda and OKR (both handled in fixed header) */}
             {!(tab === "calendar" && calView === "agenda") && tab !== "okr" && (
               <PageLabel tab={tab} data={data} />
+            )}
+
+            {/* ── CHAT — คุยกับคิม ── */}
+            {tab === "chat" && (
+              <KimChat data={data} onClose={() => setTab("home")} inline />
             )}
 
             {/* ── HOME — วันนี้ ── */}
@@ -729,6 +776,41 @@ export default function Home() {
                     onTaskClick={openDetail}
                   />
                 )}
+
+                {/* TimeBlock view — แผนงานวันนี้ */}
+                {calView === "timeblock" && (
+                  <TimeBlockView
+                    urgent={data.urgent}
+                    soon={data.soon}
+                    normal={data.normal}
+                    view="today"
+                    onTaskClick={t => openDetail(t)}
+                  />
+                )}
+
+                {/* Weekend view — ตารางชีวิตวีคเอนด์ */}
+                {calView === "weekend" && (() => {
+                  const now = new Date();
+                  const dow = now.getDay(); // 0=Sun, 6=Sat
+                  // ถ้าวันนี้เป็นเสาร์หรืออาทิตย์ ใช้วันนี้ ไม่งั้นหาวันเสาร์ถัดไป
+                  let targetDate: Date;
+                  let day: "saturday" | "sunday";
+                  if (dow === 6) { targetDate = now; day = "saturday"; }
+                  else if (dow === 0) { targetDate = now; day = "sunday"; }
+                  else {
+                    const daysToSat = 6 - dow;
+                    targetDate = new Date(now.getTime() + daysToSat * 86400000);
+                    day = "saturday";
+                  }
+                  return (
+                    <WeekendScheduleView
+                      day={day}
+                      date={targetDate}
+                      tasks={[...data.urgent, ...data.soon, ...data.normal]}
+                      onTaskClick={openDetail}
+                    />
+                  );
+                })()}
               </>
             )}
 
