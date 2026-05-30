@@ -592,7 +592,7 @@ export default function Home() {
             </div>
           </div>
         ) : tab === "calendar" ? (
-          /* Calendar header — logo only (Day/Week toggle goes below) */
+          /* Calendar header — logo left + Day/Week toggle right (matches mockup Screen 3) */
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -600,12 +600,19 @@ export default function Home() {
               <span style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)", letterSpacing: "-0.02em" }}>Norte</span>
             </div>
             <div style={{ display: "flex", gap: 6 }}>
-              <button onClick={() => setShowSearch(true)} style={{ width: 32, height: 32, borderRadius: 10, cursor: "pointer", background: "var(--bg-card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                <SearchIcon size={15} color="var(--icon-tint)" />
-              </button>
-              <button onClick={() => setShowSettings(true)} style={{ width: 32, height: 32, borderRadius: 10, cursor: "pointer", background: "var(--bg-card)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}>
-                <GearIcon size={15} color="var(--icon-tint)" />
-              </button>
+              {(["agenda","week"] as const).map(v => {
+                const on = calView === v;
+                const label = v === "agenda" ? "Day" : "Week";
+                return (
+                  <button key={v} onClick={() => { setCalView(v); if(v==="agenda") setCalDayReset(k=>k+1); }} style={{
+                    padding: "6px 14px", borderRadius: 10, cursor: "pointer",
+                    border: `1px solid ${on ? "rgba(0,129,255,0.25)" : "var(--border)"}`,
+                    background: on ? "var(--brand-soft)" : "var(--bg-card)",
+                    color: on ? "var(--brand)" : "var(--text-2)",
+                    fontSize: 11, fontWeight: on ? 700 : 600,
+                  }}>{label}</button>
+                );
+              })}
             </div>
           </div>
         ) : (
@@ -613,47 +620,25 @@ export default function Home() {
         )}
 
         {/* Calendar header — matches mockup Screen 3 */}
-        {tab === "calendar" && (
-          <div style={{ marginTop: 10 }}>
-            {/* Primary: Day / Week / More toggle */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <div style={{ display: "flex", gap: 6 }}>
-                {([
-                  { id: "agenda",    label: "Day"      },
-                  { id: "week",      label: "Week"     },
-                  { id: "month",     label: "Month"    },
-                ] as { id: "agenda"|"week"|"month"|"timeblock"|"weekend"; label: string }[]).map(v => {
-                  const on = calView === v.id;
-                  return (
-                    <button key={v.id} onClick={() => { setCalView(v.id); if(v.id==="agenda") setCalDayReset(k=>k+1); }} style={{
-                      padding: "6px 14px", borderRadius: 10, cursor: "pointer",
-                      border: `1px solid ${on ? "rgba(0,129,255,0.25)" : "var(--border)"}`,
-                      background: on ? "var(--brand-soft)" : "var(--bg-card)",
-                      color: on ? "var(--brand)" : "var(--text-2)",
-                      fontSize: 11, fontWeight: on ? 700 : 600, transition: "all 0.12s",
-                    }}>{v.label}</button>
-                  );
-                })}
-              </div>
-              {/* More sub-views */}
-              <div style={{ display: "flex", gap: 5 }}>
-                {([
-                  { id: "timeblock", label: "แผนงาน"   },
-                  { id: "weekend",   label: "วีคเอนด์" },
-                ] as { id: "agenda"|"week"|"month"|"timeblock"|"weekend"; label: string }[]).map(v => {
-                  const on = calView === v.id;
-                  return (
-                    <button key={v.id} onClick={() => setCalView(v.id)} style={{
-                      padding: "6px 10px", borderRadius: 10, cursor: "pointer",
-                      border: `1px solid ${on ? "rgba(0,129,255,0.25)" : "var(--border)"}`,
-                      background: on ? "var(--brand-soft)" : "transparent",
-                      color: on ? "var(--brand)" : "var(--text-3)",
-                      fontSize: 11, fontWeight: on ? 700 : 400, transition: "all 0.12s",
-                    }}>{v.label}</button>
-                  );
-                })}
-              </div>
-            </div>
+        {tab === "calendar" && (calView === "month" || calView === "timeblock" || calView === "weekend") && (
+          /* Secondary strip — only shows when on a non-Day/Week view */
+          <div style={{ marginTop: 8, display: "flex", gap: 5 }}>
+            {([
+              { id: "month",     label: "Month"    },
+              { id: "timeblock", label: "แผนงาน"   },
+              { id: "weekend",   label: "วีคเอนด์" },
+            ] as { id: "agenda"|"week"|"month"|"timeblock"|"weekend"; label: string }[]).map(v => {
+              const on = calView === v.id;
+              return (
+                <button key={v.id} onClick={() => setCalView(v.id)} style={{
+                  padding: "5px 12px", borderRadius: 9, cursor: "pointer",
+                  border: `1px solid ${on ? "rgba(0,129,255,0.25)" : "var(--border)"}`,
+                  background: on ? "var(--brand-soft)" : "var(--bg-card)",
+                  color: on ? "var(--brand)" : "var(--text-3)",
+                  fontSize: 11, fontWeight: on ? 700 : 500,
+                }}>{v.label}</button>
+              );
+            })}
           </div>
         )}
       </div>

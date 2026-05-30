@@ -160,7 +160,7 @@ function OKRCardHeader({ icon, title, sub, pct, pctStatus }: {
           fontSize: 9, color: pctColor, display: "block", marginTop: 1,
           fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" as const,
         }}>
-          {pctStatus === "ontrack" ? "on track" : "ล้าหลัง"}
+          {pctStatus === "ontrack" ? "complete" : "ล้าหลัง"}
         </span>
       </div>
     </div>
@@ -261,6 +261,20 @@ function OKRTracker() {
 
   return (
     <>
+      {/* ── OKR Hero ── */}
+      <div style={{ padding: "4px 0 20px" }}>
+        <span style={{
+          fontSize: 10, fontWeight: 700, letterSpacing: "0.14em",
+          textTransform: "uppercase", color: "var(--brand)", marginBottom: 6, display: "block",
+        }}>Objectives &amp; Key Results</span>
+        <div style={{ fontSize: 30, fontWeight: 900, color: "var(--text-1)", letterSpacing: "-0.03em", lineHeight: 1.1, marginBottom: 4 }}>
+          OKR<br/>Q2 2569
+        </div>
+        <div style={{ fontSize: 13, color: "var(--text-3)", fontWeight: 400 }}>
+          พ.ค. — ก.ค. 2569 · {OKR_DAYS} วัน
+        </div>
+      </div>
+
       {/* ── Stats grid ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 20 }}>
         {[
