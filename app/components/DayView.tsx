@@ -24,6 +24,9 @@ const SCROLL_SPEED = 16;
 
 const THAI_DAYS   = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+// Mon-Sun order for week strip (index 0=Mon…6=Sun, maps to JS getDay() via WEEK_JS_DOW)
+const WEEK_SHORT = ["จ","อ","พ","พฤ","ศ","ส","อา"];
+const WEEK_JS_DOW = [1,2,3,4,5,6,0]; // JS day-of-week for each Mon…Sun slot
 // Norte v2 — all areas use brand blue system
 const AREA_COLOR: Record<string,string> = { sts:"var(--brand)", daisi:"var(--brand)", digital:"var(--brand)" };
 const AREA_FILL:     Record<string,string> = { sts:"rgba(0,129,255,0.18)", daisi:"rgba(0,129,255,0.18)", digital:"rgba(0,129,255,0.25)" };
@@ -458,17 +461,80 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
   /* ═══════════════ RENDER ═══════════════ */
   return (
     <div>
-      {/* ── Day nav — sticky ── */}
-      <div style={{display:"flex",alignItems:"center",gap:8,background:"var(--bg-base)",borderBottom:"1px solid var(--border)",position:"sticky",top:-16,zIndex:10,margin:"-16px -20px 8px",padding:"8px 20px"}}>
-        <button onClick={()=>setDayOff(v=>v-1)} style={{background:"none",border:"none",cursor:"pointer",padding:4,display:"flex",flexShrink:0}}><ChevronLeftIcon size={18} color="var(--text-3)"/></button>
-        <button onClick={()=>setDayOff(0)} style={{flex:1,textAlign:"center",background:"none",border:"none",cursor:dayOff!==0?"pointer":"default",padding:"4px 0"}}>
-          <div style={{fontSize:13,fontWeight:700,color:isToday?"var(--brand)":"var(--text-1)"}}>
-            {isToday?"วันนี้":dayOff===1?"พรุ่งนี้":dayOff===-1?"เมื่อวาน":dayLabel}
+      {/* ── Day nav ── */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"6px 0 14px"}}>
+        <button onClick={()=>setDayOff(v=>v-1)} style={{
+          width:36,height:36,background:"var(--bg-card)",border:"1px solid var(--border)",
+          borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",
+          color:"var(--text-2)",cursor:"pointer",flexShrink:0,
+        }}><ChevronLeftIcon size={16} color="var(--text-2)"/></button>
+
+        <button onClick={()=>setDayOff(0)} style={{textAlign:"center",background:"none",border:"none",cursor:dayOff!==0?"pointer":"default",padding:"0 8px",flex:1}}>
+          <div style={{fontSize:16,fontWeight:800,color:"var(--text-1)",letterSpacing:"-0.01em"}}>
+            {`${THAI_DAYS[curDay.getDay()]} ${curDay.getDate()} ${THAI_MONTHS[curDay.getMonth()]}.`}
           </div>
-          <div style={{fontSize:10,color:"var(--text-3)",marginTop:1}}>{dayLabel}</div>
+          <span style={{fontSize:11,color:"var(--text-3)",display:"block",marginTop:1}}>
+            {isToday?"วันนี้":dayOff===1?"พรุ่งนี้":dayOff===-1?"เมื่อวาน":""}{tray.length>0?` · ${tray.length} งาน`:""}
+          </span>
         </button>
-        <button onClick={()=>setDayOff(v=>v+1)} style={{background:"none",border:"none",cursor:"pointer",padding:4,display:"flex",flexShrink:0}}><ChevronRightIcon size={18} color="var(--text-3)"/></button>
+
+        <button onClick={()=>setDayOff(v=>v+1)} style={{
+          width:36,height:36,background:"var(--bg-card)",border:"1px solid var(--border)",
+          borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",
+          color:"var(--text-2)",cursor:"pointer",flexShrink:0,
+        }}><ChevronRightIcon size={16} color="var(--text-2)"/></button>
       </div>
+
+      {/* ── Week strip ── */}
+      {(() => {
+        // Find Monday of the week containing curDay
+        const dow = curDay.getDay();
+        const mondayOff = dow === 0 ? -6 : 1 - dow;
+        const weekStart = addD(curDay, mondayOff);
+        const taskDateSet = new Set(
+          all.map(t => t.due?.split("T")[0]).filter(Boolean)
+        );
+        return (
+          <div style={{display:"flex",justifyContent:"space-between",padding:"0 4px",marginBottom:12,gap:4}}>
+            {WEEK_SHORT.map((name, i) => {
+              const d = addD(weekStart, i);
+              const ds = dStr(d);
+              const isActive = ds === curDate;
+              const isToday_ = ds === todayStr;
+              const hasEvent = taskDateSet.has(ds);
+              const daysFromToday = Math.round((d.getTime() - today.getTime()) / 86400000);
+              return (
+                <button
+                  key={i}
+                  onClick={() => setDayOff(daysFromToday)}
+                  style={{
+                    flex:1, display:"flex", flexDirection:"column", alignItems:"center",
+                    gap:3, padding:"7px 4px 6px",
+                    background: isActive ? "var(--brand)" : isToday_ ? "var(--bg-card)" : "transparent",
+                    border: isActive ? "none" : isToday_ ? "1px solid var(--border)" : "none",
+                    borderRadius:11, cursor:"pointer",
+                    transition:"background 0.15s",
+                  }}>
+                  <span style={{
+                    fontSize:9, fontWeight:700, letterSpacing:"0.05em",
+                    color: isActive ? "rgba(255,255,255,0.75)" : "var(--text-3)",
+                  }}>{name}</span>
+                  <span style={{
+                    fontSize:15, fontWeight:700, lineHeight:1,
+                    color: isActive ? "#fff" : isToday_ ? "var(--brand)" : "var(--text-2)",
+                  }}>{d.getDate()}</span>
+                  <div style={{
+                    width:4, height:4, borderRadius:"50%",
+                    background: isActive
+                      ? (hasEvent ? "rgba(255,255,255,0.55)" : "transparent")
+                      : (hasEvent ? "var(--brand)" : "transparent"),
+                  }}/>
+                </button>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* ── Grid ── */}
       <div style={{background:"var(--bg-card)",border:`2px solid ${draggingOffGrid?"var(--red)":activeDrag?.source==="tray"?"var(--brand)":"var(--border)"}`,borderRadius:14,overflow:"hidden",marginBottom:12,transition:"border-color 0.12s"}}>

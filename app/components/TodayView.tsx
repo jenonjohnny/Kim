@@ -480,14 +480,13 @@ export default function TodayView({
         ].map(s => (
           <div key={s.label} style={{
             background: "var(--bg-card)", border: "1px solid var(--border)",
-            borderRadius: 16, padding: "14px 12px",
-            display: "flex", flexDirection: "column", gap: 2,
-            position: "relative", overflow: "hidden",
+            borderRadius: 14, padding: "14px 10px",
+            display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
+            textAlign: "center",
           }}>
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.barColor, borderRadius: "16px 16px 0 0" }} />
-            <div style={{ marginBottom: 5, opacity: 0.6 }}>{s.icon(s.color)}</div>
-            <div style={{ fontSize: 32, fontWeight: 800, color: s.color, lineHeight: 1, letterSpacing: "-0.03em" }}>{s.n}</div>
-            <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 500, marginTop: 1 }}>{s.label}</div>
+            <div style={{ marginBottom: 4 }}>{s.icon(s.color)}</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: s.color, lineHeight: 1, letterSpacing: "-0.02em", marginBottom: 4 }}>{s.n}</div>
+            <div style={{ fontSize: 9, color: "var(--text-3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{s.label}</div>
           </div>
         ))}
       </div>
