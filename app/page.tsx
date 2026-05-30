@@ -33,53 +33,60 @@ const CARD = {
   border: "1px solid var(--border)",
 } as const;
 
-/* ─── Greeting header ─── */
-function Greeting() {
-  const h = new Date().getHours();
-  const greeting = h < 12 ? "อรุณสวัสดิ์ค่ะ" : h < 17 ? "สวัสดียามบ่ายค่ะ" : "สวัสดียามเย็นค่ะ";
+/* ─── Greeting header — Norte layout ─── */
+function Greeting({ onSearch, onSettings }: { onSearch: () => void; onSettings: () => void }) {
   const now = new Date();
   const dateStr = `${THAI_DAYS[now.getDay()]} ${now.getDate()} ${THAI_MONTHS[now.getMonth()]} ${now.getFullYear() + 543}`;
   const [name, setName] = useState(() =>
     typeof window !== "undefined" ? (localStorage.getItem("profile_name") || "คิม") : "คิม"
   );
-  // อัปเดตชื่อทันทีเมื่อเปลี่ยนใน Settings
   useEffect(() => {
     const handler = () => setName(localStorage.getItem("profile_name") || "คิม");
     window.addEventListener("profile-name-change", handler);
     return () => window.removeEventListener("profile-name-change", handler);
   }, []);
+
   return (
-    <div>
-      {/*
-        ── HEADER BRAND ROW ──
-        เปลี่ยนโลโก้: swap /public/logo-mark.png (cropped, no padding)
-        ขนาด Lock: height 22px — อย่าแก้ CSS, swap ไฟล์แทน
-        เปลี่ยนชื่อ: แก้ text ด้านล่างได้เลย
-      */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      {/* Left — logo + wordmark */}
+      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo-white.png"
-          alt="Norte"
-          style={{ height: 24, width: "auto", flexShrink: 0 }}
-        />
-        <span style={{ fontSize: 18, fontWeight: 800, color: "var(--text-1)", letterSpacing: "-0.02em" }}>
-          Norte
-        </span>
+        <img src="/logo-white.png" alt="Norte" style={{ height: 26, width: "auto", flexShrink: 0 }} />
+        <span style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)", letterSpacing: "-0.02em" }}>Norte</span>
       </div>
-      <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.02em" }}>{greeting}</div>
-      <div style={{ fontSize: 13, color: "var(--text-2)", marginTop: 6 }}>{name} · {dateStr}</div>
+
+      {/* Right — greeting + date + actions */}
+      <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: 2, alignItems: "flex-end" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-1)" }}>สวัสดีค่ะ {name}</span>
+          <button onClick={onSearch} style={{
+            width: 32, height: 32, borderRadius: 10, cursor: "pointer",
+            background: "var(--bg-card)", border: "1px solid var(--border)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+          }}>
+            <SearchIcon size={15} color="var(--icon-tint)" />
+          </button>
+          <button onClick={onSettings} style={{
+            width: 32, height: 32, borderRadius: 10, cursor: "pointer",
+            background: "var(--bg-card)", border: "1px solid var(--border)",
+            display: "flex", alignItems: "center", justifyContent: "center", padding: 0,
+          }}>
+            <GearIcon size={15} color="var(--icon-tint)" />
+          </button>
+        </div>
+        <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 400 }}>{dateStr}</span>
+      </div>
     </div>
   );
 }
 
 /* ─── Page label — เหมือนกันทุกแท็บ ─── */
 const PAGE_LABELS: Record<Tab, string> = {
-  home:     "◈  วันนี้",
-  tasks:    "≡  งานทั้งหมด",
-  chat:     "🤖  คุยกับคิม",
-  calendar: "⊞  ตารางงาน",
-  okr:      "◎  เป้าหมาย & OKR",
+  home:     "วันนี้",
+  tasks:    "งานทั้งหมด",
+  chat:     "Norte AI",
+  calendar: "ตารางงาน",
+  okr:      "เป้าหมาย & OKR",
 };
 
 function PageLabel({ tab, data }: { tab: Tab; data: TaskData }) {
@@ -96,10 +103,10 @@ function PageLabel({ tab, data }: { tab: Tab; data: TaskData }) {
       </span>
       {tab === "home" && (
         <span style={{ fontSize: 10, color: "var(--text-3)" }}>
-          <span style={{ color: "var(--red)", fontWeight: 700 }}>{data.urgent.length}</span>
+          <span style={{ color: "#ff3b30", fontWeight: 700 }}>{data.urgent.length}</span>
           {" "}ด่วน ·{" "}
-          <span style={{ color: "var(--amber)", fontWeight: 700 }}>{data.soon.length}</span>
-          {" "}ใกล้มา ·{" "}
+          <span style={{ color: "#ff9500", fontWeight: 700 }}>{data.soon.length}</span>
+          {" "}วันนี้ ·{" "}
           <span style={{ fontWeight: 600 }}>{data.total}</span>
           {" "}งาน
         </span>
@@ -122,7 +129,7 @@ function PullSpinner({ pct, ready }: { pct: number; ready: boolean }) {
   const C = 2 * Math.PI * R; // circumference ≈ 62.8
   const dash = pct * C;
   const gap  = C - dash;
-  const color = ready ? "var(--amber)" : "var(--amber)";
+  const color = ready ? "var(--brand)" : "var(--brand)";
 
   return (
     <svg
@@ -182,9 +189,13 @@ function LoadingState() {
 function EmptyState() {
   return (
     <div style={{ textAlign: "center", padding: "60px 0" }}>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>✨</div>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.35}>
+          <circle cx="24" cy="24" r="20"/><path d="M16 24l6 6 10-12"/>
+        </svg>
+      </div>
       <div style={{ color: "var(--text-2)", fontSize: 16, fontWeight: 600 }}>ไม่มีงานค้างค่ะ</div>
-      <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 8 }}>คิมภูมิใจในตัวเจ้านายมากเลย</div>
+      <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 8 }}>เยี่ยมมาก ทำได้ครบหมดแล้ว</div>
     </div>
   );
 }
@@ -224,7 +235,7 @@ function SearchSheet({
     return (
       <span>
         {text.slice(0, idx)}
-        <mark style={{ background: "rgba(255,185,0,0.3)", color: "inherit", borderRadius: 3 }}>
+        <mark style={{ background: "rgba(0,129,255,0.25)", color: "inherit", borderRadius: 3 }}>
           {text.slice(idx, idx + q.length)}
         </mark>
         {text.slice(idx + q.length)}
@@ -251,7 +262,7 @@ function SearchSheet({
           display: "flex", alignItems: "center", gap: 10,
           background: "var(--bg-card)", borderRadius: 14,
           padding: "11px 14px",
-          border: `1.5px solid ${query ? "rgba(255,185,0,0.45)" : "var(--border)"}`,
+          border: `1.5px solid ${query ? "rgba(0,129,255,0.45)" : "var(--border)"}`,
           transition: "border 0.15s",
         }}>
           <SearchIcon size={16} color="var(--text-3)" />
@@ -522,51 +533,22 @@ export default function Home() {
       userSelect: "none", WebkitUserSelect: "none",
     } as React.CSSProperties}>
 
-      {/* Amber top accent */}
+      {/* Norte blue top glow */}
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0,
         height: 1, zIndex: 50,
-        background: "linear-gradient(90deg, transparent, var(--amber) 50%, transparent)",
-        opacity: 0.6,
+        background: "linear-gradient(90deg, transparent, var(--brand) 50%, transparent)",
+        opacity: 0.5,
       }} />
 
-      {/* ── Header — flex-shrink:0 ── */}
+      {/* ── Header ── */}
       <div style={{
         flexShrink: 0, zIndex: 30,
         background: "var(--bg-base)",
         padding: "calc(env(safe-area-inset-top) + 14px) 20px 12px",
         borderBottom: "1px solid var(--border-soft)",
       }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Greeting />
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {/* Feedback */}
-            <FeedbackStrip compact />
-            {/* Search */}
-            <button
-              onClick={() => setShowSearch(true)}
-              style={{
-                width: 38, height: 38, borderRadius: 12, cursor: "pointer",
-                background: "var(--bg-card)", border: "1px solid var(--border)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                padding: 0,
-              }}
-            >
-              <SearchIcon size={17} color="var(--icon-tint)" />
-            </button>
-            {/* Settings */}
-            <button
-              onClick={() => setShowSettings(true)}
-              style={{
-                ...CARD, width: 38, height: 38, cursor: "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                padding: 0,
-              }}
-            >
-              <GearIcon size={17} color="var(--icon-tint)" />
-            </button>
-          </div>
-        </div>
+        <Greeting onSearch={() => setShowSearch(true)} onSettings={() => setShowSettings(true)} />
         {/* OKR label — pinned inside header so it never scrolls away */}
         {tab === "okr" && data && (
           <div style={{ marginTop: 10, borderTop: "1px solid var(--border-soft)", paddingTop: 10 }}>
@@ -587,11 +569,11 @@ export default function Home() {
               const on = calView === v.id;
               return (
                 <button key={v.id} onClick={() => { setCalView(v.id); if(v.id==="agenda") setCalDayReset(k=>k+1); }} style={{
-                  flexShrink: 0, padding: "7px 16px", borderRadius: 10, cursor: "pointer",
-                  border: `1.5px solid ${on ? "var(--amber)" : "var(--border)"}`,
+                  flexShrink: 0, padding: "6px 14px", borderRadius: 10, cursor: "pointer",
+                  border: `1.5px solid ${on ? "var(--brand)" : "var(--border)"}`,
                   background: on ? "var(--brand-soft)" : "transparent",
-                  color: on ? "var(--amber)" : "var(--text-3)",
-                  fontSize: 13, fontWeight: on ? 700 : 400, transition: "all 0.12s",
+                  color: on ? "var(--brand)" : "var(--text-3)",
+                  fontSize: 12, fontWeight: on ? 700 : 400, transition: "all 0.12s",
                 }}>
                   {v.label}
                 </button>
@@ -690,16 +672,16 @@ export default function Home() {
                 </div>
 
                 {/* ── P1 → P4 sections ── */}
-                <Section icon={<FlagIcon size={13} color="var(--red)" />} label="P1 · ทำทันที" count={p1.length}
-                  color="var(--red)" bg="var(--red-soft)"
+                <Section icon={<FlagIcon size={13} color="#ff3b30" />} label="P1 · ทำทันที" count={p1.length}
+                  color="#ff3b30" bg="rgba(255,59,48,0.08)"
                   tasks={p1} onDone={markDone} onTaskClick={openDetail}
                   defaultOpen={true} limit={20} />
-                <Section icon={<DotIcon size={9} color="#e07840" />} label="P2 · มอบหมาย" count={p2.length}
-                  color="#e07840" bg="rgba(224,120,64,0.08)"
+                <Section icon={<DotIcon size={9} color="#ff9500" />} label="P2 · มอบหมาย" count={p2.length}
+                  color="#ff9500" bg="rgba(255,149,0,0.08)"
                   tasks={p2} onDone={markDone} onTaskClick={openDetail}
                   defaultOpen={true} limit={20} />
-                <Section icon={<DotIcon size={9} color="var(--amber)" />} label="P3 · วางแผน" count={p3.length}
-                  color="var(--amber)" bg="var(--brand-soft)"
+                <Section icon={<DotIcon size={9} color="var(--brand)" />} label="P3 · วางแผน" count={p3.length}
+                  color="var(--brand)" bg="var(--brand-soft)"
                   tasks={p3} onDone={markDone} onTaskClick={openDetail}
                   defaultOpen={false} limit={20} />
                 <Section icon={<ArchiveIcon size={13} color="var(--text-2)" />} label="P4 · ตัดออก/รอ" count={p4.length}
@@ -823,11 +805,11 @@ export default function Home() {
           onClick={() => setShowAdd(true)}
           style={{
             width: 52, height: 52, borderRadius: "50%",
-            background: "var(--amber)", border: "none",
-            color: "#000", fontSize: 28, fontWeight: 400, cursor: "pointer",
+            background: "var(--brand)", border: "none",
+            color: "#fff", fontSize: 28, fontWeight: 400, cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
             lineHeight: 1, paddingBottom: 2,
-            boxShadow: "0 4px 24px rgba(255,185,0,0.35)",
+            boxShadow: "0 4px 24px rgba(0,129,255,0.40)",
           }}
         >+</button>
       </div>
