@@ -198,13 +198,19 @@ function TaskRow({
     if (loading || done) return;
     try { navigator.vibrate(18); } catch {}
     setLoading(true);
-    await fetch(`/api/tasks/${task.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Done" }),
-    });
-    setDone(true);
-    setTimeout(() => onDone(task.id), 320);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Done" }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setDone(true);
+      setTimeout(() => onDone(task.id), 320);
+    } catch (err) {
+      console.error("handleDone failed:", err);
+      setLoading(false); // unblock button so user can retry
+    }
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -415,13 +421,19 @@ function TodoItem({
     if (loading || done) return;
     try { navigator.vibrate(18); } catch {}
     setLoading(true);
-    await fetch(`/api/tasks/${task.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Done" }),
-    });
-    setDone(true);
-    setTimeout(() => onDone(task.id), 280);
+    try {
+      const res = await fetch(`/api/tasks/${task.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Done" }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setDone(true);
+      setTimeout(() => onDone(task.id), 280);
+    } catch (err) {
+      console.error("handleDone failed:", err);
+      setLoading(false);
+    }
   };
 
   const onTouchStart = (e: React.TouchEvent) => {
@@ -1135,10 +1147,18 @@ export default function Home() {
 
   const fetchTasks = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
-    const res = await fetch("/api/tasks", { cache: "no-store" });
-    setData(await res.json());
-    setRefreshed(new Date());
-    if (!silent) setLoading(false);
+    try {
+      const res = await fetch("/api/tasks", { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setData(json);
+      setRefreshed(new Date());
+    } catch (err) {
+      console.error("fetchTasks failed:", err);
+      // silent refresh failures are ignored; initial load shows stale/empty gracefully
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -1193,12 +1213,19 @@ export default function Home() {
 
   const markDone = useCallback(async (id: string) => {
     removeTask(id);
-    await fetch(`/api/tasks/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: "Done" }),
-    });
-  }, [removeTask]);
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "Done" }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    } catch (err) {
+      console.error("markDone failed:", err);
+      // Re-fetch so the task reappears if PATCH failed
+      fetchTasks(true);
+    }
+  }, [removeTask, fetchTasks]);
 
   const addTask = (task: Task) =>
     setData(prev => prev ? { ...prev, normal: [task, ...prev.normal], total: prev.total + 1 } : prev);

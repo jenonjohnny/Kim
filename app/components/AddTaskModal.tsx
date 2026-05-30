@@ -114,14 +114,15 @@ export default function AddTaskModal({
     const pins = getPinnedAreaIds();
     setPinned(pins);
     fetch("/api/areas")
-      .then(r => r.json())
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then(d => {
         const all: AreaItem[] = d.areas || [];
         const visibleIds = getVisibleAreaIds(all);
         const visible = sortAreas(all.filter(a => visibleIds.includes(a.id)), pins);
         setAreas(visible);
         if (visible.length > 0) setAreaId(visible[0].id);
-      });
+      })
+      .catch(err => console.error("areas fetch failed:", err));
   }, []);
 
   const handlePin = (id: string) => {
@@ -130,25 +131,35 @@ export default function AddTaskModal({
     setAreas(prev => sortAreas(prev, next));
   };
 
+  const [submitError, setSubmitError] = useState(false);
+
   const submit = async () => {
-    if (!title.trim()) return;
+    if (!title.trim() || loading) return;
     setLoading(true);
-    const { priority } = quadrantToNotion(quadrant);
-    const res = await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title:  title.trim(),
-        notes:  notes.trim() || undefined,
-        due:    due || undefined,
-        endDue: endDue || undefined,
-        areaId: areaId || undefined,
-        priority,
-      }),
-    });
-    const task = await res.json();
-    onAdd(task);
-    onClose();
+    setSubmitError(false);
+    try {
+      const { priority } = quadrantToNotion(quadrant);
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title:  title.trim(),
+          notes:  notes.trim() || undefined,
+          due:    due || undefined,
+          endDue: endDue || undefined,
+          areaId: areaId || undefined,
+          priority,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const task = await res.json();
+      onAdd(task);
+      onClose();
+    } catch (err) {
+      console.error("AddTaskModal submit failed:", err);
+      setSubmitError(true);
+      setLoading(false);
+    }
   };
 
   const selectedArea = areas.find(a => a.id === areaId);
@@ -265,6 +276,11 @@ export default function AddTaskModal({
         </div>
 
         {/* Action buttons */}
+        {submitError && (
+          <div style={{ fontSize: 12, color: "var(--red)", marginBottom: 8, textAlign: "center" }}>
+            ⚠ บันทึกไม่สำเร็จ กรุณาลองอีกครั้งค่ะ
+          </div>
+        )}
         <div style={{ display: "flex", gap: 10 }}>
           <button onClick={onClose} style={{
             flex: 1, padding: "14px 0", borderRadius: 12,

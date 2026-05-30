@@ -54,13 +54,19 @@ function parseTime(due:string):number|null {
   return (min>=H_START*60&&min<H_END*60) ? min : null;
 }
 
-async function patchTime(id:string, day:string, start:number, dur:number) {
-  await fetch(`/api/tasks/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ due:`${day}T${fmt(start)}:00`, endDue:`${day}T${fmt(start+dur)}:00` }) });
+async function patchTime(id:string, day:string, start:number, dur:number):Promise<boolean> {
+  try {
+    const res=await fetch(`/api/tasks/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ due:`${day}T${fmt(start)}:00`, endDue:`${day}T${fmt(start+dur)}:00` }) });
+    return res.ok;
+  } catch { return false; }
 }
-async function clearTime(id:string) {
-  await fetch(`/api/tasks/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ due:null }) });
+async function clearTime(id:string):Promise<boolean> {
+  try {
+    const res=await fetch(`/api/tasks/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ due:null }) });
+    return res.ok;
+  } catch { return false; }
 }
 
 /* ── Overlap layout ── */

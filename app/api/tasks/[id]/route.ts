@@ -34,7 +34,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   if (body.due !== undefined)
     properties["Due Date"] = body.due
-      ? { date: { start: body.due, end: body.endDue ?? null } }
+      ? { date: { start: body.due, end: body.endDue !== undefined ? (body.endDue || null) : null } }
       : { date: null };
 
   if (body.area !== undefined) {

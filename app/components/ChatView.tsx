@@ -44,8 +44,10 @@ export default function ChatView({ tasks }: { tasks: TaskData | null }) {
           sessionId: sessionId.current,
         }),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setMessages(prev => [...prev, { role: "assistant", content: data.content }]);
+      const reply = data.content ?? "ขอโทษค่ะ เกิดข้อผิดพลาด ลองอีกครั้งนะคะ";
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: "assistant", content: "ขอโทษค่ะ เกิดข้อผิดพลาด ลองอีกครั้งนะคะ" }]);
     }

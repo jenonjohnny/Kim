@@ -33,12 +33,17 @@ interface Props {
   onDone: (id: string) => void;
 }
 
-async function patchTask(id: string, body: Record<string, unknown>) {
-  await fetch(`/api/tasks/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+async function patchTask(id: string, body: Record<string, unknown>): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 export default function TaskDetailModal({ task, onClose, onDone }: Props) {
@@ -48,7 +53,7 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
   const [notes,    setNotes]    = useState(task.notes || "");
   const [title,    setTitle]    = useState(task.title);
   const [due,      setDue]      = useState(task.due || "");
-  const [endDue,   setEndDue]   = useState("");
+  const [endDue,   setEndDue]   = useState(task.endDue || "");
   const [area,     setArea]     = useState<string>(task.area || "sts");
 
   const [editQ,   setEditQ]   = useState(false);
@@ -75,47 +80,53 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
 
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 1800); };
 
+  const [saveError, setSaveError] = useState(false);
+  const flashError = () => { setSaveError(true); setTimeout(() => setSaveError(false), 2500); };
+
   const changeQuadrant = async (q: Quadrant) => {
     setQuadrant(q); setEditQ(false);
     setSaving("priority");
-    await patchTask(task.id, { priority: quadrantToNotion(q).priority });
-    setSaving(null); flash();
+    const ok = await patchTask(task.id, { priority: quadrantToNotion(q).priority });
+    setSaving(null); ok ? flash() : (setQuadrant(initQ), flashError());
   };
 
   const changeStatus = async (s: string) => {
     setStatus(s);
     setSaving("status");
-    await patchTask(task.id, { status: s });
-    setSaving(null); flash();
+    const ok = await patchTask(task.id, { status: s });
+    setSaving(null); ok ? flash() : (setStatus(task.status), flashError());
   };
 
   const changeArea = async (a: string) => {
     setArea(a);
     setSaving("area");
-    await patchTask(task.id, { area: a });
-    setSaving(null); flash();
+    const ok = await patchTask(task.id, { area: a });
+    setSaving(null); ok ? flash() : (setArea(task.area || "sts"), flashError());
   };
 
   const saveNotes = async () => {
     if (notes === (task.notes || "")) return;
     setSaving("notes");
-    await patchTask(task.id, { notes });
-    setSaving(null); flash();
+    const ok = await patchTask(task.id, { notes });
+    setSaving(null); ok ? flash() : flashError();
   };
 
   const saveTitle = async () => {
     const trimmed = title.trim();
     if (!trimmed || trimmed === task.title) { setTitle(task.title); return; }
     setSaving("title");
-    await patchTask(task.id, { title: trimmed });
-    setSaving(null); flash();
+    const ok = await patchTask(task.id, { title: trimmed });
+    setSaving(null); ok ? flash() : (setTitle(task.title), flashError());
   };
 
   const saveDue = async (newDue: string, newEnd: string) => {
     setSaving("due");
-    // Send end date if set, otherwise start date; empty string = clear
-    await patchTask(task.id, { due: newEnd || newDue || null });
-    setSaving(null); flash();
+    // Always send both due and endDue to avoid wiping the end date (bug C4/B2)
+    const ok = await patchTask(task.id, {
+      due: newDue || null,
+      endDue: newEnd || null,
+    });
+    setSaving(null); ok ? flash() : flashError();
   };
 
   const handleDuePick = (newStart: string) => {
@@ -206,9 +217,9 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
             )}
 
             {/* Save indicator */}
-            {(saving || saved) && (
-              <span style={{ fontSize: 10, color: saving ? "var(--text-3)" : "var(--amber)", marginLeft: "auto" }}>
-                {saving ? "กำลังบันทึก..." : "✓ Saved"}
+            {(saving || saved || saveError) && (
+              <span style={{ fontSize: 10, color: saving ? "var(--text-3)" : saveError ? "var(--red)" : "var(--amber)", marginLeft: "auto" }}>
+                {saving ? "กำลังบันทึก..." : saveError ? "⚠ บันทึกไม่สำเร็จ" : "✓ Saved"}
               </span>
             )}
           </div>

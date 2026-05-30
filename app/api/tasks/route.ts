@@ -74,8 +74,9 @@ export async function GET() {
   const review  = all.filter((t: any) => t.status === "Waiting");
   const active  = all.filter((t: any) => t.status !== "Waiting" && t.status !== "On Hold" && t.status !== "Note");
 
-  const urgent  = active.filter((t: any) => t.due && t.due <= today);
-  const soon    = active.filter((t: any) => t.due && t.due > today && t.due <= in3days);
+  // Use date-part only for comparison to avoid UTC vs Bangkok timezone mismatch
+  const urgent  = active.filter((t: any) => t.due && t.due.split("T")[0] <= today);
+  const soon    = active.filter((t: any) => t.due && t.due.split("T")[0] > today && t.due.split("T")[0] <= in3days);
   const normal  = active.filter((t: any) => !t.due || t.due > in3days);
 
   return NextResponse.json({ urgent, soon, normal, review, onhold, events, total: active.length });
