@@ -67,7 +67,7 @@ function smartSchedule(tasks: Task[], nowMin: number): TimeBlock[] {
   const dayStart  = Math.max(START_HOUR * 60, nowMin);
 
   // ── Fixed blocks: Lunch + Wednesday Team Lead ──
-  blocks.push({ id: "lunch", title: "🍱 พักกลางวัน", start: LUNCH_START, duration: LUNCH_END - LUNCH_START, category: "วันหยุด" });
+  blocks.push({ id: "lunch", title: "พักกลางวัน", start: LUNCH_START, duration: LUNCH_END - LUNCH_START, category: "วันหยุด" });
   if (isWed) {
     blocks.push({ id: "team-lead", title: "Team Lead Weekly", start: 10 * 60 + 30, duration: 60, category: "งาน" });
   }
@@ -252,11 +252,15 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
   if (blocks.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "60px 0" }}>
-        <div style={{ fontSize: 36, marginBottom: 12 }}>📭</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 12 }}>
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="var(--text-3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="4" y="8" width="28" height="22" rx="3"/><path d="M4 15h28M12 8V4M24 8V4M12 22h8"/>
+          </svg>
+        </div>
         <div style={{ color: "var(--text-2)", fontSize: 15, fontWeight: 600 }}>
           {isToday ? "ไม่มีงานเหลือวันนี้แล้วค่ะ" : "พรุ่งนี้ยังไม่มีงานค่ะ"}
         </div>
-        <div style={{ color: "var(--text-3)", fontSize: 12, marginTop: 6 }}>🌿</div>
+        <div style={{ color: "var(--text-3)", fontSize: 12, marginTop: 6 }}>พักผ่อนได้เลยค่ะ</div>
       </div>
     );
   }
@@ -266,7 +270,7 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
       return (
         <div style={{ flex: 1, background: "var(--bg-card)", border: "1px solid var(--border)", borderRadius: 16, padding: "12px 14px" }}>
           <div style={{ fontSize: 9, color: "var(--text-3)", fontWeight: 700, marginBottom: 4 }}>ตอนนี้</div>
-          <div style={{ fontSize: 13, color: "var(--text-3)" }}>ช่วงว่าง 🌿</div>
+          <div style={{ fontSize: 13, color: "var(--text-3)" }}>ช่วงว่าง</div>
         </div>
       );
     }
@@ -276,7 +280,7 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
           <div style={{ fontSize: 9, color: "var(--text-3)", fontWeight: 700, marginBottom: 4 }}>
             {side === "left" ? (isToday ? "ตอนนี้" : "งานแรก") : "ถัดไป"}
           </div>
-          <div style={{ fontSize: 13, color: "var(--text-3)" }}>หมดงานแล้ว 🎉</div>
+          <div style={{ fontSize: 13, color: "var(--text-3)" }}>หมดงานแล้ว</div>
         </div>
       );
     }
@@ -315,7 +319,7 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
                     · {minsLeft(block.start + block.duration, nowMin)}
                   </span>}
               </>
-            : <>{minToTime(block.start)} น. · {s.emoji} {block.category}</>
+            : <>{minToTime(block.start)} น. · {block.category}</>
           }
         </div>
       </div>
@@ -337,7 +341,7 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
           {isToday
             ? remainingCount > 0
               ? `${remainingCount} งานเหลือวันนี้ · เริ่มจาก ${minToTime(scheduleStart)} น.`
-              : "หมดงานวันนี้แล้ว 🎉"
+              : "หมดงานวันนี้แล้ว"
             : `${taskBlocks.length} งาน · พรุ่งนี้`}
         </span>
         <span style={{ color: "var(--text-3)" }}>กดบล็อกเพื่อดูรายละเอียด</span>
@@ -407,7 +411,7 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
                 background: isDone
                   ? "var(--bg-raised)"
                   : isFixed
-                    ? "repeating-linear-gradient(135deg, rgba(51,92,103,0.08) 0px, rgba(51,92,103,0.08) 4px, transparent 4px, transparent 10px)"
+                    ? "repeating-linear-gradient(135deg, rgba(0,129,255,0.08) 0px, rgba(0,129,255,0.08) 4px, transparent 4px, transparent 10px)"
                     : s.bg,
                 border:     `1px solid ${isDone ? "var(--border-soft)" : isFixed ? "var(--border)" : s.color + "30"}`,
                 borderLeft: `3px solid ${isDone ? "var(--border)" : isFixed ? "var(--brand)" : isCurrent ? s.color : s.color + "90"}`,

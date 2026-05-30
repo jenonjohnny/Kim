@@ -15,8 +15,8 @@ function MiniToggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
       onClick={e => { e.preventDefault(); e.stopPropagation(); onToggle(); }}
       style={{
         width: 38, height: 22, borderRadius: 11, flexShrink: 0, cursor: "pointer",
-        background: on ? "var(--amber)" : "var(--bg-raised)",
-        border: `1.5px solid ${on ? "var(--amber)" : "var(--border)"}`,
+        background: on ? "var(--brand)" : "var(--bg-raised)",
+        border: `1.5px solid ${on ? "var(--brand)" : "var(--border)"}`,
         position: "relative", transition: "background 0.2s, border-color 0.2s",
       }}
     >
@@ -135,7 +135,7 @@ export function CalendarPicker({
               onClick={e => { e.preventDefault(); e.stopPropagation(); setPicking(mode); }}
               style={{
                 flex: 1, padding: "7px 8px", borderRadius: 10, cursor: "pointer",
-                border: `1.5px solid ${active ? "var(--amber)" : "var(--border)"}`,
+                border: `1.5px solid ${active ? "var(--brand)" : "var(--border)"}`,
                 background: active ? "var(--brand-soft)" : "transparent",
                 textAlign: "left",
               }}
@@ -143,7 +143,7 @@ export function CalendarPicker({
               <div style={{ fontSize: 9, color: "var(--text-3)", fontWeight: 600, marginBottom: 2 }}>
                 {mode === "start" ? "วันเริ่ม" : "วันสิ้นสุด"}
               </div>
-              <div style={{ fontSize: 11, color: val ? "var(--amber)" : "var(--text-3)", fontWeight: val ? 600 : 400 }}>
+              <div style={{ fontSize: 11, color: val ? "var(--brand)" : "var(--text-3)", fontWeight: val ? 600 : 400 }}>
                 {val ? formatDateTH(val) : "ยังไม่เลือก"}
               </div>
             </button>
@@ -181,9 +181,9 @@ export function CalendarPicker({
               onClick={e => handleDayClick(e, dateStr)}
               style={{
                 padding: "8px 2px", textAlign: "center", borderRadius: 8,
-                background: isStart || isEnd ? "var(--amber)" : inRange ? "var(--brand-soft)" : "transparent",
-                border: `1px solid ${isToday && !isStart && !isEnd ? "rgba(255,185,0,0.4)" : "transparent"}`,
-                color: isStart || isEnd ? "#000" : isToday ? "var(--amber)" : inRange ? "var(--amber)" : "var(--text-1)",
+                background: isStart || isEnd ? "var(--brand)" : inRange ? "var(--brand-soft)" : "transparent",
+                border: `1px solid ${isToday && !isStart && !isEnd ? "rgba(0,129,255,0.4)" : "transparent"}`,
+                color: isStart || isEnd ? "#000" : isToday ? "var(--brand)" : inRange ? "var(--brand)" : "var(--text-1)",
                 fontSize: 12, fontWeight: isStart || isEnd || isToday ? 700 : 400,
                 cursor: "pointer", transition: "background 0.1s",
               }}

@@ -204,7 +204,7 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
               borderRadius: 8, padding: "5px 10px", cursor: "pointer",
               transition: "all 0.15s",
             }}>
-              {qInfo.emoji} {qInfo.shortLabel} · {qInfo.label}
+              {qInfo.shortLabel} · {qInfo.label}
               {editQ ? <ChevronUpIcon size={11} color={qInfo.color} /> : <ChevronDownIcon size={11} color={qInfo.color} />}
             </button>
 
@@ -241,7 +241,6 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
                       <span style={{ fontSize: 13, fontWeight: 800, color: on ? info.color : "var(--text-2)" }}>
                         {info.shortLabel}
                       </span>
-                      <span style={{ fontSize: 11 }}>{info.emoji}</span>
                     </div>
                     <div style={{ fontSize: 10, color: on ? info.color : "var(--text-3)", lineHeight: 1.3 }}>
                       {info.label}
@@ -421,7 +420,7 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
             }}>↗ Notion</a>
             <button onClick={() => { onDone(task.id); onClose(); }} style={{
               flex: 2, padding: "13px 0", borderRadius: 14,
-              background: "var(--brand-soft)", border: "1px solid rgba(255,185,0,0.35)",
+              background: "var(--brand-soft)", border: "1px solid rgba(0,129,255,0.35)",
               color: "var(--brand)", fontSize: 14, fontWeight: 700,
               cursor: "pointer",
             }}>✓ เสร็จแล้ว</button>

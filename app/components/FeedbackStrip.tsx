@@ -99,7 +99,7 @@ export default function FeedbackStrip({ compact }: Props) {
           {step === "done" ? (
             <div style={{ padding: "32px 20px calc(28px + env(safe-area-inset-bottom))", textAlign: "center" }}>
               <CheckCircle />
-              <div style={{ color: "var(--text-1)", fontWeight: 700, fontSize: 16, marginTop: 14 }}>ขอบคุณมากค่ะ! 🙏</div>
+              <div style={{ color: "var(--text-1)", fontWeight: 700, fontSize: 16, marginTop: 14 }}>ขอบคุณมากค่ะ! </div>
               <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 6 }}>เราจะนำ feedback ไปพัฒนา app ต่อนะคะ</div>
             </div>
           ) : (
@@ -264,7 +264,7 @@ function FormBody({
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: "9px 8px", borderRadius: 10, cursor: "pointer",
                 border: `1.5px solid ${active ? "var(--brand)" : "var(--border)"}`,
-                background: active ? "rgba(255,185,0,0.07)" : "transparent",
+                background: active ? "rgba(0,129,255,0.07)" : "transparent",
                 color: active ? "var(--brand)" : "var(--text-3)",
                 fontSize: 12, fontWeight: active ? 700 : 500,
                 transition: "all 0.15s",

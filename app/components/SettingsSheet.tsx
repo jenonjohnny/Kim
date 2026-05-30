@@ -149,7 +149,7 @@ function AreaRow({ area, visible, pinned, onToggle, onPin }: {
       <span style={{ width: 20, display: "flex", justifyContent: "center", flexShrink: 0, marginRight: 8 }}>
         {pinned
           ? <PinIcon size={15} color="var(--brand)" />
-          : <span style={{ fontSize: 14 }}>{area.emoji || "·"}</span>
+          : <span style={{ fontSize: 14, color: "var(--text-3)" }}>·</span>
         }
       </span>
       {/* Name */}
@@ -379,7 +379,7 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
                     width: 28, height: 28, borderRadius: "50%",
                     background: t.value,
                     border: `2px solid ${on ? "var(--brand)" : "var(--border)"}`,
-                    boxShadow: on ? "0 0 0 3px rgba(255,185,0,0.25)" : "none",
+                    boxShadow: on ? "0 0 0 3px rgba(0,129,255,0.25)" : "none",
                     transition: "all 0.15s",
                   }} />
                   <span style={{ fontSize: 9, color: on ? "var(--brand)" : "var(--text-3)", fontWeight: on ? 700 : 400 }}>

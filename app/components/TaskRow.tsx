@@ -65,8 +65,8 @@ export function TaskMeta({ task }: { task: Task }) {
       )}
       {hasArea && <AreaBadge area={task.area!} />}
       {task.status === "Waiting" && (
-        <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 10, color: "var(--steel-teal)" }}>
-          <ClockIcon size={11} color="var(--steel-teal)" /> ติดตาม
+        <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 10, color: "var(--brand)" }}>
+          <ClockIcon size={11} color="var(--brand)" /> ติดตาม
         </span>
       )}
       {task.notes && (

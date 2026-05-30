@@ -62,7 +62,7 @@ export default function TaskCard({ task, onDone }: { task: Task; onDone: (id: st
           <span style={{
             fontSize: 10, color: style.color, background: style.bg,
             borderRadius: 5, padding: "2px 7px", fontWeight: 600,
-          }}>{style.emoji} {cat}</span>
+          }}>{cat}</span>
           {task.due && (
             <span style={{
               fontSize: 10,

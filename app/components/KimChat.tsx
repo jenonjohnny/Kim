@@ -62,7 +62,7 @@ function Bubble({ msg }: { msg: Msg }) {
         {msg.text}
       </div>
       <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 3, paddingInline: 4 }}>
-        {isKim ? "🤖 คิม · " : ""}
+        {isKim ? "Norte · " : ""}
         {new Date(msg.ts).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}
       </div>
     </div>
@@ -193,9 +193,13 @@ export default function KimChat({ data, onClose, inline = false }: Props) {
             background: "var(--brand)", color: "#000",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 16,
-          }}>🤖</div>
+          }}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="9" cy="9" r="7"/><path d="M9 5v1.5m0 5V13m-3.5-4h1.5m5 0H13"/><circle cx="9" cy="9" r="2" fill="white" stroke="none"/>
+            </svg>
+          </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>คิม</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Norte AI</div>
             <div style={{ fontSize: 10, color: "var(--text-3)" }}>เลขาส่วนตัว AI · Gemini</div>
           </div>
           {messages.length > 0 && (
@@ -218,7 +222,13 @@ export default function KimChat({ data, onClose, inline = false }: Props) {
         }}>
           {messages.length === 0 && (
             <div style={{ textAlign: "center", padding: "30px 0 20px" }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🤖</div>
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: "var(--brand)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="13" cy="13" r="10"/><path d="M13 7v3m0 6v3m-5-6h3m6 0h3"/><circle cx="13" cy="13" r="3" fill="white" stroke="none"/>
+                  </svg>
+                </div>
+              </div>
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)", marginBottom: 6 }}>
                 สวัสดีค่ะ คุณจีนอน
               </div>
@@ -297,7 +307,7 @@ export default function KimChat({ data, onClose, inline = false }: Props) {
             rows={1}
             style={{
               flex: 1, background: "var(--bg-raised)",
-              border: `1px solid ${input ? "rgba(255,185,0,0.4)" : "var(--border)"}`,
+              border: `1px solid ${input ? "rgba(0,129,255,0.4)" : "var(--border)"}`,
               borderRadius: 12, padding: "10px 13px",
               fontSize: 14, color: "var(--text-1)",
               outline: "none", resize: "none", fontFamily: "inherit",

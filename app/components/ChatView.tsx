@@ -13,7 +13,7 @@ const SUGGESTIONS = [
 
 export default function ChatView({ tasks }: { tasks: TaskData | null }) {
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "สวัสดีค่ะคุณจีนอน 👋 คิมพร้อมช่วยเสมอเลยนะคะ วันนี้มีอะไรให้ช่วยไหมคะ?" },
+    { role: "assistant", content: "สวัสดีค่ะคุณจีนอน คิมพร้อมช่วยเสมอเลยนะคะ วันนี้มีอะไรให้ช่วยไหมคะ?" },
   ]);
   const sessionId = useRef(`${new Date().toISOString().split("T")[0]}_${Math.random().toString(36).slice(2, 7)}`);
   const [input, setInput] = useState("");
@@ -91,7 +91,7 @@ export default function ChatView({ tasks }: { tasks: TaskData | null }) {
             {m.role === "assistant" && (
               <div style={{
                 width: 28, height: 28, borderRadius: "50%",
-                background: "var(--amber)", color: "#000",
+                background: "var(--brand)", color: "#000",
                 fontSize: 12, fontWeight: 800,
                 display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0, marginRight: 8, marginTop: 2,
@@ -101,7 +101,7 @@ export default function ChatView({ tasks }: { tasks: TaskData | null }) {
               maxWidth: "75%",
               padding: "10px 14px",
               borderRadius: m.role === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px",
-              background: m.role === "user" ? "var(--amber)" : "var(--bg-card)",
+              background: m.role === "user" ? "var(--brand)" : "var(--bg-card)",
               border: m.role === "user" ? "none" : "1px solid var(--border)",
               color: m.role === "user" ? "#000" : "var(--text-1)",
               fontSize: 14, lineHeight: 1.55,
@@ -116,7 +116,7 @@ export default function ChatView({ tasks }: { tasks: TaskData | null }) {
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{
               width: 28, height: 28, borderRadius: "50%",
-              background: "var(--amber)", color: "#000",
+              background: "var(--brand)", color: "#000",
               fontSize: 12, fontWeight: 800,
               display: "flex", alignItems: "center", justifyContent: "center",
             }}>K</div>
@@ -128,7 +128,7 @@ export default function ChatView({ tasks }: { tasks: TaskData | null }) {
               {[0, 1, 2].map(i => (
                 <div key={i} style={{
                   width: 6, height: 6, borderRadius: "50%",
-                  background: "var(--amber)", opacity: 0.7,
+                  background: "var(--brand)", opacity: 0.7,
                   animation: `pulse-dot 1.2s ${i * 0.2}s infinite`,
                 }} />
               ))}
@@ -170,7 +170,7 @@ export default function ChatView({ tasks }: { tasks: TaskData | null }) {
             disabled={!input.trim() || loading}
             style={{
               width: 36, height: 36, borderRadius: "50%", border: "none",
-              background: input.trim() && !loading ? "var(--amber)" : "var(--border)",
+              background: input.trim() && !loading ? "var(--brand)" : "var(--border)",
               color: input.trim() && !loading ? "#000" : "var(--text-3)",
               cursor: input.trim() && !loading ? "pointer" : "default",
               fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center",

@@ -319,7 +319,7 @@ function SearchSheet({
             color: searchP1 ? "var(--red)" : "var(--text-3)",
             fontSize: 11, fontWeight: searchP1 ? 700 : 400, transition: "all 0.12s",
           }}>
-            🚩 P1 เท่านั้น
+            P1 เท่านั้น
           </button>
         </div>
       </div>
@@ -333,7 +333,7 @@ function SearchSheet({
         )}
         {(q || hasFilter) && results.length === 0 && (
           <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-3)", fontSize: 13 }}>
-            ไม่พบงานที่ตรงกัน ✨
+            ไม่พบงานที่ตรงกัน
           </div>
         )}
         {results.length > 0 && (
@@ -357,7 +357,7 @@ function SearchSheet({
                       </div>
                       <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
                         <span style={{ fontSize: 10, color: qInfo.color, fontWeight: 700 }}>
-                          {qInfo.emoji} {qInfo.shortLabel}
+                          {qInfo.shortLabel}
                         </span>
                         {aStyle && <span style={{ fontSize: 9, color: aStyle.color, background: aStyle.color + "18", borderRadius: 4, padding: "1px 5px", fontWeight: 700 }}>{aStyle.label}</span>}
                         {t.status === "On Hold" && (

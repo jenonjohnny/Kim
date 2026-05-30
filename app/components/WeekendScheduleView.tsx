@@ -35,7 +35,7 @@ const SUNDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "church", title: "โบสถ์", sub: "Sunday service",
     start: 8 * 60, duration: 180, emoji: "🙏",
-    color: "var(--brand)", bg: "rgba(255,185,0,0.12)", fixed: true,
+    color: "var(--brand)", bg: "rgba(0,129,255,0.12)", fixed: true,
   },
   {
     id: "sun-rest", title: "พักผ่อน / รับประทานอาหาร", sub: "หลังโบสถ์",
@@ -50,7 +50,7 @@ const SUNDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "sun-clear", title: "เคลียงานค้าง", sub: "Optional — ถ้าไม่ได้ไปเที่ยว",
     start: 15 * 60, duration: 120, emoji: "📋",
-    color: "var(--brand)", bg: "rgba(51,92,103,0.15)",
+    color: "var(--brand)", bg: "rgba(0,129,255,0.15)",
   },
   {
     id: "sun-side", title: "Side Project / รายได้เสริม", sub: "OKR — 20k target",
@@ -63,7 +63,7 @@ const SATURDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "sat-morning", title: "Morning Routine", sub: "OKR review + planning",
     start: 9 * 60, duration: 60, emoji: "☀️",
-    color: "var(--brand)", bg: "rgba(255,185,0,0.10)",
+    color: "var(--brand)", bg: "rgba(0,129,255,0.10)",
   },
   {
     id: "sat-art", title: "Art Direction Study", sub: "OKR — พัฒนาครบวงจร 3 เดือน",
@@ -83,7 +83,7 @@ const SATURDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "sat-clear", title: "เคลียงานค้าง / งาน Daisi", sub: "Optional — ถ้ามีงานด่วน",
     start: 15 * 60 + 30, duration: 90, emoji: "📋",
-    color: "var(--brand)", bg: "rgba(51,92,103,0.15)",
+    color: "var(--brand)", bg: "rgba(0,129,255,0.15)",
   },
   {
     id: "sat-learn", title: "เรียน / พัฒนาทักษะ", sub: "Course, workshop, อ่านหนังสือ",
@@ -135,7 +135,7 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
       }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>
-            {day === "sunday" ? "🙏" : "🌿"} วัน{dayLabel} · {dateStr}
+            วัน{dayLabel} · {dateStr}
           </div>
           <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>
             {day === "sunday" ? "โบสถ์เช้า · พักผ่อน · เคลียงาน" : "เรียน · Side project · เคลียงาน"}
@@ -156,9 +156,9 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
         paddingBottom: 2,
       }}>
         {[
-          { label: "Art Direction", sub: "ครบวงจร 3 เดือน", emoji: "🎨", color: "var(--cat-design)" },
-          { label: "รายได้เสริม", sub: "20k target",        emoji: "💰", color: "var(--brand)" },
-          { label: "พัฒนาทักษะ", sub: "เรียนรู้ต่อเนื่อง", emoji: "📚", color: "var(--cat-holiday)" },
+          { label: "Art Direction", sub: "ครบวงจร 3 เดือน", color: "var(--cat-design)" },
+          { label: "รายได้เสริม", sub: "20k target",        color: "var(--brand)" },
+          { label: "พัฒนาทักษะ", sub: "เรียนรู้ต่อเนื่อง", color: "var(--cat-holiday)" },
         ].map(okr => (
           <div key={okr.label} style={{
             flexShrink: 0,
@@ -166,13 +166,9 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
             background: "var(--bg-card)", border: `1px solid ${okr.color}30`,
             borderLeft: `3px solid ${okr.color}`,
             borderRadius: 10,
-            display: "flex", alignItems: "center", gap: 7,
           }}>
-            <span style={{ fontSize: 14 }}>{okr.emoji}</span>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 700, color: okr.color }}>{okr.label}</div>
-              <div style={{ fontSize: 10, color: "var(--text-3)" }}>{okr.sub}</div>
-            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: okr.color }}>{okr.label}</div>
+            <div style={{ fontSize: 10, color: "var(--text-3)" }}>{okr.sub}</div>
           </div>
         ))}
       </div>
@@ -230,14 +226,14 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
               }}>
                 <span>{minToTime(block.start)}–{minToTime(block.start + block.duration)}</span>
                 {block.okr && <span style={{ fontSize: 9, color: block.color, opacity: 0.7, letterSpacing: "0.06em" }}>OKR</span>}
-                {block.fixed && <span style={{ fontSize: 9, color: block.color, opacity: 0.7 }}>🔒</span>}
+                {block.fixed && <svg width="9" height="9" viewBox="0 0 9 9" fill="none" stroke={block.color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}><rect x="1.5" y="4" width="6" height="4.5" rx="1"/><path d="M2.5 4V3a2 2 0 0 1 4 0v1"/></svg>}
               </div>
               <div style={{
                 fontSize: 12, color: "var(--text-1)", fontWeight: 600,
                 lineHeight: 1.3, overflow: "hidden",
                 display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical",
               }}>
-                {block.emoji} {block.title}
+                {block.title}
               </div>
               {block.sub && (
                 <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -274,7 +270,7 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
           borderRadius: 14, marginBottom: 8,
         }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: "var(--brand)", letterSpacing: "0.1em", marginBottom: 12 }}>
-            📋 งานที่อาจเคลียได้วันนี้ · {clearable.length} รายการ
+            งานที่อาจเคลียได้วันนี้ · {clearable.length} รายการ
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {clearable.map(t => {
@@ -299,7 +295,7 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
             })}
           </div>
           <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 12, fontStyle: "italic" }}>
-            💡 ไม่บังคับ — เคลียถ้าสะดวก ถ้าไปเที่ยวก็ผ่านไปก่อนนะคะ
+            ไม่บังคับ — เคลียถ้าสะดวก ถ้าไปเที่ยวก็ผ่านไปก่อนนะคะ
           </div>
         </div>
       )}
@@ -311,7 +307,9 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
         borderRadius: 14, marginBottom: 8,
         display: "flex", alignItems: "center", gap: 10,
       }}>
-        <span style={{ fontSize: 16 }}>🤖</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="8" cy="8" r="6"/><path d="M8 4.5v2m0 3v2m-3-5h2m3 0h2"/><circle cx="8" cy="8" r="1.5" fill="var(--text-3)" stroke="none"/>
+        </svg>
         <div>
           <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-3)" }}>Personal Tasks จาก AI Agent</div>
           <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 2 }}>เร็วๆ นี้ — เลขาแพรจะส่งงานส่วนตัวมาได้โดยตรง</div>

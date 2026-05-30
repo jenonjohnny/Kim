@@ -239,7 +239,7 @@ export default function MonthView({ urgent, soon, normal, review, onTaskClick }:
                 background: isToday
                   ? "var(--brand)"
                   : isSelected
-                    ? (isToday ? "var(--brand-soft)" : "rgba(51,92,103,0.12)")
+                    ? (isToday ? "var(--brand-soft)" : "rgba(0,129,255,0.12)")
                     : "transparent",
                 cursor: "pointer",
                 transition: "all 0.12s",
@@ -329,7 +329,7 @@ export default function MonthView({ urgent, soon, normal, review, onTaskClick }:
           {/* Tasks */}
           {selectedTasks.length === 0 ? (
             <div style={{ textAlign: "center", padding: "10px 0 6px", color: "var(--text-3)", fontSize: 12 }}>
-              ไม่มีงานวันนี้ ✨
+              ไม่มีงานวันนี้
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>

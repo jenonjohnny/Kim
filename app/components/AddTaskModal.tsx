@@ -27,7 +27,6 @@ function EisenhowerPicker({ value, onChange }: { value: Quadrant; onChange: (q: 
                 fontSize: 14, fontWeight: 800,
                 color: on ? info.color : "var(--text-2)",
               }}>{info.shortLabel}</span>
-              <span style={{ fontSize: 12 }}>{info.emoji}</span>
             </div>
             {/* Description */}
             <div style={{ fontSize: 10, fontWeight: 500, color: on ? info.color : "var(--text-3)", lineHeight: 1.4 }}>
@@ -71,15 +70,15 @@ function AreaChip({ area, selected, pinned, onSelect, onPin }: {
       onMouseDown={startPress}  onMouseUp={cancelPress}  onMouseLeave={cancelPress}
       style={{
         flexShrink: 0, padding: "6px 10px", borderRadius: 8, cursor: "pointer",
-        border: `1.5px solid ${selected ? "var(--brand)" : pinned ? "rgba(255,185,0,0.3)" : "var(--border)"}`,
-        background: pressing ? "var(--brand-soft)" : selected ? "var(--brand-soft)" : pinned ? "rgba(255,185,0,0.06)" : "transparent",
+        border: `1.5px solid ${selected ? "var(--brand)" : pinned ? "rgba(0,129,255,0.3)" : "var(--border)"}`,
+        background: pressing ? "var(--brand-soft)" : selected ? "var(--brand-soft)" : pinned ? "rgba(0,129,255,0.06)" : "transparent",
         color: selected ? "var(--brand)" : pinned ? "var(--brand)" : "var(--text-3)",
         fontSize: 11, fontWeight: selected || pinned ? 700 : 400,
         whiteSpace: "nowrap", transition: "all 0.15s",
         userSelect: "none", WebkitUserSelect: "none",
       } as React.CSSProperties}
     >
-      {pinned && !selected ? "📌 " : (area.emoji || "📁") + " "}{area.name}
+      {area.name}
     </button>
   );
 }
@@ -185,7 +184,7 @@ export default function AddTaskModal({
         </div>
 
         <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)", marginBottom: 14 }}>
-          ➕ เพิ่มงานใหม่
+          เพิ่มงานใหม่
         </div>
 
         {/* Title */}
@@ -195,7 +194,7 @@ export default function AddTaskModal({
           placeholder="ชื่องาน..."
           style={{
             width: "100%", background: "var(--bg-input)",
-            border: `1px solid ${title ? "rgba(255,185,0,0.4)" : "var(--border)"}`,
+            border: `1px solid ${title ? "rgba(0,129,255,0.4)" : "var(--border)"}`,
             borderRadius: 12, padding: "13px 14px", fontSize: 15,
             color: "var(--text-1)", outline: "none", marginBottom: 8,
             boxSizing: "border-box", fontWeight: 500,
@@ -248,10 +247,12 @@ export default function AddTaskModal({
               width: "100%", display: "flex", alignItems: "center", gap: 10,
               padding: "11px 14px", borderRadius: 12, cursor: "pointer",
               background: "var(--bg-input)",
-              border: `1.5px solid ${due ? "rgba(255,185,0,0.4)" : showCal ? "rgba(255,185,0,0.25)" : "var(--border)"}`,
+              border: `1.5px solid ${due ? "rgba(0,129,255,0.4)" : showCal ? "rgba(0,129,255,0.25)" : "var(--border)"}`,
             }}
           >
-            <span style={{ fontSize: 17 }}>📅</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="var(--text-3)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <rect x="2" y="3" width="12" height="11" rx="2"/><path d="M2 7h12M5 1v3M11 1v3"/>
+            </svg>
             <span style={{
               flex: 1, fontSize: 13, textAlign: "left",
               color: dueSummary ? "var(--brand)" : "var(--text-3)",

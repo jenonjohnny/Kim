@@ -61,7 +61,7 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
   const q = getQuadrant(task);
   const qInfo = QUADRANT_INFO[q];
   const accentColor = q === "Q1" ? "var(--red)"
-    : q === "Q2" ? "#e07840"
+    : q === "Q2" ? "#ff9500"
     : q === "Q3" ? "var(--brand)"
     : task.area === "sts"     ? "var(--brand)"
     : task.area === "daisi"   ? "var(--brand)"
@@ -135,7 +135,7 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
               fontSize: 10, fontWeight: 800, color: qInfo.color,
               background: qInfo.color + "22", borderRadius: 5, padding: "2px 8px",
             }}>
-              {qInfo.emoji} {qInfo.shortLabel} · {qInfo.label}
+              {qInfo.shortLabel} · {qInfo.label}
             </span>
             {task.area && <AreaBadge area={task.area} />}
             {dueStr && (
