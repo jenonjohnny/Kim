@@ -7,10 +7,11 @@ const THAI_DAYS_SHORT = ["อา","จ","อ","พ","พฤ","ศ","ส"];
 const THAI_DAYS_FULL  = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
 const THAI_MONTHS     = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
+// Norte v2 — all areas use brand blue
 const AREA_COLOR: Record<string, string> = {
-  sts:     "var(--amber)",
-  daisi:   "var(--warm-gold)",
-  digital: "var(--steel-teal)",
+  sts:     "var(--brand)",
+  daisi:   "var(--brand)",
+  digital: "var(--brand)",
 };
 
 function getMonday(date: Date): Date {
@@ -73,8 +74,8 @@ function WeekTaskRow({ task, onClick }: { task: Task; onClick: () => void }) {
       {/* Badges */}
       <div style={{ display: "flex", alignItems: "center", gap: 5, flexShrink: 0 }}>
         {isReview && (
-          <span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 9, color: "var(--steel-teal)" }}>
-            <ClockIcon size={9} color="var(--steel-teal)" /> รอ
+          <span style={{ display: "flex", alignItems: "center", gap: 2, fontSize: 9, color: "var(--brand)" }}>
+            <ClockIcon size={9} color="var(--brand)" /> รอ
           </span>
         )}
         {isOnHold && (
@@ -109,12 +110,12 @@ function DaySection({
   const dayLabel = THAI_DAYS_FULL[dow];
 
   const accentColor = isToday
-    ? "var(--amber)"
+    ? "var(--brand)"
     : isWeekend
-      ? "var(--warm-gold)"
+      ? "var(--brand)"
       : isPast
         ? "var(--border)"
-        : "var(--steel-teal)";
+        : "var(--brand)";
 
   const urgentCount = tasks.filter(t => {
     const today = toDateStr(new Date());
@@ -137,8 +138,8 @@ function DaySection({
         <div style={{
           display: "flex", flexDirection: "column", alignItems: "center",
           width: 40, flexShrink: 0,
-          background: isToday ? "var(--amber)" : isPast ? "transparent" : "var(--bg-raised)",
-          border: `1px solid ${isToday ? "var(--amber)" : "var(--border)"}`,
+          background: isToday ? "var(--brand)" : isPast ? "transparent" : "var(--bg-raised)",
+          border: `1px solid ${isToday ? "var(--brand)" : "var(--border)"}`,
           borderRadius: 10, padding: "5px 0",
         }}>
           <span style={{ fontSize: 9, fontWeight: 700, color: isToday ? "#000" : isPast ? "var(--text-3)" : "var(--text-3)", letterSpacing: "0.04em" }}>
@@ -161,7 +162,7 @@ function DaySection({
             </span>
             {isToday && (
               <span style={{
-                fontSize: 9, fontWeight: 700, color: "var(--amber)",
+                fontSize: 9, fontWeight: 700, color: "var(--brand)",
                 background: "var(--brand-soft)", borderRadius: 4,
                 padding: "1px 5px", letterSpacing: "0.06em",
               }}>TODAY</span>
@@ -347,7 +348,7 @@ export default function WeekView({ urgent, soon, normal, review, onTaskClick }: 
         borderRadius: 12, overflow: "hidden",
       }}>
         {[
-          { label: "งานสัปดาห์นี้", n: weekTasks.length, color: "var(--steel-teal)" },
+          { label: "งานสัปดาห์นี้", n: weekTasks.length, color: "var(--brand)" },
           { label: "เลยกำหนด",       n: weekUrgent,        color: "var(--red)"        },
           { label: "ยังไม่กำหนดวัน", n: undated.length,    color: "var(--text-3)"     },
         ].map((s, i) => (

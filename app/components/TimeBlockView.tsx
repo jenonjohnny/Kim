@@ -410,7 +410,7 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
                     ? "repeating-linear-gradient(135deg, rgba(51,92,103,0.08) 0px, rgba(51,92,103,0.08) 4px, transparent 4px, transparent 10px)"
                     : s.bg,
                 border:     `1px solid ${isDone ? "var(--border-soft)" : isFixed ? "var(--border)" : s.color + "30"}`,
-                borderLeft: `3px solid ${isDone ? "var(--border)" : isFixed ? "var(--steel-teal)" : isCurrent ? s.color : s.color + "90"}`,
+                borderLeft: `3px solid ${isDone ? "var(--border)" : isFixed ? "var(--brand)" : isCurrent ? s.color : s.color + "90"}`,
                 borderRadius: 10,
                 padding:    "6px 10px",
                 overflow:   "hidden",
@@ -422,7 +422,7 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
             >
               <div style={{
                 fontSize: 10, fontWeight: 600,
-                color: isDone ? "var(--text-3)" : isFixed ? "var(--steel-teal)" : s.color,
+                color: isDone ? "var(--text-3)" : isFixed ? "var(--brand)" : s.color,
                 lineHeight: 1, marginBottom: 2,
                 display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
@@ -455,8 +455,8 @@ export default function TimeBlockView({ urgent, soon, normal, events = [], view,
               left: TIME_W, right: 0,
               display: "flex", alignItems: "center", gap: 4, zIndex: 10,
             }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--amber)", flexShrink: 0 }} />
-              <div style={{ flex: 1, height: 1.5, background: "var(--amber)", opacity: 0.7 }} />
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--brand)", flexShrink: 0 }} />
+              <div style={{ flex: 1, height: 1.5, background: "var(--brand)", opacity: 0.7 }} />
             </div>
           );
         })()}

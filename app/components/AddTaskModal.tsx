@@ -71,9 +71,9 @@ function AreaChip({ area, selected, pinned, onSelect, onPin }: {
       onMouseDown={startPress}  onMouseUp={cancelPress}  onMouseLeave={cancelPress}
       style={{
         flexShrink: 0, padding: "6px 10px", borderRadius: 8, cursor: "pointer",
-        border: `1.5px solid ${selected ? "var(--amber)" : pinned ? "rgba(255,185,0,0.3)" : "var(--border)"}`,
+        border: `1.5px solid ${selected ? "var(--brand)" : pinned ? "rgba(255,185,0,0.3)" : "var(--border)"}`,
         background: pressing ? "var(--brand-soft)" : selected ? "var(--brand-soft)" : pinned ? "rgba(255,185,0,0.06)" : "transparent",
-        color: selected ? "var(--amber)" : pinned ? "var(--amber)" : "var(--text-3)",
+        color: selected ? "var(--brand)" : pinned ? "var(--brand)" : "var(--text-3)",
         fontSize: 11, fontWeight: selected || pinned ? 700 : 400,
         whiteSpace: "nowrap", transition: "all 0.15s",
         userSelect: "none", WebkitUserSelect: "none",
@@ -254,7 +254,7 @@ export default function AddTaskModal({
             <span style={{ fontSize: 17 }}>📅</span>
             <span style={{
               flex: 1, fontSize: 13, textAlign: "left",
-              color: dueSummary ? "var(--amber)" : "var(--text-3)",
+              color: dueSummary ? "var(--brand)" : "var(--text-3)",
               fontWeight: dueSummary ? 600 : 400,
             }}>
               {dueSummary || "กำหนดวันที่..."}
@@ -291,7 +291,7 @@ export default function AddTaskModal({
           }}>ยกเลิก</button>
           <button onClick={submit} disabled={loading || !title.trim()} style={{
             flex: 2, padding: "14px 0", borderRadius: 12, border: "none",
-            background: title.trim() ? "var(--amber)" : "var(--border)",
+            background: title.trim() ? "var(--brand)" : "var(--border)",
             color: title.trim() ? "#000" : "var(--text-3)",
             cursor: title.trim() ? "pointer" : "default",
             fontSize: 14, fontWeight: 700, transition: "all 0.2s",

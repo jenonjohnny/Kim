@@ -114,7 +114,7 @@ function PageLabel({ tab, data }: { tab: Tab; data: TaskData }) {
       {tab === "tasks" && (
         <span style={{ fontSize: 10, color: "var(--text-3)" }}>
           {data.total} งาน
-          {data.review.length > 0 && <> · <span style={{ color: "var(--steel-teal)" }}>{data.review.length} รอตรวจ</span></>}
+          {data.review.length > 0 && <> · <span style={{ color: "var(--brand)" }}>{data.review.length} รอตรวจ</span></>}
           {data.onhold.length > 0 && <> · {data.onhold.length} พัก</>}
         </span>
       )}
@@ -295,9 +295,9 @@ function SearchSheet({
         <div style={{ display: "flex", gap: 6, marginTop: 10, overflowX: "auto", paddingBottom: 2 }}>
           {([
             { id: "all",     label: "ทั้งหมด", color: "var(--text-2)"     },
-            { id: "sts",     label: "STS",     color: "var(--amber)"      },
-            { id: "daisi",   label: "Daisi",   color: "var(--warm-gold)"  },
-            { id: "digital", label: "Digital", color: "var(--steel-teal)" },
+            { id: "sts",     label: "STS",     color: "var(--brand)"      },
+            { id: "daisi",   label: "Daisi",   color: "var(--brand)"  },
+            { id: "digital", label: "Digital", color: "var(--brand)" },
           ] as { id: typeof searchArea; label: string; color: string }[]).map(f => {
             const on = searchArea === f.id;
             return (
@@ -366,8 +366,8 @@ function SearchSheet({
                           </span>
                         )}
                         {t.status === "Waiting" && (
-                          <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: "var(--steel-teal)" }}>
-                            <ClockIcon size={9} color="var(--steel-teal)" /> รอ
+                          <span style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 9, color: "var(--brand)" }}>
+                            <ClockIcon size={9} color="var(--brand)" /> รอ
                           </span>
                         )}
                       </div>
@@ -677,9 +677,9 @@ export default function Home() {
               // Area filter chips
               const areaOpts: { id: typeof areaFilter; label: string; color: string }[] = [
                 { id: "all",     label: "ทั้งหมด", color: "var(--text-2)"     },
-                { id: "sts",     label: "STS",     color: "var(--amber)"      },
-                { id: "daisi",   label: "Daisi",   color: "var(--warm-gold)"  },
-                { id: "digital", label: "Digital", color: "var(--steel-teal)" },
+                { id: "sts",     label: "STS",     color: "var(--brand)"      },
+                { id: "daisi",   label: "Daisi",   color: "var(--brand)"  },
+                { id: "digital", label: "Digital", color: "var(--brand)" },
               ];
 
               return <>
@@ -727,8 +727,8 @@ export default function Home() {
 
                 {/* ── Waiting / รอตรวจ ── */}
                 {review.length > 0 && (
-                  <Section icon={<ClockIcon size={13} color="var(--steel-teal)" />} label="รอตรวจ / ติดตาม" count={review.length}
-                    color="var(--steel-teal)" bg="var(--teal-glow)"
+                  <Section icon={<ClockIcon size={13} color="var(--brand)" />} label="รอตรวจ / ติดตาม" count={review.length}
+                    color="var(--brand)" bg="var(--teal-glow)"
                     tasks={review} onDone={markDone} onTaskClick={openDetail}
                     defaultOpen={true} limit={20} />
                 )}

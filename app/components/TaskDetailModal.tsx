@@ -5,16 +5,16 @@ import { CalendarPicker, formatDateTH } from "./CalendarPicker";
 import { ClockIcon, FileTextIcon, ChevronUpIcon, ChevronDownIcon, PauseIcon } from "./icons";
 
 const AREA_OPTS: { id: string; label: string; color: string }[] = [
-  { id: "sts",     label: "STS",     color: "var(--amber)"      },
-  { id: "daisi",   label: "Daisi",   color: "var(--warm-gold)"  },
-  { id: "digital", label: "Digital", color: "var(--steel-teal)" },
+  { id: "sts",     label: "STS",     color: "var(--brand)"      },
+  { id: "daisi",   label: "Daisi",   color: "var(--brand)"  },
+  { id: "digital", label: "Digital", color: "var(--brand)" },
 ];
 const AREA_MAP = Object.fromEntries(AREA_OPTS.map(a => [a.id, a]));
 
 const STATUS_OPTIONS: { name: string; label: string; icon: React.ReactNode; color: string }[] = [
   { name: "Not started", label: "ยังไม่เริ่ม", icon: <span style={{ fontSize: 10 }}>○</span>,  color: "var(--text-3)"     },
-  { name: "In progress", label: "กำลังทำ",    icon: <span style={{ fontSize: 10 }}>▶</span>,  color: "var(--steel-teal)" },
-  { name: "Waiting",     label: "รอตรวจ",      icon: <ClockIcon size={11} color="var(--amber)" />,       color: "var(--amber)"      },
+  { name: "In progress", label: "กำลังทำ",    icon: <span style={{ fontSize: 10 }}>▶</span>,  color: "var(--brand)" },
+  { name: "Waiting",     label: "รอตรวจ",      icon: <ClockIcon size={11} color="var(--brand)" />,       color: "var(--brand)"      },
   { name: "On Hold",     label: "พักไว้",       icon: <PauseIcon size={11} color="var(--text-3)" />,      color: "var(--text-3)"     },
 ];
 
@@ -22,8 +22,8 @@ function dueLabelStr(due: string) {
   const today = new Date().toISOString().split("T")[0];
   const diff  = Math.ceil((new Date(due).getTime() - new Date(today).getTime()) / 86400000);
   if (diff < 0) return { text: `เลยกำหนด ${Math.abs(diff)} วัน`, color: "var(--red)" };
-  if (diff === 0) return { text: "ครบวันนี้",   color: "var(--amber)" };
-  if (diff === 1) return { text: "ครบพรุ่งนี้", color: "var(--amber)" };
+  if (diff === 0) return { text: "ครบวันนี้",   color: "var(--brand)" };
+  if (diff === 1) return { text: "ครบพรุ่งนี้", color: "var(--brand)" };
   return { text: `อีก ${diff} วัน`, color: "var(--text-3)" };
 }
 
@@ -218,7 +218,7 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
 
             {/* Save indicator */}
             {(saving || saved || saveError) && (
-              <span style={{ fontSize: 10, color: saving ? "var(--text-3)" : saveError ? "var(--red)" : "var(--amber)", marginLeft: "auto" }}>
+              <span style={{ fontSize: 10, color: saving ? "var(--text-3)" : saveError ? "var(--red)" : "var(--brand)", marginLeft: "auto" }}>
                 {saving ? "กำลังบันทึก..." : saveError ? "⚠ บันทึกไม่สำเร็จ" : "✓ Saved"}
               </span>
             )}
@@ -422,7 +422,7 @@ export default function TaskDetailModal({ task, onClose, onDone }: Props) {
             <button onClick={() => { onDone(task.id); onClose(); }} style={{
               flex: 2, padding: "13px 0", borderRadius: 14,
               background: "var(--brand-soft)", border: "1px solid rgba(255,185,0,0.35)",
-              color: "var(--amber)", fontSize: 14, fontWeight: 700,
+              color: "var(--brand)", fontSize: 14, fontWeight: 700,
               cursor: "pointer",
             }}>✓ เสร็จแล้ว</button>
           </div>

@@ -79,7 +79,7 @@ export default function FeedbackStrip({ compact }: Props) {
             position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 9999,
             background: "var(--bg-card)",
             borderRadius: "20px 20px 0 0",
-            borderTop: "2px solid var(--amber)",
+            borderTop: "2px solid var(--brand)",
             borderLeft: "1px solid var(--border)",
             borderRight: "1px solid var(--border)",
             borderBottom: "none",
@@ -126,7 +126,7 @@ export default function FeedbackStrip({ compact }: Props) {
                 <button onClick={submit} disabled={step === "sending"} style={{
                   width: "100%", padding: "14px 0",
                   display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  background: step === "sending" ? "var(--border)" : "var(--amber)",
+                  background: step === "sending" ? "var(--border)" : "var(--brand)",
                   color: step === "sending" ? "var(--text-3)" : "#000",
                   border: "none", borderRadius: 12,
                   fontSize: 14, fontWeight: 700,
@@ -226,7 +226,7 @@ function FormBody({
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <MessageSquareIcon size={15} color="var(--amber)" />
+          <MessageSquareIcon size={15} color="var(--brand)" />
           <span style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Feedback</span>
         </div>
         <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, display: "flex" }}>
@@ -243,11 +243,11 @@ function FormBody({
               onMouseEnter={() => onHover(n)} onMouseLeave={() => onHover(0)}
               style={{
                 background: "none", border: "none", cursor: "pointer", padding: "4px 6px", borderRadius: 8,
-                color: displayRating >= n ? "var(--amber)" : "var(--text-3)",
+                color: displayRating >= n ? "var(--brand)" : "var(--text-3)",
                 transform: displayRating >= n ? "scale(1.15)" : "scale(1)",
                 transition: "color 0.1s, transform 0.1s",
               }}>
-              <StarIcon size={26} color={displayRating >= n ? "var(--amber)" : "var(--text-3)"} filled={displayRating >= n} />
+              <StarIcon size={26} color={displayRating >= n ? "var(--brand)" : "var(--text-3)"} filled={displayRating >= n} />
             </button>
           ))}
         </div>
@@ -263,13 +263,13 @@ function FormBody({
               <button key={id} onClick={() => onCategory(id)} style={{
                 flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                 padding: "9px 8px", borderRadius: 10, cursor: "pointer",
-                border: `1.5px solid ${active ? "var(--amber)" : "var(--border)"}`,
+                border: `1.5px solid ${active ? "var(--brand)" : "var(--border)"}`,
                 background: active ? "rgba(255,185,0,0.07)" : "transparent",
-                color: active ? "var(--amber)" : "var(--text-3)",
+                color: active ? "var(--brand)" : "var(--text-3)",
                 fontSize: 12, fontWeight: active ? 700 : 500,
                 transition: "all 0.15s",
               }}>
-                <Icon size={13} color={active ? "var(--amber)" : "var(--text-3)"} />
+                <Icon size={13} color={active ? "var(--brand)" : "var(--text-3)"} />
                 {label}
               </button>
             );
@@ -304,7 +304,7 @@ function FormBody({
           <button onClick={onSubmit} disabled={step === "sending"} style={{
             width: "100%", padding: "13px 0",
             display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-            background: step === "sending" ? "var(--border)" : "var(--amber)",
+            background: step === "sending" ? "var(--border)" : "var(--brand)",
             color: step === "sending" ? "var(--text-3)" : "#000",
             border: "none", borderRadius: 12,
             fontSize: 13, fontWeight: 700, cursor: step === "sending" ? "default" : "pointer",
@@ -321,7 +321,7 @@ function FormBody({
 function CheckCircle() {
   return (
     <svg width="40" height="40" viewBox="0 0 24 24" fill="none"
-      stroke="var(--amber)" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"
+      stroke="var(--brand)" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round"
       style={{ margin: "0 auto", display: "block" }}>
       <circle cx="12" cy="12" r="9" />
       <polyline points="9 12 11 14 15 10" />

@@ -62,10 +62,10 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
   const qInfo = QUADRANT_INFO[q];
   const accentColor = q === "Q1" ? "var(--red)"
     : q === "Q2" ? "#e07840"
-    : q === "Q3" ? "var(--amber)"
-    : task.area === "sts"     ? "var(--amber)"
-    : task.area === "daisi"   ? "var(--warm-gold)"
-    : task.area === "digital" ? "var(--steel-teal)"
+    : q === "Q3" ? "var(--brand)"
+    : task.area === "sts"     ? "var(--brand)"
+    : task.area === "daisi"   ? "var(--brand)"
+    : task.area === "digital" ? "var(--brand)"
     : "var(--text-3)";
 
   const handleDone = async (e: React.MouseEvent) => {
@@ -88,7 +88,7 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
     const dateOnly = task.due.includes("T") ? task.due.split("T")[0] : task.due;
     const d = new Date(dateOnly + "T00:00:00");
     const text = diff < 0 ? `เลย ${Math.abs(diff)} วัน` : diff === 0 ? "วันนี้" : diff === 1 ? "พรุ่งนี้" : `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`;
-    const color = diff <= 0 ? "var(--red)" : diff <= 1 ? "var(--amber)" : "var(--text-3)";
+    const color = diff <= 0 ? "var(--red)" : diff <= 1 ? "var(--brand)" : "var(--text-3)";
     return { text, color };
   })();
 
@@ -273,8 +273,8 @@ export function TodoItem({
     const today = new Date().toISOString().split("T")[0];
     const diff = Math.ceil((new Date(task.due).getTime() - new Date(today).getTime()) / 86400000);
     if (diff < 0) return { text: `เลย ${Math.abs(diff)} วัน`, color: "var(--red)" };
-    if (diff === 0) return { text: "วันนี้!", color: "var(--amber)" };
-    if (diff === 1) return { text: "พรุ่งนี้", color: "var(--amber)" };
+    if (diff === 0) return { text: "วันนี้!", color: "var(--brand)" };
+    if (diff === 1) return { text: "พรุ่งนี้", color: "var(--brand)" };
     const dateOnly = task.due.includes("T") ? task.due.split("T")[0] : task.due;
     const d = new Date(dateOnly + "T00:00:00");
     return { text: `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`, color: "var(--text-3)" };
@@ -555,7 +555,7 @@ export default function TodayView({
             return (
               <div key={t.id} onClick={() => onTaskClick(t)}
                 style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", padding: "2px 0" }}>
-                <ClockIcon size={12} color="var(--steel-teal)" />
+                <ClockIcon size={12} color="var(--brand)" />
                 <span style={{ fontSize: 13, color: "var(--text-2)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.title}</span>
                 {area && <span style={{ fontSize: 9, color: area.color, background: area.color + "20", borderRadius: 4, padding: "1px 5px", fontWeight: 700, flexShrink: 0 }}>{area.label}</span>}
                 <ChevronRightIcon size={13} color="var(--text-3)" />

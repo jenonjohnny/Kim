@@ -7,9 +7,9 @@ const THAI_DAYS_FULL  = ["อาทิตย์","จันทร์","อัง
 const THAI_MONTHS_SHORT = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
 const AREA_COLOR: Record<string, string> = {
-  sts:     "var(--amber)",
-  daisi:   "var(--warm-gold)",
-  digital: "var(--steel-teal)",
+  sts:     "var(--brand)",
+  daisi:   "var(--brand)",
+  digital: "var(--brand)",
 };
 
 function toDateStr(d: Date): string {
@@ -49,7 +49,7 @@ function AgendaRow({ task, onClick }: { task: Task; onClick: () => void }) {
       </span>
       <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
         {task.status === "Waiting" && (
-          <span style={{ fontSize: 9, color: "var(--steel-teal)", fontWeight: 700 }}>รอ</span>
+          <span style={{ fontSize: 9, color: "var(--brand)", fontWeight: 700 }}>รอ</span>
         )}
         {task.area && (
           <span style={{
@@ -85,13 +85,13 @@ function DayHeader({ date, count, isToday, isPast }: {
       <div style={{
         display: "flex", flexDirection: "column", alignItems: "center",
         width: 42, flexShrink: 0,
-        background: isToday ? "var(--amber)" : "var(--bg-raised)",
-        border: `1px solid ${isToday ? "var(--amber)" : "var(--border)"}`,
+        background: isToday ? "var(--brand)" : "var(--bg-raised)",
+        border: `1px solid ${isToday ? "var(--brand)" : "var(--border)"}`,
         borderRadius: 10, padding: "5px 0",
       }}>
         <span style={{
           fontSize: 9, fontWeight: 700, letterSpacing: "0.04em",
-          color: isToday ? "#000" : isPast ? "var(--text-3)" : isWeekend ? "var(--warm-gold)" : "var(--text-3)",
+          color: isToday ? "#000" : isPast ? "var(--text-3)" : isWeekend ? "var(--brand)" : "var(--text-3)",
         }}>
           {THAI_DAYS_FULL[dow].slice(0, 3)}
         </span>
@@ -108,11 +108,11 @@ function DayHeader({ date, count, isToday, isPast }: {
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
           <span style={{
             fontSize: 12, fontWeight: 700,
-            color: isToday ? "var(--amber)" : isPast ? "var(--text-3)" : isWeekend ? "var(--warm-gold)" : "var(--text-2)",
+            color: isToday ? "var(--brand)" : isPast ? "var(--text-3)" : isWeekend ? "var(--brand)" : "var(--text-2)",
           }}>{label}</span>
           {isToday && (
             <span style={{
-              fontSize: 9, fontWeight: 700, color: "var(--amber)",
+              fontSize: 9, fontWeight: 700, color: "var(--brand)",
               background: "var(--brand-soft)", borderRadius: 4,
               padding: "1px 5px", letterSpacing: "0.06em",
             }}>TODAY</span>
@@ -125,7 +125,7 @@ function DayHeader({ date, count, isToday, isPast }: {
       {count > 0 && (
         <span style={{
           fontSize: 11, fontWeight: 700,
-          color: isToday && isPast ? "var(--red)" : isToday ? "var(--amber)" : "var(--text-3)",
+          color: isToday && isPast ? "var(--red)" : isToday ? "var(--brand)" : "var(--text-3)",
           background: "var(--bg-raised)", borderRadius: 6,
           padding: "2px 8px", flexShrink: 0,
         }}>{count}</span>
@@ -195,9 +195,9 @@ export default function AgendaView({ urgent, soon, normal, review, onTaskClick }
       }}>
         {[
           { label: "เลยกำหนด", n: overdueCount, color: overdueCount > 0 ? "var(--red)" : "var(--text-3)" },
-          { label: "วันนี้",    n: todayCount,   color: "var(--amber)"      },
+          { label: "วันนี้",    n: todayCount,   color: "var(--brand)"      },
           { label: "ไม่มีกำหนด", n: undated.length, color: "var(--text-3)" },
-          { label: "รวมทั้งหมด", n: totalActive,  color: "var(--steel-teal)" },
+          { label: "รวมทั้งหมด", n: totalActive,  color: "var(--brand)" },
         ].map((s, i) => (
           <div key={s.label} style={{
             flex: 1, textAlign: "center", padding: "11px 4px",

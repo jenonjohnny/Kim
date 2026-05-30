@@ -2,8 +2,8 @@
 import React, { useState, useRef } from "react";
 import { Task, TaskData, getQuadrant, QUADRANT_INFO } from "./types";
 import {
-  FlagIcon, ClockIcon, ArchiveIcon, FileTextIcon, PauseIcon,
-  ChevronDownIcon, ChevronUpIcon, ChevronRightIcon, DotIcon,
+  ClockIcon, FileTextIcon,
+  ChevronDownIcon, ChevronRightIcon,
 } from "./icons";
 
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -22,8 +22,8 @@ const AREA_ICON: Record<string, React.ReactNode> = {
 };
 
 const CARD = {
-  padding: "14px 16px",
-  borderRadius: 16,
+  padding: "13px 14px",
+  borderRadius: 14,
   background: "var(--bg-card)",
   border: "1px solid var(--border)",
 } as const;
@@ -106,16 +106,19 @@ export default function TaskRow({
   const [swipeX, setSwipeX] = useState(0);
   const swipeRef = useRef<{ startX: number; startY: number; tracking: boolean }>({ startX: 0, startY: 0, tracking: false });
   const SWIPE_THRESHOLD = 80;
-  const qRow = getQuadrant(task);
-  const borderColor =
-    qRow === "Q1" ? "var(--red)"
-    : qRow === "Q2" ? "#e07840"
-    : qRow === "Q3" ? "var(--amber)"
-    : task.area === "sts"     ? "var(--amber)"
-    : task.area === "daisi"   ? "var(--warm-gold)"
-    : task.area === "digital" ? "var(--steel-teal)"
+  // Norte v2 urgency-only border system
+  const isOverdue = task.due && task.due < new Date().toISOString().split("T")[0];
+  const isP1 = task.priority === "P1" || task.urgent;
+  const isP2 = task.priority === "P2";
+  const borderColor = isOverdue ? "rgba(255,59,48,0.4)"
+    : isP1 ? "rgba(255,59,48,0.25)"
+    : isP2 ? "rgba(255,149,0,0.18)"
     : "var(--border)";
-  const checkColor = borderColor;
+  const insetShadow = isOverdue ? "inset 2px 0 0 #ff3b30"
+    : isP1 ? "inset 2px 0 0 rgba(255,59,48,0.55)"
+    : isP2 ? "inset 2px 0 0 rgba(255,149,0,0.5)"
+    : "none";
+  const checkColor = isOverdue || isP1 ? "#ff3b30" : isP2 ? "#ff9500" : "var(--brand)";
 
   const handleDone = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
@@ -158,9 +161,9 @@ export default function TaskRow({
     if (!task.due) return null;
     const today = new Date().toISOString().split("T")[0];
     const diff = Math.ceil((new Date(task.due).getTime() - new Date(today).getTime()) / 86400000);
-    if (diff < 0) return { text: `เลย ${Math.abs(diff)} วัน`, color: "var(--red)" };
-    if (diff === 0) return { text: "วันนี้", color: "var(--amber)" };
-    if (diff === 1) return { text: "พรุ่งนี้", color: "var(--amber)" };
+    if (diff < 0) return { text: `เลย ${Math.abs(diff)} วัน`, color: "#ff3b30" };
+    if (diff === 0) return { text: "วันนี้", color: "#ff9500" };
+    if (diff === 1) return { text: "พรุ่งนี้", color: "#ff9500" };
     const dateOnly = task.due.includes("T") ? task.due.split("T")[0] : task.due;
     const d = new Date(dateOnly + "T00:00:00");
     return { text: `${d.getDate()} ${THAI_MONTHS[d.getMonth()]}`, color: "var(--text-3)" };
@@ -173,15 +176,14 @@ export default function TaskRow({
       {/* Reveal layer */}
       <div style={{
         position: "absolute", inset: 0,
-        background: swipePct >= 1 ? "var(--amber)" : "var(--brand-dim)",
+        background: swipePct >= 1 ? "var(--brand)" : "var(--brand-dim)",
         display: "flex", alignItems: "center", paddingLeft: 18,
         transition: swipeX === 0 ? "background 0.2s" : "none",
       }}>
-        <span style={{
-          fontSize: 16, fontWeight: 800,
-          color: swipePct >= 1 ? "#000" : "var(--amber)",
-          opacity: swipePct, transition: swipeX === 0 ? "opacity 0.2s" : "none",
-        }}>✓</span>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          style={{ opacity: swipePct, transition: swipeX === 0 ? "opacity 0.2s" : "none" }}>
+          <path d="M3 9l5 5 7-8"/>
+        </svg>
       </div>
 
       {/* Card */}
@@ -194,7 +196,8 @@ export default function TaskRow({
           position: "relative",
           ...CARD,
           display: "flex", alignItems: "center", gap: 12,
-          borderLeft: `2px solid ${borderColor}`,
+          borderColor,
+          boxShadow: insetShadow,
           opacity: done ? 0 : 1,
           transform: done ? "translateX(20px)" : `translateX(${swipeX}px)`,
           transition: swipeX === 0 ? "transform 0.32s cubic-bezier(0.32,0.72,0,1), opacity 0.3s" : "none",
@@ -206,20 +209,26 @@ export default function TaskRow({
           onClick={handleDone}
           disabled={loading}
           style={{
-            width: 22, height: 22, borderRadius: "50%", flexShrink: 0,
-            border: `2px solid ${loading ? checkColor : "var(--border)"}`,
+            width: 20, height: 20, borderRadius: 6, flexShrink: 0,
+            border: `1.5px solid ${loading ? checkColor : "var(--border)"}`,
             background: loading ? checkColor + "22" : "transparent",
             cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
             transition: "all 0.2s",
           }}
         >
-          {loading && <span style={{ color: checkColor, fontSize: 11, fontWeight: 700 }}>✓</span>}
+          {loading && (
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke={checkColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M1.5 5l3 3 4-4"/>
+            </svg>
+          )}
         </button>
 
         {/* Title + meta */}
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 14, fontWeight: 600, color: "var(--text-1)", lineHeight: 1.3,
+            fontSize: 14,
+            fontWeight: isP1 ? 700 : isP2 ? 600 : 500,
+            color: "var(--text-1)", lineHeight: 1.3,
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           }}>
             {task.title}
@@ -240,7 +249,7 @@ export default function TaskRow({
   );
 }
 
-/* ─── Section — lightweight divider header with collapsible tasks ─── */
+/* ─── Section — Norte v2 task-section-header style ─── */
 export function Section({
   icon, label, count, color,
   tasks, onDone, onTaskClick,
@@ -262,36 +271,43 @@ export function Section({
 
   return (
     <div style={{ marginBottom: 4 }}>
+      {/* Section header — matches mockup task-section-header */}
       <button
         onClick={() => hasItems && setOpen(o => !o)}
         style={{
-          display: "flex", alignItems: "center", gap: 8,
-          width: "100%", padding: "12px 4px 8px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          width: "100%", padding: "20px 0 10px",
           background: "transparent", border: "none",
           cursor: hasItems ? "pointer" : "default",
         }}
       >
-        <span style={{ display: "flex", alignItems: "center" }}>{icon}</span>
-        <span style={{ fontSize: 11, fontWeight: 700, color, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>
-          {label}
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <span style={{ display: "flex", alignItems: "center" }}>{icon}</span>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", letterSpacing: "0.1em", textTransform: "uppercase" as const }}>
+            {label}
+          </span>
         </span>
-        {hasItems && (
-          <span style={{
-            fontSize: 10, fontWeight: 700, color,
-            background: color + "18", borderRadius: 5,
-            padding: "1px 6px",
-          }}>{count}</span>
-        )}
-        {!hasItems && <span style={{ fontSize: 10, color: "var(--text-3)" }}>ว่าง</span>}
-        <div style={{ flex: 1, height: 1, background: color + "20", marginLeft: 2 }} />
-        <span style={{ display: "flex", alignItems: "center", color: "var(--text-3)", flexShrink: 0 }}>
-          {hasItems ? (open ? <ChevronUpIcon size={14} color="var(--text-3)" /> : <ChevronDownIcon size={14} color="var(--text-3)" />) : null}
+        <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {hasItems ? (
+            <span style={{
+              fontSize: 10, fontWeight: 700, color: "var(--brand)",
+              background: "var(--brand-soft)", borderRadius: 20,
+              padding: "2px 8px", border: "1px solid rgba(0,129,255,0.2)",
+            }}>{count} งาน</span>
+          ) : (
+            <span style={{ fontSize: 10, color: "var(--text-3)" }}>ว่าง</span>
+          )}
+          {hasItems && (
+            <span style={{ display: "flex", transform: open ? "none" : "rotate(-90deg)", transition: "transform 0.2s" }}>
+              <ChevronDownIcon size={12} color="var(--text-3)" />
+            </span>
+          )}
         </span>
       </button>
 
       {open && hasItems && (
         <div style={{ marginBottom: 8 }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             {visible.map(t => (
               <TaskRow
                 key={t.id}
@@ -305,7 +321,7 @@ export function Section({
             <button
               onClick={e => { e.stopPropagation(); setShowAll(true); }}
               style={{
-                marginTop: 5, width: "100%",
+                marginTop: 6, width: "100%",
                 padding: "9px 0", borderRadius: 10,
                 background: "transparent",
                 border: "1px dashed var(--border)",
@@ -313,7 +329,7 @@ export function Section({
                 textAlign: "center",
               }}
             >
-              + {tasks.length - limit} รายการอีก
+              + {tasks.length - limit} งานอีก
             </button>
           )}
         </div>

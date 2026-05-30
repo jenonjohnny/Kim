@@ -8,9 +8,9 @@ const THAI_MONTHS_FULL = ["มกราคม","กุมภาพันธ์",
 const THAI_MONTHS_SHORT = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
 const AREA_COLOR: Record<string, string> = {
-  sts:     "var(--amber)",
-  daisi:   "var(--warm-gold)",
-  digital: "var(--steel-teal)",
+  sts:     "var(--brand)",
+  daisi:   "var(--brand)",
+  digital: "var(--brand)",
 };
 
 function toDateStr(d: Date): string {
@@ -170,7 +170,7 @@ export default function MonthView({ urgent, soon, normal, review, onTaskClick }:
         borderRadius: 12, overflow: "hidden",
       }}>
         {[
-          { label: "งานเดือนนี้",   n: monthTasks.length, color: "var(--steel-teal)" },
+          { label: "งานเดือนนี้",   n: monthTasks.length, color: "var(--brand)" },
           { label: "เลยกำหนด",      n: overdueCount,       color: "var(--red)"        },
           { label: "ไม่มีกำหนด",    n: undated.length,     color: "var(--text-3)"     },
         ].map((s, i) => (
@@ -195,7 +195,7 @@ export default function MonthView({ urgent, soon, normal, review, onTaskClick }:
           return (
             <div key={d} style={{
               textAlign: "center", fontSize: 10, fontWeight: 700,
-              color: isWeekend ? "var(--warm-gold)" : "var(--text-3)",
+              color: isWeekend ? "var(--brand)" : "var(--text-3)",
               padding: "4px 0",
             }}>{d}</div>
           );
@@ -234,10 +234,10 @@ export default function MonthView({ urgent, soon, normal, review, onTaskClick }:
                 padding: "6px 2px",
                 borderRadius: 10,
                 border: isSelected
-                  ? `1.5px solid ${isToday ? "var(--amber)" : "var(--steel-teal)"}`
+                  ? `1.5px solid ${isToday ? "var(--brand)" : "var(--brand)"}`
                   : "1.5px solid transparent",
                 background: isToday
-                  ? "var(--amber)"
+                  ? "var(--brand)"
                   : isSelected
                     ? (isToday ? "var(--brand-soft)" : "rgba(51,92,103,0.12)")
                     : "transparent",
@@ -256,7 +256,7 @@ export default function MonthView({ urgent, soon, normal, review, onTaskClick }:
                     : isPast
                       ? "var(--text-3)"
                       : isWeekend
-                        ? "var(--warm-gold)"
+                        ? "var(--brand)"
                         : "var(--text-1)",
                 lineHeight: 1,
               }}>
@@ -305,8 +305,8 @@ export default function MonthView({ urgent, soon, normal, review, onTaskClick }:
           }}>
             <div style={{
               display: "flex", flexDirection: "column", alignItems: "center",
-              background: selectedDate === todayStr ? "var(--amber)" : "var(--bg-raised)",
-              border: `1px solid ${selectedDate === todayStr ? "var(--amber)" : "var(--border)"}`,
+              background: selectedDate === todayStr ? "var(--brand)" : "var(--bg-raised)",
+              border: `1px solid ${selectedDate === todayStr ? "var(--brand)" : "var(--border)"}`,
               borderRadius: 8, padding: "4px 8px", minWidth: 36, flexShrink: 0,
             }}>
               <span style={{ fontSize: 9, fontWeight: 700, color: selectedDate === todayStr ? "#000" : "var(--text-3)", lineHeight: 1 }}>

@@ -53,7 +53,7 @@ function Bubble({ msg }: { msg: Msg }) {
       <div style={{
         maxWidth: "82%", padding: "10px 13px",
         borderRadius: isKim ? "4px 16px 16px 16px" : "16px 4px 16px 16px",
-        background: isKim ? "var(--bg-raised)" : "var(--amber)",
+        background: isKim ? "var(--bg-raised)" : "var(--brand)",
         color: isKim ? "var(--text-1)" : "#000",
         fontSize: 13, lineHeight: 1.55,
         whiteSpace: "pre-wrap", wordBreak: "break-word",
@@ -176,7 +176,7 @@ export default function KimChat({ data, onClose, inline = false }: Props) {
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 71,
         background: "var(--bg-base)",
         borderRadius: "22px 22px 0 0",
-        borderTop: "2px solid var(--amber)",
+        borderTop: "2px solid var(--brand)",
         height: "86dvh",
         display: "flex", flexDirection: "column",
         animation: "sheetIn 0.42s cubic-bezier(0.32, 0.72, 0, 1)",
@@ -190,7 +190,7 @@ export default function KimChat({ data, onClose, inline = false }: Props) {
         }}>
           <div style={{
             width: 34, height: 34, borderRadius: "50%", flexShrink: 0,
-            background: "var(--amber)", color: "#000",
+            background: "var(--brand)", color: "#000",
             display: "flex", alignItems: "center", justifyContent: "center",
             fontSize: 16,
           }}>🤖</div>
@@ -310,7 +310,7 @@ export default function KimChat({ data, onClose, inline = false }: Props) {
             disabled={!input.trim() || loading}
             style={{
               width: 42, height: 42, borderRadius: "50%", flexShrink: 0,
-              background: input.trim() && !loading ? "var(--amber)" : "var(--border)",
+              background: input.trim() && !loading ? "var(--brand)" : "var(--border)",
               border: "none", cursor: input.trim() && !loading ? "pointer" : "default",
               color: input.trim() && !loading ? "#000" : "var(--text-3)",
               fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center",

@@ -71,8 +71,8 @@ function ToggleSwitch({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
     <div onClick={onToggle} style={{
       width: 44, height: 26, borderRadius: 13, flexShrink: 0, cursor: "pointer",
-      background: on ? "var(--amber)" : "var(--bg-raised)",
-      border: `1.5px solid ${on ? "var(--amber)" : "var(--border)"}`,
+      background: on ? "var(--brand)" : "var(--bg-raised)",
+      border: `1.5px solid ${on ? "var(--brand)" : "var(--border)"}`,
       position: "relative", transition: "background 0.2s, border-color 0.2s",
     }}>
       <div style={{
@@ -103,7 +103,7 @@ function AreaSectionHeader({ label, count, actionLabel, onAction }: {
       </span>
       <button onClick={onAction} style={{
         background: "none", border: "none", cursor: "pointer",
-        fontSize: 11, color: "var(--steel-teal)", fontWeight: 600, padding: "2px 0",
+        fontSize: 11, color: "var(--brand)", fontWeight: 600, padding: "2px 0",
       }}>
         {actionLabel}
       </button>
@@ -148,14 +148,14 @@ function AreaRow({ area, visible, pinned, onToggle, onPin }: {
       {/* Pin / area icon */}
       <span style={{ width: 20, display: "flex", justifyContent: "center", flexShrink: 0, marginRight: 8 }}>
         {pinned
-          ? <PinIcon size={15} color="var(--amber)" />
+          ? <PinIcon size={15} color="var(--brand)" />
           : <span style={{ fontSize: 14 }}>{area.emoji || "·"}</span>
         }
       </span>
       {/* Name */}
       <span style={{
         flex: 1, fontSize: 13,
-        color: pinned ? "var(--amber)" : visible ? "var(--text-1)" : "var(--text-3)",
+        color: pinned ? "var(--brand)" : visible ? "var(--text-1)" : "var(--text-3)",
         fontWeight: pinned ? 600 : 400,
       }}>
         {area.name}
@@ -239,7 +239,7 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
 
   const ICON_TINTS = [
     { label: "Gray",      value: "#949597" },
-    { label: "Amber",     value: "#ffb900" },
+    { label: "Amber",     value: "var(--brand)" },
     { label: "Teal",      value: "#335c67" },
     { label: "Gold",      value: "#dfa040" },
     { label: "White",     value: "#e8e8e8" },
@@ -332,7 +332,7 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
               autoFocus
               style={{
                 flex: 1, background: "var(--bg-input)",
-                border: "1.5px solid var(--amber)", borderRadius: 8,
+                border: "1.5px solid var(--brand)", borderRadius: 8,
                 padding: "5px 10px", fontSize: 13, color: "var(--text-1)",
                 fontFamily: "inherit", outline: "none",
               }}
@@ -378,11 +378,11 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
                   <div style={{
                     width: 28, height: 28, borderRadius: "50%",
                     background: t.value,
-                    border: `2px solid ${on ? "var(--amber)" : "var(--border)"}`,
+                    border: `2px solid ${on ? "var(--brand)" : "var(--border)"}`,
                     boxShadow: on ? "0 0 0 3px rgba(255,185,0,0.25)" : "none",
                     transition: "all 0.15s",
                   }} />
-                  <span style={{ fontSize: 9, color: on ? "var(--amber)" : "var(--text-3)", fontWeight: on ? 700 : 400 }}>
+                  <span style={{ fontSize: 9, color: on ? "var(--brand)" : "var(--text-3)", fontWeight: on ? 700 : 400 }}>
                     {t.label}
                   </span>
                 </button>

@@ -35,7 +35,7 @@ const SUNDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "church", title: "โบสถ์", sub: "Sunday service",
     start: 8 * 60, duration: 180, emoji: "🙏",
-    color: "var(--amber)", bg: "rgba(255,185,0,0.12)", fixed: true,
+    color: "var(--brand)", bg: "rgba(255,185,0,0.12)", fixed: true,
   },
   {
     id: "sun-rest", title: "พักผ่อน / รับประทานอาหาร", sub: "หลังโบสถ์",
@@ -50,12 +50,12 @@ const SUNDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "sun-clear", title: "เคลียงานค้าง", sub: "Optional — ถ้าไม่ได้ไปเที่ยว",
     start: 15 * 60, duration: 120, emoji: "📋",
-    color: "var(--steel-teal)", bg: "rgba(51,92,103,0.15)",
+    color: "var(--brand)", bg: "rgba(51,92,103,0.15)",
   },
   {
     id: "sun-side", title: "Side Project / รายได้เสริม", sub: "OKR — 20k target",
     start: 17 * 60, duration: 90, emoji: "💡",
-    color: "var(--warm-gold)", bg: "rgba(223,160,64,0.13)", okr: true,
+    color: "var(--brand)", bg: "rgba(223,160,64,0.13)", okr: true,
   },
 ];
 
@@ -63,7 +63,7 @@ const SATURDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "sat-morning", title: "Morning Routine", sub: "OKR review + planning",
     start: 9 * 60, duration: 60, emoji: "☀️",
-    color: "var(--amber)", bg: "rgba(255,185,0,0.10)",
+    color: "var(--brand)", bg: "rgba(255,185,0,0.10)",
   },
   {
     id: "sat-art", title: "Art Direction Study", sub: "OKR — พัฒนาครบวงจร 3 เดือน",
@@ -78,12 +78,12 @@ const SATURDAY_BLOCKS: PersonalBlock[] = [
   {
     id: "sat-side", title: "Side Job / รายได้เสริม", sub: "OKR — 20k target",
     start: 13 * 60, duration: 150, emoji: "💼",
-    color: "var(--warm-gold)", bg: "rgba(223,160,64,0.13)", okr: true,
+    color: "var(--brand)", bg: "rgba(223,160,64,0.13)", okr: true,
   },
   {
     id: "sat-clear", title: "เคลียงานค้าง / งาน Daisi", sub: "Optional — ถ้ามีงานด่วน",
     start: 15 * 60 + 30, duration: 90, emoji: "📋",
-    color: "var(--steel-teal)", bg: "rgba(51,92,103,0.15)",
+    color: "var(--brand)", bg: "rgba(51,92,103,0.15)",
   },
   {
     id: "sat-learn", title: "เรียน / พัฒนาทักษะ", sub: "Course, workshop, อ่านหนังสือ",
@@ -131,7 +131,7 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
         marginBottom: 16, padding: "12px 16px",
         background: "var(--bg-card)", border: "1px solid var(--border)",
         borderRadius: 16,
-        borderLeft: "3px solid var(--amber)",
+        borderLeft: "3px solid var(--brand)",
       }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>
@@ -142,7 +142,7 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
           </div>
         </div>
         <div style={{
-          fontSize: 10, fontWeight: 700, color: "var(--amber)",
+          fontSize: 10, fontWeight: 700, color: "var(--brand)",
           background: "var(--brand-soft)", borderRadius: 8,
           padding: "4px 10px", letterSpacing: "0.08em",
         }}>
@@ -157,7 +157,7 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
       }}>
         {[
           { label: "Art Direction", sub: "ครบวงจร 3 เดือน", emoji: "🎨", color: "var(--cat-design)" },
-          { label: "รายได้เสริม", sub: "20k target",        emoji: "💰", color: "var(--warm-gold)" },
+          { label: "รายได้เสริม", sub: "20k target",        emoji: "💰", color: "var(--brand)" },
           { label: "พัฒนาทักษะ", sub: "เรียนรู้ต่อเนื่อง", emoji: "📚", color: "var(--cat-holiday)" },
         ].map(okr => (
           <div key={okr.label} style={{
@@ -258,8 +258,8 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
               left: TIME_W, right: 0,
               display: "flex", alignItems: "center", gap: 4, zIndex: 10,
             }}>
-              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--amber)", flexShrink: 0 }} />
-              <div style={{ flex: 1, height: 1.5, background: "var(--amber)", opacity: 0.7 }} />
+              <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--brand)", flexShrink: 0 }} />
+              <div style={{ flex: 1, height: 1.5, background: "var(--brand)", opacity: 0.7 }} />
             </div>
           );
         })()}
@@ -270,10 +270,10 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
         <div style={{
           padding: "14px 16px",
           background: "var(--bg-card)", border: "1px solid var(--border)",
-          borderLeft: "3px solid var(--steel-teal)",
+          borderLeft: "3px solid var(--brand)",
           borderRadius: 14, marginBottom: 8,
         }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--steel-teal)", letterSpacing: "0.1em", marginBottom: 12 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, color: "var(--brand)", letterSpacing: "0.1em", marginBottom: 12 }}>
             📋 งานที่อาจเคลียได้วันนี้ · {clearable.length} รายการ
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -281,7 +281,7 @@ export default function WeekendScheduleView({ day, date, tasks, onTaskClick }: P
               const s = CAT_STYLE[detectCategory(t.title)];
               const today = new Date().toISOString().split("T")[0];
               const diff  = t.due ? Math.ceil((new Date(t.due).getTime() - new Date(today).getTime()) / 86400000) : null;
-              const dueColor = diff !== null && diff < 0 ? "var(--red)" : diff === 0 ? "var(--amber)" : "var(--text-3)";
+              const dueColor = diff !== null && diff < 0 ? "var(--red)" : diff === 0 ? "var(--brand)" : "var(--text-3)";
               const dueText  = diff !== null
                 ? diff < 0 ? `ค้าง ${Math.abs(diff)} วัน` : diff === 0 ? "วันนี้" : `+${diff} วัน`
                 : null;

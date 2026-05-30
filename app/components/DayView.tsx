@@ -24,10 +24,10 @@ const SCROLL_SPEED = 16;
 
 const THAI_DAYS   = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-const AREA_COLOR: Record<string,string> = { sts:"var(--amber)", daisi:"var(--warm-gold)", digital:"var(--steel-teal)" };
-// Explicit rgba fills — CSS-var+hex doesn't work reliably for block fills
-const AREA_FILL:     Record<string,string> = { sts:"rgba(255,185,0,0.22)", daisi:"rgba(160,96,208,0.22)", digital:"rgba(51,92,103,0.55)" };
-const AREA_FILL_SEL: Record<string,string> = { sts:"rgba(255,185,0,0.42)", daisi:"rgba(160,96,208,0.42)", digital:"rgba(51,92,103,0.78)" };
+// Norte v2 — all areas use brand blue system
+const AREA_COLOR: Record<string,string> = { sts:"var(--brand)", daisi:"var(--brand)", digital:"var(--brand)" };
+const AREA_FILL:     Record<string,string> = { sts:"rgba(0,129,255,0.18)", daisi:"rgba(0,129,255,0.18)", digital:"rgba(0,129,255,0.25)" };
+const AREA_FILL_SEL: Record<string,string> = { sts:"rgba(0,129,255,0.38)", daisi:"rgba(0,129,255,0.38)", digital:"rgba(0,129,255,0.45)" };
 const AREA_LABEL: Record<string,string> = { sts:"STS", daisi:"Daisi", digital:"Digital" };
 const AREA_IDS:   Record<string,string> = {
   sts:"2a02ffbd-a6db-8096-8ee5-f4a9b6b73c02",
@@ -462,7 +462,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       <div style={{display:"flex",alignItems:"center",gap:8,background:"var(--bg-base)",borderBottom:"1px solid var(--border)",position:"sticky",top:-16,zIndex:10,margin:"-16px -20px 8px",padding:"8px 20px"}}>
         <button onClick={()=>setDayOff(v=>v-1)} style={{background:"none",border:"none",cursor:"pointer",padding:4,display:"flex",flexShrink:0}}><ChevronLeftIcon size={18} color="var(--text-3)"/></button>
         <button onClick={()=>setDayOff(0)} style={{flex:1,textAlign:"center",background:"none",border:"none",cursor:dayOff!==0?"pointer":"default",padding:"4px 0"}}>
-          <div style={{fontSize:13,fontWeight:700,color:isToday?"var(--amber)":"var(--text-1)"}}>
+          <div style={{fontSize:13,fontWeight:700,color:isToday?"var(--brand)":"var(--text-1)"}}>
             {isToday?"วันนี้":dayOff===1?"พรุ่งนี้":dayOff===-1?"เมื่อวาน":dayLabel}
           </div>
           <div style={{fontSize:10,color:"var(--text-3)",marginTop:1}}>{dayLabel}</div>
@@ -471,8 +471,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       </div>
 
       {/* ── Grid ── */}
-      <div style={{background:"var(--bg-card)",border:`2px solid ${draggingOffGrid?"var(--red)":activeDrag?.source==="tray"?"var(--amber)":"var(--border)"}`,borderRadius:14,overflow:"hidden",marginBottom:12,transition:"border-color 0.12s"}}>
-        {saving&&<div style={{padding:"5px 14px",background:"var(--brand-soft)",fontSize:10,fontWeight:700,color:"var(--amber)",letterSpacing:"0.08em"}}>บันทึก...</div>}
+      <div style={{background:"var(--bg-card)",border:`2px solid ${draggingOffGrid?"var(--red)":activeDrag?.source==="tray"?"var(--brand)":"var(--border)"}`,borderRadius:14,overflow:"hidden",marginBottom:12,transition:"border-color 0.12s"}}>
+        {saving&&<div style={{padding:"5px 14px",background:"var(--brand-soft)",fontSize:10,fontWeight:700,color:"var(--brand)",letterSpacing:"0.08em"}}>บันทึก...</div>}
         {draggingOffGrid&&<div style={{padding:"5px 14px",background:"rgba(255,80,80,0.12)",fontSize:10,fontWeight:700,color:"var(--red)"}}>ปล่อยนอก grid → ลบออก</div>}
 
         <div ref={gridRef} style={{position:"relative",height:GRID_H+20}}>
@@ -485,7 +485,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
           {/* Hour lines */}
           {hours.map(h=>(
             <div key={h} style={{position:"absolute",left:0,right:0,top:minToY(h*60),display:"flex",alignItems:"flex-start",pointerEvents:"none"}}>
-              <div style={{width:TIME_W,flexShrink:0,fontSize:10,fontWeight:600,color:(isToday&&h===today.getHours())?"var(--amber)":"var(--text-3)",paddingRight:8,textAlign:"right",transform:"translateY(-6px)"}}>
+              <div style={{width:TIME_W,flexShrink:0,fontSize:10,fontWeight:600,color:(isToday&&h===today.getHours())?"var(--brand)":"var(--text-3)",paddingRight:8,textAlign:"right",transform:"translateY(-6px)"}}>
                 {`${String(h).padStart(2,"0")}:00`}
               </div>
               <div style={{flex:1,borderTop:`1px solid ${h%2===0?"var(--border)":"rgba(255,255,255,0.04)"}`}}/>
@@ -510,8 +510,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
 
             {/* Tray drop indicator */}
             {activeDrag?.source==="tray"&&ghostMin!==null&&(
-              <div style={{position:"absolute",left:3,right:3,top:minToY(ghostMin),height:DEF_DUR*PX_MIN,background:"var(--amber)20",border:"2px dashed var(--amber)",borderRadius:8,zIndex:5,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                <span style={{fontSize:11,fontWeight:700,color:"var(--amber)"}}>{fmt(ghostMin)} – {fmt(ghostMin+DEF_DUR)}</span>
+              <div style={{position:"absolute",left:3,right:3,top:minToY(ghostMin),height:DEF_DUR*PX_MIN,background:"rgba(0,129,255,0.12)",border:"2px dashed var(--brand)",borderRadius:8,zIndex:5,pointerEvents:"none",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                <span style={{fontSize:11,fontWeight:700,color:"var(--brand)"}}>{fmt(ghostMin)} – {fmt(ghostMin+DEF_DUR)}</span>
               </div>
             )}
 
@@ -561,7 +561,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
               const {col,totalCols}=layout.get(b.task.id)??{col:0,totalCols:1};
               const top=minToY(b.startMin);
               const height=Math.max(b.dur*PX_MIN,MIN_DUR*PX_MIN);
-              const ac=b.task.area?(AREA_COLOR[b.task.area]??"var(--steel-teal)"):"var(--steel-teal)";
+              const ac=b.task.area?(AREA_COLOR[b.task.area]??"var(--brand)"):"var(--brand)";
               const fillNorm=b.task.area?(AREA_FILL[b.task.area]??"rgba(100,150,180,0.28)"):"rgba(100,150,180,0.28)";
               const fillSel =b.task.area?(AREA_FILL_SEL[b.task.area]??"rgba(100,150,180,0.48)"):"rgba(100,150,180,0.48)";
               const short=b.dur<=30;
@@ -621,7 +621,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
 
                   {/* Drag tooltip */}
                   {isDrag&&(
-                    <div style={{position:"absolute",top:-22,left:"50%",transform:"translateX(-50%)",background:offGrid?"var(--red)":"var(--amber)",borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:"#000",zIndex:20,whiteSpace:"nowrap",pointerEvents:"none"}}>
+                    <div style={{position:"absolute",top:-22,left:"50%",transform:"translateX(-50%)",background:offGrid?"var(--red)":"var(--brand)",borderRadius:6,padding:"3px 8px",fontSize:10,fontWeight:700,color:"#000",zIndex:20,whiteSpace:"nowrap",pointerEvents:"none"}}>
                       {offGrid?"ลบ":fmt(b.startMin)}
                     </div>
                   )}
@@ -759,9 +759,9 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       {/* Tray drag ghost */}
       {activeDrag?.source==="tray"&&activeDrag.task&&(
         <div style={{position:"fixed",left:16,right:16,top:activeDrag.curPY-32,zIndex:120,pointerEvents:"none"}}>
-          <div style={{background:(activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--steel-teal)")+"30",border:`2px solid ${activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--steel-teal)"}`,borderRadius:10,padding:"8px 14px",boxShadow:"0 8px 28px rgba(0,0,0,0.4)"}}>
-            <div style={{fontSize:12,fontWeight:700,color:activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--steel-teal)"}}>{activeDrag.task.title}</div>
-            {ghostMin!==null&&<div style={{fontSize:10,opacity:0.8,color:activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--steel-teal)",marginTop:2}}>{fmt(ghostMin)} – {fmt(ghostMin+DEF_DUR)}</div>}
+          <div style={{background:(activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--brand)")+"30",border:`2px solid ${activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--brand)"}`,borderRadius:10,padding:"8px 14px",boxShadow:"0 8px 28px rgba(0,0,0,0.4)"}}>
+            <div style={{fontSize:12,fontWeight:700,color:activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--brand)"}}>{activeDrag.task.title}</div>
+            {ghostMin!==null&&<div style={{fontSize:10,opacity:0.8,color:activeDrag.task.area?AREA_COLOR[activeDrag.task.area]:"var(--brand)",marginTop:2}}>{fmt(ghostMin)} – {fmt(ghostMin+DEF_DUR)}</div>}
           </div>
         </div>
       )}
@@ -872,7 +872,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
 /* ── Time picker ── */
 function PickerInner({task,curDate,onDone,onCancel}:{task:Task;curDate:string;onDone:(m:number)=>void;onCancel:()=>void}) {
   const [time,setTime]=useState("09:00");
-  const ac=task.area?(AREA_COLOR[task.area]??"var(--steel-teal)"):"var(--steel-teal)";
+  const ac=task.area?(AREA_COLOR[task.area]??"var(--brand)"):"var(--brand)";
   return <>
     <div style={{display:"flex",justifyContent:"center",paddingTop:14,paddingBottom:12}}>
       <div style={{width:40,height:5,borderRadius:3,background:"var(--border)"}}/>
