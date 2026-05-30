@@ -925,8 +925,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                   <div style={{fontSize:10,color:"var(--text-3)",fontWeight:600,marginBottom:10,letterSpacing:"0.06em"}}>
                     ช่วงเวลา · {durLabel(createSheet.endMin-createSheet.startMin)}
                   </div>
-                  <div style={{display:"flex",alignItems:"center",gap:10}}>
-                    <div style={{flex:1,minWidth:0,overflow:"hidden"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <div style={{flexShrink:0}}>
                       <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>เริ่ม</div>
                       <input type="time" value={fmt(createSheet.startMin)}
                         onChange={e=>{
@@ -935,10 +935,10 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                           const sm=clamp(h*60+m,H_START*60,createSheet.endMin-MIN_DUR);
                           setCreateSheet(s=>s?{...s,startMin:sm}:s);
                         }}
-                        style={{width:"100%",minWidth:0,padding:"8px 6px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:14,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
+                        style={{display:"block",width:"110px",padding:"8px 8px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:15,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
                     </div>
                     <div style={{fontSize:14,color:"var(--text-3)",paddingTop:16,flexShrink:0}}>—</div>
-                    <div style={{flex:1,minWidth:0,overflow:"hidden"}}>
+                    <div style={{flexShrink:0}}>
                       <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>สิ้นสุด</div>
                       <input type="time" value={fmt(createSheet.endMin)}
                         onChange={e=>{
@@ -947,7 +947,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                           const em=clamp(h*60+m,createSheet.startMin+MIN_DUR,H_END*60);
                           setCreateSheet(s=>s?{...s,endMin:em}:s);
                         }}
-                        style={{width:"100%",minWidth:0,padding:"8px 6px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:14,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
+                        style={{display:"block",width:"110px",padding:"8px 8px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:15,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
                     </div>
                   </div>
                 </div>

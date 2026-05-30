@@ -1274,6 +1274,13 @@ export default function Home() {
             </button>
           </div>
         </div>
+        {/* OKR label — pinned inside header so it never scrolls away */}
+        {tab === "okr" && data && (
+          <div style={{ marginTop: 10, borderTop: "1px solid var(--border-soft)", paddingTop: 10 }}>
+            <PageLabel tab="okr" data={data} />
+          </div>
+        )}
+
         {/* Calendar sub-tab — pinned inside header so it never scrolls away */}
         {tab === "calendar" && (
           <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
@@ -1321,20 +1328,9 @@ export default function Home() {
 
         {loading ? <LoadingState /> : !data ? null : (
           <>
-            {/* Page label — hide for calendar/agenda (day nav is its own header) */}
-            {/* OKR gets a sticky version so the label stays visible while scrolling */}
-            {!(tab === "calendar" && calView === "agenda") && (
-              tab === "okr"
-                ? <div style={{
-                    position: "sticky", top: 0, zIndex: 5,
-                    background: "var(--bg-base)",
-                    margin: "0 -20px",
-                    padding: "12px 20px",
-                    borderBottom: "1px solid var(--border-soft)",
-                  }}>
-                    <PageLabel tab={tab} data={data} />
-                  </div>
-                : <PageLabel tab={tab} data={data} />
+            {/* Page label — hide for calendar/agenda and OKR (both handled in fixed header) */}
+            {!(tab === "calendar" && calView === "agenda") && tab !== "okr" && (
+              <PageLabel tab={tab} data={data} />
             )}
 
             {/* ── HOME — วันนี้ ── */}
