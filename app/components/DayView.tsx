@@ -19,8 +19,8 @@ const DEF_DUR   = 60;
 const HOLD_MS      = 300;
 const TRAY_HOLD_MS = 400;
 const DIR_THRESH   = 6;
-const SCROLL_ZONE  = 100;
-const SCROLL_SPEED = 10;
+const SCROLL_ZONE  = 150;
+const SCROLL_SPEED = 16;
 
 const THAI_DAYS   = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
@@ -294,8 +294,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
         const sc=scrollContainer?.current;
         if(sc) sc.scrollTop += prevY - e.clientY;
         const dy=Math.abs(e.clientY-d.startY);
-        // Cancel hold if user moved more than 12px from start (intent = scroll, not drag)
-        if(dy>12){ if(trayHoldTimerRef.current){ clearTimeout(trayHoldTimerRef.current); trayHoldTimerRef.current=null; } setDrag(null); dragRef.current=null; }
+        // Cancel hold if user moved more than 20px from start (intent = scroll, not drag)
+        if(dy>20){ if(trayHoldTimerRef.current){ clearTimeout(trayHoldTimerRef.current); trayHoldTimerRef.current=null; } setDrag(null); dragRef.current=null; }
         return;
       }
       if(d.phase==="pending"){
@@ -389,6 +389,19 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
         // Capture pointer now so browser hands us the gesture (overrides scroll)
         try{ trayHoldElemRef.current?.setPointerCapture(cur.pointerId); }catch{}
         activateDrag(cur,latestPtrRef.current.y,latestPtrRef.current.x);
+        // Auto-scroll the grid into view so user can drop without paging
+        const sc=scrollContainer?.current;
+        const grid=gridRef.current;
+        if(sc&&grid){
+          const now=new Date();
+          const currentMin=now.getHours()*60+now.getMinutes();
+          const focusMin=Math.max(H_START*60+30,Math.min(currentMin-30,H_END*60-90));
+          const scRect=sc.getBoundingClientRect();
+          const gridRect=grid.getBoundingClientRect();
+          const gridTopInSc=gridRect.top-scRect.top+sc.scrollTop;
+          const target=Math.max(0,gridTopInSc+minToY(focusMin)-scRect.height*0.22);
+          sc.scrollTo({top:target,behavior:"smooth"});
+        }
       }
     },TRAY_HOLD_MS);
   };

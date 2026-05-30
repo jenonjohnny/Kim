@@ -10,6 +10,7 @@ import MonthView from "./components/MonthView";
 import AgendaView from "./components/AgendaView";
 import DayView from "./components/DayView";
 import SettingsSheet from "./components/SettingsSheet";
+import FeedbackStrip from "./components/FeedbackStrip";
 import { Task, TaskData, detectCategory, getQuadrant, QUADRANT_INFO } from "./components/types";
 import {
   SearchIcon, GearIcon, LightningIcon, FlagIcon, ClockIcon, PauseIcon,
@@ -865,7 +866,9 @@ function TodayView({
         </ZoneCard>
       )}
 
-      <div style={{ textAlign: "center", fontSize: 10, color: "var(--text-3)", marginTop: 8, paddingBottom: 4 }}>
+      <FeedbackStrip />
+
+      <div style={{ textAlign: "center", fontSize: 10, color: "var(--text-3)", marginTop: 4, paddingBottom: 4 }}>
         sync {syncTime} น. · auto ทุก 5 นาที
       </div>
     </div>
