@@ -38,7 +38,7 @@ export default function Nav({
                 flex: 1,
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
                 padding: "7px 4px 8px",
-                background: "none",
+                background: on ? "var(--brand-soft)" : "none",
                 border: "none", cursor: "pointer",
                 borderRadius: 12,
                 transition: "all 0.18s",

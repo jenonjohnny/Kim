@@ -17,15 +17,15 @@
   /* ─── Surfaces ─── */
   --bg-base:     #0a0a0f;
   --bg-card:     #111118;
-  --bg-raised:   #18181f;
+  --bg-raised:   #1a1a24;
   --bg-input:    #1f1f28;
-  --border:      #24242e;
-  --border-soft: #18181f;
+  --border:      #1e1e2a;
+  --border-soft: #16161e;
 
   /* ─── Text ─── */
   --text-1:      #f2f2f2;
   --text-2:      #949597;
-  --text-3:      #3a3a48;
+  --text-3:      #606070;
 
   /* ─── Icon tint — customizable via Settings ─── */
   --icon-tint:   #606070;   /* default = muted */

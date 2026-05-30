@@ -293,11 +293,11 @@ export function TodoItem({
     return null;
   })();
 
-  // Priority badge
+  // Priority badge — Norte v2: P1=brand blue, P2=brand soft, P3=transparent
   const pBadge = (() => {
     const p = task.priority;
-    if (p === "P1") return { label: "P1", color: "white", bg: "#ff3b30", border: "none" };
-    if (p === "P2") return { label: "P2", color: "#ff9500", bg: "rgba(255,149,0,0.12)", border: "1px solid rgba(255,149,0,0.3)" };
+    if (p === "P1") return { label: "P1", color: "white", bg: "var(--brand)", border: "none" };
+    if (p === "P2") return { label: "P2", color: "var(--brand)", bg: "var(--brand-soft)", border: "1px solid rgba(0,129,255,0.25)" };
     if (p === "P3") return { label: "P3", color: "var(--text-3)", bg: "transparent", border: "1px solid var(--border)" };
     return null;
   })();
@@ -451,42 +451,47 @@ export default function TodayView({
       <div style={{
         fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
         textTransform: "uppercase", color: "var(--text-3)",
-        marginBottom: 8, marginTop: 4,
+        marginBottom: 8, marginTop: 20,
       }}>
         ภาพรวมวันนี้
       </div>
 
-      {/* ── Stats — 3 cards ── */}
+      {/* ── Stats — 3 cards (Norte v2 style) ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
         {[
           {
-            label: "ด่วนมาก", n: now.length,
-            color: now.length > 0 ? "#ff3b30" : "var(--text-3)",
+            label: "ด่วนมาก", n: now.length, type: "urgent",
+            numColor: now.length > 0 ? "#ff3b30" : "var(--text-3)",
             barColor: now.length > 0 ? "#ff3b30" : "var(--border)",
             icon: (c: string) => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M6 2v4m0 2.5v.5"/><circle cx="6" cy="6" r="5"/></svg>,
           },
           {
-            label: "วันนี้", n: soon.length,
-            color: soon.length > 0 ? "#ff9500" : "var(--text-3)",
+            label: "วันนี้", n: soon.length, type: "soon",
+            numColor: soon.length > 0 ? "#ff9500" : "var(--text-3)",
             barColor: soon.length > 0 ? "#ff9500" : "var(--border)",
             icon: (c: string) => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="5"/><path d="M6 3.5V6l1.5 1.5"/></svg>,
           },
           {
-            label: "ทั้งหมด", n: total,
-            color: "var(--text-2)",
+            label: "ทั้งหมด", n: total, type: "total",
+            numColor: "var(--text-2)",
             barColor: "rgba(0,129,255,0.2)",
             icon: (c: string) => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M2 9h8M2 6h6M2 3h4"/></svg>,
           },
         ].map(s => (
           <div key={s.label} style={{
             background: "var(--bg-card)", border: "1px solid var(--border)",
-            borderRadius: 14, padding: "14px 10px",
-            display: "flex", flexDirection: "column", alignItems: "center", gap: 0,
-            textAlign: "center",
+            borderRadius: 16, padding: "14px 12px",
+            display: "flex", flexDirection: "column", gap: 3,
+            position: "relative", overflow: "hidden",
           }}>
-            <div style={{ marginBottom: 4 }}>{s.icon(s.color)}</div>
-            <div style={{ fontSize: 28, fontWeight: 800, color: s.color, lineHeight: 1, letterSpacing: "-0.02em", marginBottom: 4 }}>{s.n}</div>
-            <div style={{ fontSize: 9, color: "var(--text-3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{s.label}</div>
+            {/* Top color bar */}
+            <div style={{
+              position: "absolute", top: 0, left: 0, right: 0, height: 2,
+              background: s.barColor, borderRadius: "16px 16px 0 0",
+            }} />
+            <div style={{ marginBottom: 6, opacity: 0.5 }}>{s.icon(s.numColor)}</div>
+            <div style={{ fontSize: 32, fontWeight: 800, color: s.numColor, lineHeight: 1, letterSpacing: "-0.03em" }}>{s.n}</div>
+            <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 500, letterSpacing: "0.03em", marginTop: 1 }}>{s.label}</div>
           </div>
         ))}
       </div>
