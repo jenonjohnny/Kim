@@ -12,9 +12,10 @@ const HEADERS = {
 const STS_AREA_ID             = process.env.NOTION_STS_AREA_ID             || "2a02ffbd-a6db-8096-8ee5-f4a9b6b73c02";
 const DAISI_AREA_ID           = process.env.NOTION_DAISI_AREA_ID           || "2982ffbd-a6db-8050-bf58-dfac37b527e2";
 const DIGITAL_PRODUCT_AREA_ID = process.env.NOTION_DIGITAL_PRODUCT_AREA_ID || "36b2ffbd-a6db-81c1-b644-f337f63e7738";
-// Skip area filter only when explicitly opted-out (for testers with plain DBs)
-// Default = true → owner always gets the area filter with hardcoded fallback IDs
-const USE_AREAS = process.env.NOTION_SKIP_AREAS !== "true";
+// Opt-in to area filter — set NOTION_USE_AREAS=true to restrict to known area IDs.
+// Default = false → fetch all tasks regardless of area, so tasks without an area
+// are never silently dropped.
+const USE_AREAS = process.env.NOTION_USE_AREAS === "true";
 
 function parseTask(p: any) {
   const props = p.properties;
@@ -43,12 +44,16 @@ export async function GET() {
     { property: "Status", status: { does_not_equal: "Done" } },
     { property: "Status", status: { does_not_equal: "Daily Tracking" } },
   ];
+  // Note: Notion API does not support `is_empty` on relation properties.
+  // To include tasks with no area, we fetch ALL active tasks and skip the area
+  // filter entirely — post-filter is done in parseTask (area stays undefined for
+  // unrecognised IDs, which is fine). USE_AREAS only restricts to known area IDs
+  // when the owner explicitly wants that; the default is to fetch everything.
   const areaFilter = USE_AREAS
     ? [{ or: [
         { property: "Areas", relation: { contains: STS_AREA_ID } },
         { property: "Areas", relation: { contains: DAISI_AREA_ID } },
         { property: "Areas", relation: { contains: DIGITAL_PRODUCT_AREA_ID } },
-        { property: "Areas", relation: { is_empty: true } },  // งานไม่มี area (ส่วนตัว) ก็ fetch มาด้วย
       ]}]
     : [];
 
