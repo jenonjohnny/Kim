@@ -160,29 +160,32 @@ function FocusCard({ task, onDone, onClick }: { task: Task; onDone: (id: string)
   );
 }
 
-/* ─── Zone card wrapper ─── */
+/* ─── Zone card wrapper — non-collapsible (matches mockup) ─── */
 function ZoneCard({
-  accentColor, label, labelIcon, count, children, defaultOpen = true, isUrgent = false,
+  accentColor, label, labelIcon, count, children, isUrgent = false,
+  collapsible = false, defaultOpen = true,
 }: {
   accentColor: string; label: string; labelIcon: React.ReactNode;
-  count: number; children: React.ReactNode; defaultOpen?: boolean; isUrgent?: boolean;
+  count: number; children: React.ReactNode; isUrgent?: boolean;
+  collapsible?: boolean; defaultOpen?: boolean;
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <div style={{ marginBottom: 4 }}>
-      <button
-        onClick={() => setOpen(v => !v)}
+      {/* Section header */}
+      <div
+        onClick={collapsible ? () => setOpen(v => !v) : undefined}
         style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
-          width: "100%", padding: "20px 0 10px",
-          background: "transparent", border: "none", cursor: "pointer",
+          padding: "20px 0 10px",
+          cursor: collapsible ? "pointer" : "default",
         }}
       >
         <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
           {isUrgent ? (
             <span style={{
               display: "inline-block", width: 6, height: 6, borderRadius: "50%",
-              background: accentColor, flexShrink: 0,
+              background: "#ff3b30", flexShrink: 0,
               animation: "pulse-red 2s ease-in-out infinite",
             }} />
           ) : (
@@ -193,17 +196,20 @@ function ZoneCard({
           </span>
         </span>
         <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {/* Count badge — always brand blue per mockup */}
           <span style={{
-            fontSize: 10, fontWeight: 700, color: accentColor,
-            background: accentColor + "18", borderRadius: 20,
-            padding: "2px 9px", border: `1px solid ${accentColor}30`,
+            fontSize: 10, fontWeight: 700, color: "var(--brand)",
+            background: "var(--brand-soft)", borderRadius: 20,
+            padding: "2px 8px", border: "1px solid rgba(0,129,255,0.2)",
           }}>{count} งาน</span>
-          <span style={{ display: "flex", transform: open ? "none" : "rotate(-90deg)", transition: "transform 0.2s" }}>
-            <ChevronDownIcon size={12} color="var(--text-3)" />
-          </span>
+          {collapsible && (
+            <span style={{ display: "flex", transform: open ? "none" : "rotate(-90deg)", transition: "transform 0.2s" }}>
+              <ChevronDownIcon size={12} color="var(--text-3)" />
+            </span>
+          )}
         </span>
-      </button>
-      {open && (
+      </div>
+      {(!collapsible || open) && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {children}
         </div>
@@ -441,16 +447,14 @@ export default function TodayView({
 
   return (
     <div>
-      {/* ── Morning Brief Card ── */}
-      <MorningBriefCard data={data} />
-
-      {/* ── Meetings Strip (GCal) ── */}
-      <MeetingsStrip events={gcalEvents} />
-
-      {/* ── Focus Card ── */}
-      {focusTask && (
-        <FocusCard task={focusTask} onDone={onDone} onClick={() => onTaskClick(focusTask)} />
-      )}
+      {/* ── Section label — ภาพรวมวันนี้ (matches mockup) ── */}
+      <div style={{
+        fontSize: 10, fontWeight: 700, letterSpacing: "0.12em",
+        textTransform: "uppercase", color: "var(--text-3)",
+        marginBottom: 8, marginTop: 4,
+      }}>
+        ภาพรวมวันนี้
+      </div>
 
       {/* ── Stats — 3 cards ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
@@ -488,6 +492,12 @@ export default function TodayView({
         ))}
       </div>
 
+      {/* ── Morning Brief Card — after stats, before tasks (matches mockup) ── */}
+      <MorningBriefCard data={data} />
+
+      {/* ── Meetings Strip (GCal) — only if events exist ── */}
+      {gcalEvents.length > 0 && <MeetingsStrip events={gcalEvents} />}
+
       {/* ── Zone: ตอนนี้ ── */}
       {now.length > 0 && (
         <ZoneCard
@@ -514,12 +524,12 @@ export default function TodayView({
         </ZoneCard>
       )}
 
-      {/* ── Zone: ถัดไป ── */}
+      {/* ── Zone: ถัดไป — collapsible, collapsed by default ── */}
       {later.length > 0 && (
         <ZoneCard
           accentColor="var(--brand)" label="ถัดไป" count={later.length}
           labelIcon={<DotIcon size={9} color="var(--brand)" />}
-          defaultOpen={false}
+          collapsible defaultOpen={false}
         >
           {later.slice(0, 10).map(t => (
             <TodoItem key={t.id} task={t} onDone={onDone}
@@ -533,12 +543,12 @@ export default function TodayView({
         </ZoneCard>
       )}
 
-      {/* ── Zone: รอตรวจ ── */}
+      {/* ── Zone: รอตรวจ — collapsible, collapsed by default ── */}
       {review.length > 0 && (
         <ZoneCard
           accentColor="var(--text-3)" label="รอตรวจ" count={review.length}
           labelIcon={<ClockIcon size={11} color="var(--text-3)" />}
-          defaultOpen={false}
+          collapsible defaultOpen={false}
         >
           {review.slice(0, 6).map(t => {
             const area = t.area ? AREA_STYLE[t.area] : null;

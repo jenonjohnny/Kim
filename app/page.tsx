@@ -530,10 +530,11 @@ export default function Home() {
       height: "100dvh",
       display: "flex", flexDirection: "column",
       overflow: "hidden",
+      position: "relative",
       userSelect: "none", WebkitUserSelect: "none",
     } as React.CSSProperties}>
 
-      {/* Norte blue top glow */}
+      {/* Norte blue top glow — 1px line at very top */}
       <div style={{
         position: "fixed", top: 0, left: 0, right: 0,
         height: 1, zIndex: 50,
@@ -541,12 +542,40 @@ export default function Home() {
         opacity: 0.5,
       }} />
 
-      {/* ── Header ── */}
+      {/* ── Logo watermark — faded background (matches mockup) ── */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo-mark.png"
+        alt=""
+        aria-hidden="true"
+        style={{
+          position: "fixed", left: -22, top: 28,
+          width: 190, height: "auto",
+          opacity: 0.07,
+          filter: "brightness(10)",
+          pointerEvents: "none", userSelect: "none",
+          zIndex: 0,
+        }}
+      />
+
+      {/* ── Geo rings — decorative blue circles (matches mockup) ── */}
+      <svg
+        aria-hidden="true"
+        style={{ position: "fixed", right: -20, top: 200, opacity: 0.25, pointerEvents: "none", zIndex: 0 }}
+        width="110" height="110" viewBox="0 0 110 110" fill="none"
+      >
+        <circle cx="55" cy="55" r="50" stroke="rgba(0,129,255,0.15)" strokeWidth="1"/>
+        <circle cx="55" cy="55" r="34" stroke="rgba(0,129,255,0.10)" strokeWidth="1"/>
+        <circle cx="55" cy="55" r="18" stroke="rgba(0,129,255,0.07)" strokeWidth="1"/>
+        <line x1="55" y1="3" x2="55" y2="107" stroke="rgba(0,129,255,0.05)" strokeWidth="0.5"/>
+        <line x1="3" y1="55" x2="107" y2="55" stroke="rgba(0,129,255,0.05)" strokeWidth="0.5"/>
+      </svg>
+
+      {/* ── Header — no border-bottom (matches mockup) ── */}
       <div style={{
         flexShrink: 0, zIndex: 30,
         background: "var(--bg-base)",
         padding: "calc(env(safe-area-inset-top) + 14px) 20px 12px",
-        borderBottom: "1px solid var(--border-soft)",
       }}>
         <Greeting onSearch={() => setShowSearch(true)} onSettings={() => setShowSettings(true)} />
         {/* OKR label — pinned inside header so it never scrolls away */}
@@ -588,7 +617,8 @@ export default function Home() {
         ref={scrollRef}
         style={{
           flex: 1, overflowY: "auto", overflowX: "hidden",
-          padding: tab === "calendar" && calView === "agenda" ? "16px 20px 80px" : "16px 20px 80px",
+          padding: "8px 20px 80px",
+          position: "relative", zIndex: 1,
         }}
       >
         {/* Pull-to-refresh indicator */}
@@ -605,8 +635,8 @@ export default function Home() {
 
         {loading ? <LoadingState /> : !data ? null : (
           <>
-            {/* Page label — hide for calendar/agenda and OKR (both handled in fixed header) */}
-            {!(tab === "calendar" && calView === "agenda") && tab !== "okr" && (
+            {/* Page label — only for tasks tab; home has section label inside TodayView, calendar/OKR in header */}
+            {tab === "tasks" && (
               <PageLabel tab={tab} data={data} />
             )}
 
