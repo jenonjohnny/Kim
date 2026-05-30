@@ -577,12 +577,26 @@ export default function Home() {
         background: "var(--bg-base)",
         padding: "calc(env(safe-area-inset-top) + 14px) 20px 12px",
       }}>
-        <Greeting onSearch={() => setShowSearch(true)} onSettings={() => setShowSettings(true)} />
-        {/* OKR label — pinned inside header so it never scrolls away */}
-        {tab === "okr" && data && (
-          <div style={{ marginTop: 10, borderTop: "1px solid var(--border-soft)", paddingTop: 10 }}>
-            <PageLabel tab="okr" data={data} />
+        {tab === "okr" ? (
+          /* OKR header — logo + Q2 ACTIVE badge (matches mockup Screen 2) */
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo-white.png" alt="Norte" style={{ height: 26, width: "auto", flexShrink: 0 }} />
+              <span style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)", letterSpacing: "-0.02em" }}>Norte</span>
+            </div>
+            <div style={{
+              background: "var(--bg-card)", border: "1px solid var(--border)",
+              borderRadius: 10, padding: "6px 10px",
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <span style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 600 }}>Q2 2569</span>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--brand)", boxShadow: "0 0 6px rgba(0,129,255,0.5)", display: "block", flexShrink: 0 }} />
+              <span style={{ fontSize: 10, color: "var(--brand)", fontWeight: 700, letterSpacing: "0.04em" }}>ACTIVE</span>
+            </div>
           </div>
+        ) : (
+          <Greeting onSearch={() => setShowSearch(true)} onSettings={() => setShowSettings(true)} />
         )}
 
         {/* Calendar sub-tab — pinned inside header so it never scrolls away */}
