@@ -1,11 +1,12 @@
 "use client";
-import { HomeIcon, ListIcon, CalendarIcon, TargetIcon } from "./icons";
+import { HomeIcon, ListIcon, CalendarIcon, TargetIcon, RobotIcon } from "./icons";
 
-export type Tab = "home" | "tasks" | "calendar" | "okr";
+export type Tab = "home" | "tasks" | "chat" | "calendar" | "okr";
 
 const TABS: { id: Tab; label: string; Icon: React.FC<{ size?: number; color?: string }> }[] = [
   { id: "home",     label: "วันนี้",  Icon: HomeIcon     },
   { id: "tasks",    label: "งาน",    Icon: ListIcon     },
+  { id: "chat",     label: "คิม",    Icon: RobotIcon    },
   { id: "calendar", label: "ตาราง",  Icon: CalendarIcon },
   { id: "okr",      label: "OKR",    Icon: TargetIcon   },
 ];

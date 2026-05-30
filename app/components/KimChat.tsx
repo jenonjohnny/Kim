@@ -72,9 +72,11 @@ function Bubble({ msg }: { msg: Msg }) {
 interface Props {
   data: TaskData | null;
   onClose: () => void;
+  /** ถ้า true = ไม่แสดง backdrop (ใช้เป็น tab เต็มหน้า) */
+  inline?: boolean;
 }
 
-export default function KimChat({ data, onClose }: Props) {
+export default function KimChat({ data, onClose, inline = false }: Props) {
   const [messages, setMessages] = useState<Msg[]>(() => loadHistory());
   const [input, setInput]   = useState("");
   const [loading, setLoading] = useState(false);
@@ -148,20 +150,29 @@ export default function KimChat({ data, onClose }: Props) {
 
   return (
     <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        style={{
-          position: "fixed", inset: 0,
-          background: "rgba(0,0,0,0.5)",
-          backdropFilter: "blur(3px)",
-          zIndex: 70,
-          animation: "fadeIn 0.18s ease-out",
-        }}
-      />
+      {/* Backdrop — แสดงเฉพาะตอนไม่ได้ใช้เป็น tab */}
+      {!inline && (
+        <div
+          onClick={onClose}
+          style={{
+            position: "fixed", inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            backdropFilter: "blur(3px)",
+            zIndex: 70,
+            animation: "fadeIn 0.18s ease-out",
+          }}
+        />
+      )}
 
       {/* Chat sheet */}
-      <div style={{
+      <div style={inline ? {
+        position: "fixed",
+        top: "calc(env(safe-area-inset-top) + 115px)", /* below fixed header */
+        bottom: "calc(env(safe-area-inset-bottom) + 62px)", /* above nav */
+        left: 0, right: 0, zIndex: 5,
+        background: "var(--bg-base)",
+        display: "flex", flexDirection: "column",
+      } : {
         position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 71,
         background: "var(--bg-base)",
         borderRadius: "22px 22px 0 0",
@@ -193,10 +204,12 @@ export default function KimChat({ data, onClose }: Props) {
               fontSize: 11, color: "var(--text-3)", padding: "4px 6px",
             }}>ล้าง</button>
           )}
-          <button onClick={onClose} style={{
-            background: "none", border: "none", cursor: "pointer",
-            fontSize: 20, color: "var(--text-2)", padding: "4px 6px", lineHeight: 1,
-          }}>✕</button>
+          {!inline && (
+            <button onClick={onClose} style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: 20, color: "var(--text-2)", padding: "4px 6px", lineHeight: 1,
+            }}>✕</button>
+          )}
         </div>
 
         {/* ── Messages ── */}
