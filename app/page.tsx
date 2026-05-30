@@ -56,20 +56,15 @@ function Greeting() {
         ขนาด Lock: height 22px — อย่าแก้ CSS, swap ไฟล์แทน
         เปลี่ยนชื่อ: แก้ text ด้านล่างได้เลย
       */}
-      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/logo-mark.png"
+          src="/logo-white.png"
           alt="Norte"
-          style={{
-            height: 20,
-            width: "auto",
-            flexShrink: 0,
-            animation: "pulse-dot 2.5s ease-in-out infinite",
-          }}
+          style={{ height: 24, width: "auto", flexShrink: 0 }}
         />
-        <span style={{ fontSize: 11, color: "var(--amber)", fontWeight: 700, letterSpacing: "0.12em" }}>
-          NORTE
+        <span style={{ fontSize: 18, fontWeight: 800, color: "var(--text-1)", letterSpacing: "-0.02em" }}>
+          Norte
         </span>
       </div>
       <div style={{ fontSize: 26, fontWeight: 800, lineHeight: 1.1, letterSpacing: "-0.02em" }}>{greeting}</div>

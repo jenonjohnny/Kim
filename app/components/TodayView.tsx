@@ -340,9 +340,14 @@ export function TodoItem({
 function EmptyState() {
   return (
     <div style={{ textAlign: "center", padding: "60px 0" }}>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>✨</div>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--brand)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity={0.4}>
+          <circle cx="24" cy="24" r="20"/>
+          <path d="M16 24l6 6 10-12"/>
+        </svg>
+      </div>
       <div style={{ color: "var(--text-2)", fontSize: 16, fontWeight: 600 }}>ไม่มีงานค้างค่ะ</div>
-      <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 8 }}>คิมภูมิใจในตัวเจ้านายมากเลย</div>
+      <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 8 }}>เยี่ยมมาก ทำงานได้ครบหมดแล้ว</div>
     </div>
   );
 }
@@ -389,23 +394,44 @@ export default function TodayView({
       )}
 
       {/* ── Stats strip ── */}
-      <div style={{
-        display: "flex", gap: 0, marginBottom: 14,
-        background: "var(--bg-card)", border: "1px solid var(--border)",
-        borderRadius: 14, overflow: "hidden",
-      }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
         {[
-          { label: "ค้าง/วันนี้", n: now.length,    color: now.length > 0 ? "var(--red)" : "var(--text-3)" },
-          { label: "เร็วๆนี้",    n: soon.length,   color: "var(--amber)"      },
-          { label: "ถัดไป",       n: later.length,  color: "var(--text-3)"     },
-          { label: "รอตรวจ",      n: review.length, color: "var(--steel-teal)" },
-        ].map((s, i) => (
+          {
+            label: "ด่วน", n: now.length,
+            color: now.length > 0 ? "#ff3b30" : "var(--text-3)",
+            barColor: now.length > 0 ? "#ff3b30" : "var(--border)",
+            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M6 2v4m0 2.5v.5"/><circle cx="6" cy="6" r="5"/></svg>,
+          },
+          {
+            label: "วันนี้", n: soon.length,
+            color: soon.length > 0 ? "#ff9500" : "var(--text-3)",
+            barColor: soon.length > 0 ? "#ff9500" : "var(--border)",
+            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="5"/><path d="M6 3.5V6l1.5 1.5"/></svg>,
+          },
+          {
+            label: "ถัดไป", n: later.length,
+            color: "var(--brand)",
+            barColor: "rgba(0,129,255,0.25)",
+            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><path d="M2 9h8M2 6h6M2 3h4"/></svg>,
+          },
+          {
+            label: "รอตรวจ", n: review.length,
+            color: "var(--text-2)",
+            barColor: "var(--border)",
+            icon: (c: string) => <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round"><circle cx="6" cy="6" r="5"/><path d="M6 3.5V6l1.5 1.5"/></svg>,
+          },
+        ].map(s => (
           <div key={s.label} style={{
-            flex: 1, textAlign: "center", padding: "11px 4px",
-            borderLeft: i > 0 ? "1px solid var(--border)" : "none",
+            background: "var(--bg-card)", border: "1px solid var(--border)",
+            borderRadius: 14, padding: "12px 10px",
+            display: "flex", flexDirection: "column", gap: 2,
+            position: "relative", overflow: "hidden",
           }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.n}</div>
-            <div style={{ fontSize: 9, color: "var(--text-3)", marginTop: 3 }}>{s.label}</div>
+            {/* top color bar */}
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: s.barColor, borderRadius: "14px 14px 0 0" }} />
+            <div style={{ marginBottom: 4, opacity: 0.6 }}>{s.icon(s.color)}</div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: s.color, lineHeight: 1, letterSpacing: "-0.02em" }}>{s.n}</div>
+            <div style={{ fontSize: 9, color: "var(--text-3)", fontWeight: 500 }}>{s.label}</div>
           </div>
         ))}
       </div>
@@ -413,12 +439,12 @@ export default function TodayView({
       {/* ── Zone: ตอนนี้ ── */}
       {now.length > 0 && (
         <ZoneCard
-          accentColor="var(--red)" label="ตอนนี้" count={now.length}
-          labelIcon={<DotIcon size={9} color="var(--red)" />}
+          accentColor="#ff3b30" label="ด่วนมาก — P1" count={now.length}
+          labelIcon={<DotIcon size={9} color="#ff3b30" />}
         >
           {now.map(t => (
             <TodoItem key={t.id} task={t} onDone={onDone}
-              onClick={() => onTaskClick(t)} accent="var(--red)" />
+              onClick={() => onTaskClick(t)} accent="#ff3b30" />
           ))}
         </ZoneCard>
       )}
@@ -426,12 +452,12 @@ export default function TodayView({
       {/* ── Zone: เร็วๆนี้ ── */}
       {soon.length > 0 && (
         <ZoneCard
-          accentColor="var(--amber)" label="เร็วๆ นี้ · 3 วัน" count={soon.length}
-          labelIcon={<DotIcon size={9} color="var(--amber)" />}
+          accentColor="#ff9500" label="วันนี้ — P2" count={soon.length}
+          labelIcon={<DotIcon size={9} color="#ff9500" />}
         >
           {soon.map(t => (
             <TodoItem key={t.id} task={t} onDone={onDone}
-              onClick={() => onTaskClick(t)} accent="var(--amber)" />
+              onClick={() => onTaskClick(t)} accent="#ff9500" />
           ))}
         </ZoneCard>
       )}
@@ -439,8 +465,8 @@ export default function TodayView({
       {/* ── Zone: ถัดไป ── */}
       {later.length > 0 && (
         <ZoneCard
-          accentColor="var(--text-3)" label="ถัดไป" count={later.length}
-          labelIcon={<DotIcon size={9} color="var(--text-3)" />}
+          accentColor="var(--brand)" label="ถัดไป" count={later.length}
+          labelIcon={<DotIcon size={9} color="var(--brand)" />}
           defaultOpen={false}
         >
           {later.slice(0, 10).map(t => (
@@ -449,7 +475,7 @@ export default function TodayView({
           ))}
           {later.length > 10 && (
             <div style={{ textAlign: "center", fontSize: 11, color: "var(--text-3)", paddingTop: 4 }}>
-              +{later.length - 10} งานอีก · ดูที่แท็บ <strong style={{ color: "var(--amber)" }}>งาน</strong>
+              +{later.length - 10} งานอีก · ดูที่แท็บ <strong style={{ color: "var(--brand)" }}>งาน</strong>
             </div>
           )}
         </ZoneCard>
@@ -458,8 +484,8 @@ export default function TodayView({
       {/* ── Zone: รอตรวจ ── */}
       {review.length > 0 && (
         <ZoneCard
-          accentColor="var(--steel-teal)" label="รอตรวจ" count={review.length}
-          labelIcon={<ClockIcon size={11} color="var(--steel-teal)" />}
+          accentColor="var(--text-3)" label="รอตรวจ" count={review.length}
+          labelIcon={<ClockIcon size={11} color="var(--text-3)" />}
           defaultOpen={false}
         >
           {review.slice(0, 6).map(t => {

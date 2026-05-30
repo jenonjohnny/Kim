@@ -28,13 +28,15 @@
   --text-3:      #3a3a48;
 
   /* ─── Icon tint — customizable via Settings ─── */
-  --icon-tint:   #949597;   /* default = text-2, change to customize */
-  --icon-active: #ffb900;   /* active/selected icon = amber */
+  --icon-tint:   #606070;   /* default = muted */
+  --icon-active: #0081ff;   /* active/selected icon = norte blue */
 
   /* ─── Brand accent ─── */
-  --brand:       #ffb900;
-  --brand-soft:  rgba(255,185,0,0.12);
-  --brand-dim:   rgba(255,185,0,0.06);
+  --brand:       #0081ff;
+  --brand-dark:  #0066cc;
+  --brand-soft:  rgba(0,129,255,0.10);
+  --brand-dim:   rgba(0,129,255,0.05);
+  --brand-glow:  rgba(0,129,255,0.25);
 
   /* ─── Teal depth ─── */
   --teal:        #0b4651;
@@ -43,10 +45,10 @@
   --teal-glow:   rgba(51,92,103,0.25);
 
   /* ─── Status ─── */
-  --red:         #e04545;
-  --red-soft:    rgba(224,69,69,0.11);
-  --yellow:      #ffb900;
-  --yellow-soft: rgba(255,185,0,0.11);
+  --red:         #ff3b30;
+  --red-soft:    rgba(255,59,48,0.11);
+  --yellow:      #ff9500;
+  --yellow-soft: rgba(255,149,0,0.11);
   --green:       #2db877;
   --green-soft:  rgba(45,184,119,0.11);
 
@@ -67,17 +69,18 @@
 
 /* ─── Light theme ─── */
 [data-theme="light"] {
-  --bg-base:     #f5f5f8;
+  --bg-base:     #f0f4fa;
   --bg-card:     #ffffff;
-  --bg-raised:   #eeeeef;
-  --bg-input:    #e8e8ef;
-  --border:      #d5d5e0;
-  --border-soft: #eeeeef;
-  --text-1:      #111118;
-  --text-2:      #55555f;
-  --text-3:      #aaaabc;
-  --brand-soft:  rgba(255,185,0,0.15);
-  --brand-dim:   rgba(255,185,0,0.08);
+  --bg-raised:   #e8eef8;
+  --bg-input:    #e0e8f4;
+  --border:      #d0d8ee;
+  --border-soft: #e0e8f4;
+  --text-1:      #0a0a0f;
+  --text-2:      #4a4a5a;
+  --text-3:      #9090a0;
+  --icon-tint:   #8090a8;
+  --brand-soft:  rgba(0,129,255,0.10);
+  --brand-dim:   rgba(0,129,255,0.05);
   --teal-soft:   rgba(11,70,81,0.12);
   --teal-glow:   rgba(51,92,103,0.10);
   --red-soft:    rgba(224,69,69,0.09);

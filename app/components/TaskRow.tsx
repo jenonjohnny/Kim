@@ -9,9 +9,16 @@ import {
 const THAI_MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
 
 export const AREA_STYLE: Record<string, { label: string; color: string }> = {
-  sts:     { label: "STS",     color: "var(--amber)"      },
-  daisi:   { label: "Daisi",   color: "var(--warm-gold)"  },
-  digital: { label: "Digital", color: "var(--steel-teal)" },
+  sts:     { label: "STS",     color: "var(--brand)"  },
+  daisi:   { label: "Daisi",   color: "var(--brand)"  },
+  digital: { label: "Digital", color: "var(--brand)"  },
+};
+
+/* Norte-style area icons */
+const AREA_ICON: Record<string, React.ReactNode> = {
+  sts:     <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><line x1="3" y1="1" x2="3" y2="7"/></svg>,
+  daisi:   <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"><path d="M4 1l.8 2.2 2.2.3-1.6 1.5.4 2.2L4 6.2 1.8 7.2l.4-2.2L.6 3.5l2.2-.3z"/></svg>,
+  digital: <svg width="8" height="8" viewBox="0 0 8 8" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="1,6 3,4 5,5 7,2"/></svg>,
 };
 
 const CARD = {
@@ -26,10 +33,15 @@ export function AreaBadge({ area }: { area: string }) {
   if (!s) return null;
   return (
     <span style={{
-      fontSize: 9, fontWeight: 700, color: s.color,
-      background: s.color + "20", borderRadius: 5,
-      padding: "1px 6px", letterSpacing: "0.06em",
-    }}>{s.label}</span>
+      fontSize: 9, fontWeight: 600, color: "var(--brand)",
+      background: "var(--brand-soft)", borderRadius: 5,
+      border: "1px solid rgba(0,129,255,0.2)",
+      padding: "1px 6px", letterSpacing: "0.04em",
+      display: "inline-flex", alignItems: "center", gap: 3,
+    }}>
+      {AREA_ICON[area]}
+      {s.label}
+    </span>
   );
 }
 
@@ -42,11 +54,13 @@ export function TaskMeta({ task }: { task: Task }) {
     <div style={{ display: "flex", gap: 5, alignItems: "center", flexWrap: "wrap", marginTop: 3 }}>
       {hasQData && (
         <span style={{
-          fontSize: 10, fontWeight: 800, color: qInfo.color,
-          background: qInfo.color + "18", borderRadius: 5,
-          padding: "1px 7px", letterSpacing: "0.03em",
+          fontSize: 10, fontWeight: 800,
+          color: task.priority === "P1" ? "#ff3b30" : task.priority === "P2" ? "#ff9500" : "var(--text-3)",
+          background: task.priority === "P1" ? "rgba(255,59,48,0.12)" : task.priority === "P2" ? "rgba(255,149,0,0.12)" : "var(--bg-raised)",
+          border: `1px solid ${task.priority === "P1" ? "rgba(255,59,48,0.25)" : task.priority === "P2" ? "rgba(255,149,0,0.25)" : "var(--border)"}`,
+          borderRadius: 5, padding: "1px 7px", letterSpacing: "0.03em",
         }}>
-          {qInfo.emoji} {qInfo.shortLabel}
+          {task.priority || qInfo.shortLabel}
         </span>
       )}
       {hasArea && <AreaBadge area={task.area!} />}
