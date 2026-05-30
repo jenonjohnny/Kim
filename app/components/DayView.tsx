@@ -471,7 +471,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
 
         <button onClick={()=>setDayOff(0)} style={{textAlign:"center",background:"none",border:"none",cursor:dayOff!==0?"pointer":"default",padding:"0 8px",flex:1}}>
           <div style={{fontSize:16,fontWeight:800,color:"var(--text-1)",letterSpacing:"-0.01em"}}>
-            {`${THAI_DAYS[curDay.getDay()]} ${curDay.getDate()} ${THAI_MONTHS[curDay.getMonth()]}.`}
+            {`${THAI_DAYS[curDay.getDay()]} ${curDay.getDate()} ${THAI_MONTHS[curDay.getMonth()]}`}
           </div>
           <span style={{fontSize:11,color:"var(--text-3)",display:"block",marginTop:1}}>
             {isToday?"วันนี้":dayOff===1?"พรุ่งนี้":dayOff===-1?"เมื่อวาน":""}{tray.length>0?` · ${tray.length} งาน`:""}

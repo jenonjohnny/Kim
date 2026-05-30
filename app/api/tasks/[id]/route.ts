@@ -42,11 +42,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     properties["Areas"] = areaId ? { relation: [{ id: areaId }] } : { relation: [] };
   }
 
-  const res = await fetch(`https://api.notion.com/v1/pages/${id}`, {
-    method: "PATCH",
-    headers: HEADERS,
-    body: JSON.stringify({ properties }),
-  });
-  const data = await res.json();
-  return NextResponse.json({ ok: data.object === "page" });
+  try {
+    const res = await fetch(`https://api.notion.com/v1/pages/${id}`, {
+      method: "PATCH",
+      headers: HEADERS,
+      body: JSON.stringify({ properties }),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Notion PATCH error:", res.status, errText);
+      return NextResponse.json({ ok: false, error: "notion_error", status: res.status }, { status: res.status });
+    }
+    const data = await res.json();
+    return NextResponse.json({ ok: data.object === "page" });
+  } catch (err) {
+    console.error("PATCH /api/tasks/[id] error:", err);
+    return NextResponse.json({ ok: false, error: "fetch_failed" }, { status: 503 });
+  }
 }

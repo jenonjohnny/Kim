@@ -108,7 +108,7 @@ export default function TaskRow({
   const SWIPE_THRESHOLD = 80;
   // Norte v2 urgency-only border system
   const isOverdue = task.due && task.due < new Date().toISOString().split("T")[0];
-  const isP1 = task.priority === "P1" || task.urgent;
+  const isP1 = task.priority === "P1";
   const isP2 = task.priority === "P2";
   const borderColor = isOverdue ? "rgba(255,59,48,0.4)"
     : isP1 ? "rgba(255,59,48,0.25)"

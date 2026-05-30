@@ -303,7 +303,7 @@ export function TodoItem({
   })();
 
   const isOverdue = task.due && task.due < new Date().toISOString().split("T")[0];
-  const isP1 = task.priority === "P1" || task.urgent;
+  const isP1 = task.priority === "P1";
 
   return (
     <div style={{ position: "relative", borderRadius: 14, overflow: "hidden" }}>
@@ -437,9 +437,7 @@ export default function TodayView({
 
   const allActive = [...data.urgent, ...data.soon, ...data.normal];
   const focusTask =
-    allActive.find(t => t.urgent && t.priority === "P1") ||
     allActive.find(t => t.priority === "P1") ||
-    allActive.find(t => t.urgent) ||
     allActive.find(t => t.priority === "P2") ||
     allActive[0] || null;
 

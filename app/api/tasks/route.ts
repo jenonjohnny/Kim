@@ -57,57 +57,79 @@ export async function GET() {
       ]}]
     : [];
 
-  const res = await fetch(`https://api.notion.com/v1/databases/${DB}/query`, {
-    method: "POST",
-    headers: HEADERS,
-    body: JSON.stringify({
-      page_size: 100,
-      filter: { and: [...statusFilters, ...areaFilter] },
-      sorts: [{ property: "Due Date", direction: "ascending" }],
-    }),
-    cache: "no-store",   // ← ไม่ cache เลย ดึง Notion fresh ทุกครั้ง
-  });
-  const data = await res.json();
-  const all = (data.results || []).map(parseTask);
+  try {
+    const res = await fetch(`https://api.notion.com/v1/databases/${DB}/query`, {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify({
+        page_size: 100,
+        filter: { and: [...statusFilters, ...areaFilter] },
+        sorts: [{ property: "Due Date", direction: "ascending" }],
+      }),
+      cache: "no-store",   // ← ไม่ cache เลย ดึง Notion fresh ทุกครั้ง
+    });
 
-  const today  = new Date().toISOString().split("T")[0];
-  const in3days = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Notion GET error:", res.status, errText);
+      return NextResponse.json({ error: "notion_error", status: res.status }, { status: 502 });
+    }
 
-  // events = Note status ที่มีเวลาระบุ (meeting/event ที่ใส่ใน Time Block)
-  const events  = all.filter((t: any) => t.status === "Note" && t.due && t.due.includes("T"));
-  const onhold  = all.filter((t: any) => t.status === "On Hold");
-  const review  = all.filter((t: any) => t.status === "Waiting");
-  const active  = all.filter((t: any) => t.status !== "Waiting" && t.status !== "On Hold" && t.status !== "Note");
+    const data = await res.json();
+    const all = (data.results || []).map(parseTask);
 
-  // Use date-part only for comparison to avoid UTC vs Bangkok timezone mismatch
-  const urgent  = active.filter((t: any) => t.due && t.due.split("T")[0] <= today);
-  const soon    = active.filter((t: any) => t.due && t.due.split("T")[0] > today && t.due.split("T")[0] <= in3days);
-  const normal  = active.filter((t: any) => !t.due || t.due > in3days);
+    const today  = new Date().toISOString().split("T")[0];
+    const in3days = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
 
-  return NextResponse.json({ urgent, soon, normal, review, onhold, events, total: active.length });
+    // events = Note status ที่มีเวลาระบุ (meeting/event ที่ใส่ใน Time Block)
+    const events  = all.filter((t: any) => t.status === "Note" && t.due && t.due.includes("T"));
+    const onhold  = all.filter((t: any) => t.status === "On Hold");
+    const review  = all.filter((t: any) => t.status === "Waiting");
+    const active  = all.filter((t: any) => t.status !== "Waiting" && t.status !== "On Hold" && t.status !== "Note");
+
+    // Use date-part only for comparison to avoid UTC vs Bangkok timezone mismatch
+    const urgent  = active.filter((t: any) => t.due && t.due.split("T")[0] <= today);
+    const soon    = active.filter((t: any) => t.due && t.due.split("T")[0] > today && t.due.split("T")[0] <= in3days);
+    const normal  = active.filter((t: any) => !t.due || t.due > in3days);
+
+    return NextResponse.json({ urgent, soon, normal, review, onhold, events, total: active.length });
+  } catch (err) {
+    console.error("GET /api/tasks error:", err);
+    return NextResponse.json({ error: "fetch_failed" }, { status: 503 });
+  }
 }
 
 export async function POST(req: Request) {
-  const { title, due, endDue, notes, areaId, priority, urgent } = await req.json();
-  const body: any = {
-    parent: { database_id: DB },
-    icon: { type: "external", external: { url: "https://www.notion.so/icons/checkmark_blue.svg" } },
-    properties: {
-      Name: { title: [{ text: { content: title } }] },
-      Status: { status: { name: "Not started" } },
-    },
-  };
-  if (areaId) body.properties["Areas"] = { relation: [{ id: areaId }] };
-  if (due) body.properties["Due Date"] = { date: { start: due, end: endDue || null } };
-  if (notes) body.properties["Notes"] = { rich_text: [{ text: { content: notes } }] };
-  if (priority) body.properties["Priority Level"] = { select: { name: priority } };
-  if (urgent) body.properties["Urgent"] = { select: { name: urgent } };
+  try {
+    const { title, due, endDue, notes, areaId, priority, urgent } = await req.json();
+    const body: any = {
+      parent: { database_id: DB },
+      icon: { type: "external", external: { url: "https://www.notion.so/icons/checkmark_blue.svg" } },
+      properties: {
+        Name: { title: [{ text: { content: title } }] },
+        Status: { status: { name: "Not started" } },
+      },
+    };
+    if (areaId) body.properties["Areas"] = { relation: [{ id: areaId }] };
+    if (due) body.properties["Due Date"] = { date: { start: due, end: endDue || null } };
+    if (notes) body.properties["Notes"] = { rich_text: [{ text: { content: notes } }] };
+    if (priority) body.properties["Priority Level"] = { select: { name: priority } };
+    if (urgent) body.properties["Urgent"] = { select: { name: urgent } };
 
-  const res = await fetch("https://api.notion.com/v1/pages", {
-    method: "POST",
-    headers: HEADERS,
-    body: JSON.stringify(body),
-  });
-  const result = await res.json();
-  return NextResponse.json(parseTask(result));
+    const res = await fetch("https://api.notion.com/v1/pages", {
+      method: "POST",
+      headers: HEADERS,
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      console.error("Notion POST error:", res.status, errText);
+      return NextResponse.json({ error: "notion_error" }, { status: 502 });
+    }
+    const result = await res.json();
+    return NextResponse.json(parseTask(result));
+  } catch (err) {
+    console.error("POST /api/tasks error:", err);
+    return NextResponse.json({ error: "fetch_failed" }, { status: 503 });
+  }
 }
