@@ -878,9 +878,7 @@ function TodayView({
         </ZoneCard>
       )}
 
-      <FeedbackStrip />
-
-      <div style={{ textAlign: "center", fontSize: 10, color: "var(--text-3)", marginTop: 4, paddingBottom: 4 }}>
+      <div style={{ textAlign: "center", fontSize: 10, color: "var(--text-3)", marginTop: 8, paddingBottom: 16 }}>
         sync {syncTime} น. · auto ทุก 5 นาที
       </div>
     </div>
@@ -1275,6 +1273,8 @@ export default function Home() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <Greeting />
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {/* Feedback */}
+            <FeedbackStrip compact />
             {/* Search */}
             <button
               onClick={() => setShowSearch(true)}

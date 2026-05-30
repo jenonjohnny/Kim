@@ -693,6 +693,9 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
             <span style={{flex:1,fontSize:12,fontWeight:700,color:"var(--text-2)"}}>{isToday?"งานวันนี้ — ยังไม่มีเวลา":"งาน — ยังไม่มีเวลา"}</span>
             <span style={{fontSize:11,fontWeight:700,color:"var(--text-3)",background:"var(--bg-raised)",borderRadius:6,padding:"2px 8px"}}>{tray.length}</span>
           </div>
+          <div style={{padding:"0 12px 4px",display:"flex",alignItems:"center",gap:6,paddingLeft:14,paddingBottom:8}}>
+            <span style={{fontSize:10,color:"var(--text-3)"}}>กดค้าง 0.4 วิ แล้วลากขึ้น grid</span>
+          </div>
           <div style={{padding:"0 12px 12px",display:"flex",flexDirection:"column",gap:6}}>
             {tray.filter(t=>!doneTrayIds.has(t.id)).map(t=>{
               const ac=t.area?(AREA_COLOR[t.area]??"var(--text-3)"):"var(--text-3)";
@@ -737,12 +740,12 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                 </div>
               );
             })}
-            <div style={{textAlign:"center",fontSize:9,color:"var(--text-3)",paddingTop:2}}>ลาก task ขึ้นไปวางบน grid · ลากออกนอก grid เพื่อลบ</div>
+            <div style={{textAlign:"center",fontSize:9,color:"var(--text-3)",paddingTop:4,paddingBottom:2,opacity:0.6}}>ลากออกนอก grid เพื่อลบออกจากตาราง</div>
           </div>
         </div>
       )}
 
-      <div style={{textAlign:"center",fontSize:10,color:"var(--text-3)",paddingBottom:4}}>
+      <div style={{textAlign:"center",fontSize:10,color:"var(--text-3)",paddingBottom:90}}>
         แตะ grid สร้าง · แตะ block เลือก · ลากวงกลมปรับเวลา · กดค้าง block ที่เลือกแล้วเพื่อย้าย
       </div>
 

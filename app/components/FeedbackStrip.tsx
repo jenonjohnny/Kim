@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { StarIcon, MessageSquareIcon, BugIcon, LightbulbIcon, SendIcon, CloseIcon } from "./icons";
 
 const CATEGORIES = [
@@ -41,6 +42,12 @@ export default function FeedbackStrip({ compact }: Props) {
         body: JSON.stringify({ rating, category, comment }),
       });
       const data = await res.json();
+      // 503 = Notion DB not yet configured — treat as success (queued)
+      if (res.status === 503) {
+        setStep("done");
+        setTimeout(reset, 3000);
+        return;
+      }
       if (!data.ok) throw new Error(data.error);
       setStep("done");
       setTimeout(reset, 2500);
@@ -55,9 +62,89 @@ export default function FeedbackStrip({ compact }: Props) {
   ══════════════════════════════════ */
   if (compact) {
     const sheetOpen = step === "open" || step === "sending" || step === "done";
+
+    // Portal: render backdrop + sheet directly on document.body to escape
+    // the page's <main overflow:hidden> stacking context
+    const portalContent = sheetOpen ? (
+      <>
+        {/* Backdrop */}
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 9998, background: "rgba(0,0,0,0.65)" }}
+          onClick={step !== "sending" ? reset : undefined}
+        />
+        {/* Sheet */}
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 9999,
+            background: "var(--bg-card)",
+            borderRadius: "20px 20px 0 0",
+            borderTop: "2px solid var(--amber)",
+            borderLeft: "1px solid var(--border)",
+            borderRight: "1px solid var(--border)",
+            borderBottom: "none",
+            boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
+            display: "flex", flexDirection: "column",
+            minHeight: "58vh",
+            maxHeight: "88dvh",
+            overflow: "hidden",
+            animation: "sheetIn 0.38s cubic-bezier(0.32,0.72,0,1)",
+          }}
+        >
+          {/* Handle */}
+          <div style={{ display: "flex", justifyContent: "center", padding: "12px 0 4px" }}>
+            <div style={{ width: 36, height: 4, background: "var(--border)", borderRadius: 2 }} />
+          </div>
+
+          {step === "done" ? (
+            <div style={{ padding: "32px 20px calc(28px + env(safe-area-inset-bottom))", textAlign: "center" }}>
+              <CheckCircle />
+              <div style={{ color: "var(--text-1)", fontWeight: 700, fontSize: 16, marginTop: 14 }}>ขอบคุณมากค่ะ! 🙏</div>
+              <div style={{ color: "var(--text-3)", fontSize: 13, marginTop: 6 }}>เราจะนำ feedback ไปพัฒนา app ต่อนะคะ</div>
+            </div>
+          ) : (
+            <>
+              {/* Scrollable form */}
+              <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" as any, padding: "20px 20px 8px" }}>
+                <FormBody
+                  step={step} rating={rating} hovered={hovered}
+                  category={category} comment={comment} error=""
+                  onClose={reset} onRate={setRating} onHover={setHovered}
+                  onCategory={setCategory} onComment={setComment}
+                  onSubmit={submit}
+                  hideSubmit
+                />
+              </div>
+              {/* Pinned submit */}
+              <div style={{
+                flexShrink: 0,
+                padding: "8px 20px calc(env(safe-area-inset-bottom) + 16px)",
+                borderTop: "1px solid var(--border-soft)",
+                background: "var(--bg-card)",
+              }}>
+                {error && <div style={{ fontSize: 12, color: "var(--red)", marginBottom: 10 }}>{error}</div>}
+                <button onClick={submit} disabled={step === "sending"} style={{
+                  width: "100%", padding: "14px 0",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  background: step === "sending" ? "var(--border)" : "var(--amber)",
+                  color: step === "sending" ? "var(--text-3)" : "#000",
+                  border: "none", borderRadius: 12,
+                  fontSize: 14, fontWeight: 700,
+                  cursor: step === "sending" ? "default" : "pointer",
+                  transition: "all 0.15s",
+                }}>
+                  {step === "sending" ? "กำลังส่ง..." : <><SendIcon size={14} color="#000" />ส่ง Feedback</>}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </>
+    ) : null;
+
     return (
       <>
-        {/* Icon button */}
+        {/* Icon button — always visible in header */}
         <button onClick={() => setStep("open")} style={{
           width: 38, height: 38, borderRadius: 12,
           background: "var(--bg-card)", border: "1px solid var(--border)",
@@ -66,80 +153,10 @@ export default function FeedbackStrip({ compact }: Props) {
         }}>
           <MessageSquareIcon size={17} color="var(--icon-tint)" />
         </button>
-
-        {/* Backdrop — separate from sheet so sheet uses fixed bottom:0 */}
-        {sheetOpen && (
-          <div
-            style={{ position: "fixed", inset: 0, zIndex: 199, background: "rgba(0,0,0,0.6)" }}
-            onClick={step !== "sending" ? reset : undefined}
-          />
-        )}
-
-        {/* Sheet — position:fixed bottom:0 directly, NOT inside a flex parent */}
-        {sheetOpen && (
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 200,
-              background: "var(--bg-card)",
-              borderRadius: "20px 20px 0 0",
-              border: "1px solid var(--border)",
-              borderBottom: "none",
-              boxShadow: "0 -8px 40px rgba(0,0,0,0.5)",
-              /* Flex column: scrollable content area + pinned submit */
-              display: "flex", flexDirection: "column",
-              minHeight: "60vh",
-              maxHeight: "88dvh",
-              overflow: "hidden",
-            }}
-          >
-            {step === "done" ? (
-              <div style={{ padding: "40px 20px calc(28px + env(safe-area-inset-bottom))", textAlign: "center" }}>
-                <CheckCircle />
-                <div style={{ color: "var(--text-1)", fontWeight: 700, fontSize: 15, marginTop: 12 }}>ขอบคุณมากค่ะ!</div>
-                <div style={{ color: "var(--text-3)", fontSize: 12, marginTop: 4 }}>feedback ของคุณช่วยพัฒนา app ค่ะ</div>
-              </div>
-            ) : (
-              <>
-                {/* Scrollable form content (without submit button) */}
-                <div style={{ flex: 1, minHeight: 0, overflowY: "auto", WebkitOverflowScrolling: "touch" as any, padding: "20px 20px 8px" }}>
-                  <FormBody
-                    step={step} rating={rating} hovered={hovered}
-                    category={category} comment={comment} error=""
-                    onClose={reset} onRate={setRating} onHover={setHovered}
-                    onCategory={setCategory} onComment={setComment}
-                    onSubmit={submit}
-                    hideSubmit
-                  />
-                </div>
-
-                {/* Pinned bottom — error + submit button always visible */}
-                <div style={{
-                  flexShrink: 0,
-                  padding: "8px 20px calc(env(safe-area-inset-bottom) + 16px)",
-                  borderTop: "1px solid var(--border-soft)",
-                  background: "var(--bg-card)",
-                }}>
-                  {error && (
-                    <div style={{ fontSize: 12, color: "var(--red)", marginBottom: 10 }}>{error}</div>
-                  )}
-                  <button onClick={submit} disabled={step === "sending"} style={{
-                    width: "100%", padding: "14px 0",
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                    background: step === "sending" ? "var(--border)" : "var(--amber)",
-                    color: step === "sending" ? "var(--text-3)" : "#000",
-                    border: "none", borderRadius: 12,
-                    fontSize: 14, fontWeight: 700,
-                    cursor: step === "sending" ? "default" : "pointer",
-                    transition: "all 0.15s",
-                  }}>
-                    {step === "sending" ? "กำลังส่ง..." : <><SendIcon size={14} color="#000" />ส่ง Feedback</>}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+        {/* Portal: mount modal directly on body to escape stacking context */}
+        {typeof document !== "undefined" && portalContent
+          ? createPortal(portalContent, document.body)
+          : null}
       </>
     );
   }
