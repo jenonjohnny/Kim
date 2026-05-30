@@ -169,17 +169,14 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       .catch(()=>{}); // silent fail — GCal is optional
   },[dayOff]);
 
-  // Non-passive touchmove:
-  // • tray-hold phase → preventDefault so browser doesn't claim scroll while we're proxy-scrolling
-  // • active drag phase → preventDefault to keep page locked during drag
+  // Non-passive touchmove — only register during active drag to avoid global scroll lag.
+  // During tray-hold we allow native pan-y scroll (touchAction:"pan-y" on tray items).
   useEffect(()=>{
-    const handler=(e:TouchEvent)=>{
-      const p=dragRef.current?.phase;
-      if(p==="active"||p==="tray-hold") e.preventDefault();
-    };
+    if(drag?.phase!=="active") return;
+    const handler=(e:TouchEvent)=>{ e.preventDefault(); };
     document.addEventListener("touchmove",handler,{passive:false});
     return()=>document.removeEventListener("touchmove",handler);
-  },[]);
+  },[drag?.phase]);
 
   const curDay  = addD(today, dayOff);
   const curDate = dStr(curDay);
@@ -296,12 +293,9 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
         return;
       }
       if(d.phase==="tray-hold"){
-        // Proxy scroll — tray items use touchAction:"none" so we manually scroll the container
-        const sc=scrollContainer?.current;
-        if(sc) sc.scrollTop += prevY - e.clientY;
+        // Native scroll handles pan-y — just cancel hold if user has clearly scrolled
         const dy=Math.abs(e.clientY-d.startY);
-        // Cancel hold if user moved more than 20px from start (intent = scroll, not drag)
-        if(dy>20){ if(trayHoldTimerRef.current){ clearTimeout(trayHoldTimerRef.current); trayHoldTimerRef.current=null; } setDrag(null); dragRef.current=null; }
+        if(dy>14){ if(trayHoldTimerRef.current){ clearTimeout(trayHoldTimerRef.current); trayHoldTimerRef.current=null; } setDrag(null); dragRef.current=null; }
         return;
       }
       if(d.phase==="pending"){
@@ -363,8 +357,21 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
   },[stopAutoScroll,isOverGrid,getGridY,curDate]);
 
   useEffect(()=>{
-    window.addEventListener("pointermove",onPM); window.addEventListener("pointerup",onPU);
-    return()=>{ window.removeEventListener("pointermove",onPM); window.removeEventListener("pointerup",onPU); stopAutoScroll(); };
+    // pointercancel fires when browser claims touch for native scroll (touchAction:"pan-y")
+    const onPC=()=>{
+      if(holdTimerRef.current){ clearTimeout(holdTimerRef.current); holdTimerRef.current=null; }
+      if(trayHoldTimerRef.current){ clearTimeout(trayHoldTimerRef.current); trayHoldTimerRef.current=null; }
+      dragRef.current=null; setDrag(null); stopAutoScroll();
+    };
+    window.addEventListener("pointermove",onPM);
+    window.addEventListener("pointerup",onPU);
+    window.addEventListener("pointercancel",onPC);
+    return()=>{
+      window.removeEventListener("pointermove",onPM);
+      window.removeEventListener("pointerup",onPU);
+      window.removeEventListener("pointercancel",onPC);
+      stopAutoScroll();
+    };
   },[onPM,onPU,stopAutoScroll]);
 
   /* ── Block drag (only when selected — activates immediately on movement) ── */
@@ -716,7 +723,7 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                     transform:isDragging?"scale(1.01)":"none",
                     transition:"transform 0.1s,background 0.15s,border-color 0.15s",
                     cursor:"grab",userSelect:"none",WebkitUserSelect:"none",
-                    touchAction:"none",  /* none = proxy scroll in onPM handles swipe; hold 400ms activates drag */
+                    touchAction:"pan-y",  /* pan-y = browser scrolls natively; hold 400ms → setPointerCapture activates drag */
                   } as React.CSSProperties}
                   onPointerDown={e=>onTrayPD(e,t)}
                   onClick={()=>onTrayTap(t)}>

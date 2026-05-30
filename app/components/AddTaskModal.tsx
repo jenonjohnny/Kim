@@ -263,8 +263,10 @@ export default function AddTaskModal({
           </button>
           {showCal && (
             <CalendarPicker
-              startValue={due} onStartChange={v => { setDue(v); }}
-              endValue={endDue} onEndChange={v => { setEndDue(v); }}
+              startValue={due}
+              onStartChange={v => { setDue(v + (due.includes("T") ? due.slice(10) : "")); }}
+              endValue={endDue}
+              onEndChange={v => { setEndDue(v + (endDue.includes("T") ? endDue.slice(10) : "")); }}
             />
           )}
         </div>
