@@ -5,7 +5,6 @@ import {
   ChevronLeftIcon, ChevronRightIcon, ClockIcon,
   FlagIcon, DotIcon, ChevronDownIcon, GoogleIcon,
 } from "./icons";
-import { AreaItem, getVisibleAreaIds } from "./SettingsSheet";
 
 /* ═══════════════════════════════  CONSTANTS  ═══════════════════════════════ */
 const HOUR_H    = 72;
@@ -63,11 +62,6 @@ async function clearTime(id:string) {
   await fetch(`/api/tasks/${id}`, { method:"PATCH", headers:{"Content-Type":"application/json"},
     body:JSON.stringify({ due:null }) });
 }
-async function createTaskApi(title:string, notes:string, day:string, start:number, end:number, areaId:string|undefined, priority:string|null) {
-  const res = await fetch("/api/tasks", { method:"POST", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ title, notes:notes||undefined, due:`${day}T${fmt(start)}:00`, endDue:`${day}T${fmt(end)}:00`, areaId:areaId||undefined, priority:priority||undefined }) });
-  return res.json();
-}
 
 /* ── Overlap layout ── */
 interface ColInfo { col:number; totalCols:number; }
@@ -100,7 +94,6 @@ function loadBlocks(date:string):Record<string,{startMin:number;dur:number}>|nul
 /* ═══════════════════════════════  TYPES  ═══════════════════════════════ */
 interface Block { task:Task; startMin:number; dur:number; }
 interface PeekState { task:Task; startMin:number; dur:number; }
-interface CreateSheet { startMin:number; endMin:number; }
 
 type DragPhase =
   | { phase:"hold"; source:"block"; taskId:string; startX:number; startY:number; blockOffsetMin:number; }
@@ -116,9 +109,10 @@ interface Props {
   onDone?: (id:string)=>void;
   scrollContainer?: React.RefObject<HTMLDivElement|null>;
   resetKey?: number;
+  onCreateBlock?: (due:string, endDue:string) => void;
 }
 
-export default function DayView({ urgent, soon, normal, review, onTaskClick, onDone, scrollContainer, resetKey }:Props) {
+export default function DayView({ urgent, soon, normal, review, onTaskClick, onDone, scrollContainer, resetKey, onCreateBlock }:Props) {
   const today    = new Date();
   const todayStr = dStr(today);
 
@@ -130,17 +124,8 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
   const [peekTask,   setPeekTask]   = useState<PeekState|null>(null);
   const [peekTransY, setPeekTransY] = useState(0);
   const [pickTask,   setPickTask]   = useState<Task|null>(null);
-  const [createSheet,   setCreateSheet]   = useState<CreateSheet|null>(null);
-  const [createTitle,   setCreateTitle]   = useState("");
-  const [createNote,    setCreateNote]    = useState("");
-  const [createAreaId,  setCreateAreaId]  = useState("");
-  const [createAreas,   setCreateAreas]   = useState<AreaItem[]>([]);
-  const [createPriority,setCreatePriority]= useState<"P1"|"P2"|"P3"|"P4"|null>(null);
-  const [creating,      setCreating]      = useState(false);
-  const [createTransY, setCreateTransY] = useState(0);
   const [removedIds,   setRemovedIds]   = useState<Set<string>>(new Set());
-  const [activeTrayId,   setActiveTrayId]   = useState<string|null>(null); // tap-to-highlight
-  const [createExpanded, setCreateExpanded] = useState(false);
+  const [activeTrayId,   setActiveTrayId]   = useState<string|null>(null);
   const [doneTrayIds,    setDoneTrayIds]    = useState<Set<string>>(new Set());
 
   // Google Calendar read-only events
@@ -156,7 +141,6 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
   const latestPtrRef   = useRef({x:0,y:0});
   const rafRef         = useRef<number|null>(null);
   const peekDragRef    = useRef<{startY:number; dy:number}|null>(null);
-  const createDragRef  = useRef<{startY:number}|null>(null);
   // Handle drag (top/bot circle on selected block)
   const handleDragRef  = useRef<{id:string; type:"top"|"bot"}|null>(null);
 
@@ -179,17 +163,14 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
       .catch(()=>{}); // silent fail — GCal is optional
   },[dayOff]);
 
-  // Fetch Notion areas for create form (once on mount)
+  // Non-passive touchmove:
+  // • tray-hold phase → preventDefault so browser doesn't claim scroll while we're proxy-scrolling
+  // • active drag phase → preventDefault to keep page locked during drag
   useEffect(()=>{
-    fetch("/api/areas").then(r=>r.json()).then(d=>{
-      const all: AreaItem[] = d.areas || [];
-      setCreateAreas(all.filter((a:AreaItem)=>getVisibleAreaIds(all).includes(a.id)));
-    }).catch(()=>{});
-  },[]);
-
-  // Non-passive touchmove — prevent browser scroll during active drag phase only
-  useEffect(()=>{
-    const handler=(e:TouchEvent)=>{ if(dragRef.current?.phase==="active") e.preventDefault(); };
+    const handler=(e:TouchEvent)=>{
+      const p=dragRef.current?.phase;
+      if(p==="active"||p==="tray-hold") e.preventDefault();
+    };
     document.addEventListener("touchmove",handler,{passive:false});
     return()=>document.removeEventListener("touchmove",handler);
   },[]);
@@ -414,8 +395,6 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
 
   /* ── Tray tap (quick release) = toggle highlight ── */
   const onTrayTap=(task:Task)=>{
-    // Dismiss any open create sheet so actions don't conflict
-    if(createSheet||createExpanded){ setCreateSheet(null); setCreateExpanded(false); setCreatePriority(null); }
     setActiveTrayId(prev => prev===task.id ? null : task.id);
   };
 
@@ -427,16 +406,14 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
     await fetch(`/api/tasks/${task.id}`,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status:"Done"})});
   },[onDone]);
 
-  /* ── Grid tap: deselect or create ── */
+  /* ── Grid tap: deselect or open AddTaskModal with pre-filled time ── */
   const onGridClick=(e:React.MouseEvent)=>{
     if(drag) return;
-    if(selectedId){
-      setSelectedId(null); setPeekTask(null); return;
-    }
+    if(selectedId){ setSelectedId(null); setPeekTask(null); return; }
     const y=getGridY(e.clientY);
     const sm=snapM(clamp(yToMin(y),H_START*60,H_END*60-60));
-    setCreateSheet({startMin:sm,endMin:sm+DEF_DUR});
-    setCreateTitle(""); setCreateNote(""); setCreateAreaId(""); setCreatePriority(null); setCreateTransY(0);
+    const em=sm+DEF_DUR;
+    onCreateBlock?.(`${curDate}T${fmt(sm)}:00`, `${curDate}T${fmt(em)}:00`);
   };
 
   const dismissPeek=useCallback(()=>{ setPeekTask(null); setPeekTransY(0); setSelectedId(null); },[]);
@@ -597,8 +574,6 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
                   onClick={e=>{
                     e.stopPropagation();
                     if(!isSelected){
-                      // First tap = select + open peek; clear any open create sheet
-                      if(createSheet||createExpanded){ setCreateSheet(null); setCreateExpanded(false); setCreatePriority(null); }
                       setSelectedId(b.task.id);
                       setPeekTask({task:b.task,startMin:b.startMin,dur:b.dur});
                       setPeekTransY(0);
@@ -861,167 +836,6 @@ export default function DayView({ urgent, soon, normal, review, onTaskClick, onD
         </div>
       )}
 
-      {/* ── Create sheet — mini peek → full form ── */}
-      {createSheet&&(
-        <div style={{position:"fixed",inset:0,zIndex:90,background:createExpanded?"rgba(0,0,0,0.5)":"transparent",display:"flex",alignItems:"flex-end",pointerEvents:createExpanded?"auto":"none"}}
-          onClick={()=>{ if(createExpanded){setCreateSheet(null);setCreateExpanded(false);} }}>
-          <div
-            style={{
-              width:"100%", background:"var(--bg-card)",
-              borderRadius:"20px 20px 0 0",
-              border:"1px solid var(--border)",
-              boxShadow:"0 -8px 40px rgba(0,0,0,0.5)",
-              transform:`translateY(${Math.max(0,createTransY)}px)`,
-              transition:createDragRef.current?"none":"transform 0.22s ease-out",
-              animation:"sheetIn 0.35s cubic-bezier(0.32,0.72,0,1)",
-              pointerEvents:"auto",
-            } as React.CSSProperties}
-            onClick={e=>e.stopPropagation()}>
-
-            {/* Swipe handle — drag up=expand, drag down=dismiss (whole top area is draggable) */}
-            <div style={{display:"flex",justifyContent:"center",paddingTop:10,paddingBottom:10,cursor:"ns-resize",touchAction:"none",userSelect:"none",WebkitUserSelect:"none"} as React.CSSProperties}
-              onPointerDown={e=>{ e.currentTarget.setPointerCapture(e.pointerId); createDragRef.current={startY:e.clientY}; setCreateTransY(0); }}
-              onPointerMove={e=>{ if(!createDragRef.current) return; const dy=e.clientY-createDragRef.current.startY; setCreateTransY(dy); }}
-              onPointerUp={()=>{
-                if(!createDragRef.current) return;
-                if(createTransY<-30){ setCreateExpanded(true); setCreateTransY(0); } // swipe up → expand
-                else if(createTransY>60){ setCreateSheet(null); setCreateExpanded(false); } // swipe down → dismiss
-                else setCreateTransY(0);
-                createDragRef.current=null;
-              }}>
-              <div style={{width:44,height:5,borderRadius:3,background:"var(--border)"}}/>
-            </div>
-
-            {/* ── MINI state — time only, swipe whole area to expand ── */}
-            {!createExpanded&&(
-              <div style={{padding:"4px 20px calc(28px + env(safe-area-inset-bottom))",display:"flex",alignItems:"center",gap:12,touchAction:"none",userSelect:"none"} as React.CSSProperties}
-                onPointerDown={e=>{ if((e.target as HTMLElement).tagName==="BUTTON") return; e.currentTarget.setPointerCapture(e.pointerId); createDragRef.current={startY:e.clientY}; setCreateTransY(0); }}
-                onPointerMove={e=>{ if(!createDragRef.current) return; const dy=e.clientY-createDragRef.current.startY; setCreateTransY(dy); }}
-                onPointerUp={()=>{ if(!createDragRef.current) return; if(createTransY<-30){setCreateExpanded(true);setCreateTransY(0);} else if(createTransY>60){setCreateSheet(null);setCreateExpanded(false);} else setCreateTransY(0); createDragRef.current=null; }}>
-                <div style={{flex:1}}>
-                  <div style={{fontSize:10,color:"var(--text-3)",marginBottom:2}}>แตะ "สร้างงาน" หรือเลื่อนขึ้น</div>
-                  <div style={{fontSize:20,fontWeight:800,color:"var(--amber)"}}>{fmt(createSheet.startMin)} – {fmt(createSheet.endMin)}</div>
-                </div>
-                <button onClick={()=>setCreateExpanded(true)}
-                  style={{padding:"10px 18px",borderRadius:12,background:"var(--amber)",border:"none",color:"#000",fontSize:13,fontWeight:700,cursor:"pointer",flexShrink:0,touchAction:"auto"}}>
-                  สร้างงาน →
-                </button>
-                <button onClick={()=>{ setCreateSheet(null); setCreateExpanded(false); }}
-                  style={{padding:"10px 14px",borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:13,cursor:"pointer",flexShrink:0,touchAction:"auto"}}>
-                  ✕
-                </button>
-              </div>
-            )}
-
-            {/* ── FULL state ── */}
-            {createExpanded&&(
-            <div style={{display:"flex",flexDirection:"column",maxHeight:"82dvh"}}>
-              {/* Scrollable content */}
-              <div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch" as any,padding:"0 20px 8px"}}>
-                <div style={{fontSize:11,fontWeight:700,color:"var(--text-3)",letterSpacing:"0.1em",marginBottom:14}}>สร้าง BLOCK ใหม่</div>
-
-                {/* Time range — native time inputs (scroll wheel on iOS) */}
-                <div style={{background:"var(--bg-raised)",borderRadius:12,padding:"12px 14px",marginBottom:12}}>
-                  <div style={{fontSize:10,color:"var(--text-3)",fontWeight:600,marginBottom:10,letterSpacing:"0.06em"}}>
-                    ช่วงเวลา · {durLabel(createSheet.endMin-createSheet.startMin)}
-                  </div>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{flexShrink:0}}>
-                      <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>เริ่ม</div>
-                      <input type="time" value={fmt(createSheet.startMin)}
-                        onChange={e=>{
-                          if(!e.target.value) return;
-                          const [h,m]=e.target.value.split(":").map(Number);
-                          const sm=clamp(h*60+m,H_START*60,createSheet.endMin-MIN_DUR);
-                          setCreateSheet(s=>s?{...s,startMin:sm}:s);
-                        }}
-                        style={{display:"block",width:"110px",padding:"8px 8px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:15,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
-                    </div>
-                    <div style={{fontSize:14,color:"var(--text-3)",paddingTop:16,flexShrink:0}}>—</div>
-                    <div style={{flexShrink:0}}>
-                      <div style={{fontSize:9,color:"var(--text-3)",marginBottom:4}}>สิ้นสุด</div>
-                      <input type="time" value={fmt(createSheet.endMin)}
-                        onChange={e=>{
-                          if(!e.target.value) return;
-                          const [h,m]=e.target.value.split(":").map(Number);
-                          const em=clamp(h*60+m,createSheet.startMin+MIN_DUR,H_END*60);
-                          setCreateSheet(s=>s?{...s,endMin:em}:s);
-                        }}
-                        style={{display:"block",width:"110px",padding:"8px 8px",background:"var(--bg-card)",border:"1px solid var(--border)",borderRadius:10,fontSize:15,fontWeight:800,color:"var(--amber)",fontFamily:"inherit",outline:"none",boxSizing:"border-box"} as React.CSSProperties}/>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Title — no autoFocus to prevent keyboard bounce */}
-                <input value={createTitle} onChange={e=>setCreateTitle(e.target.value)}
-                  placeholder="ชื่องาน..."
-                  style={{width:"100%",padding:"13px 14px",background:"var(--bg-raised)",border:"1px solid var(--border)",borderRadius:12,fontSize:15,fontWeight:600,color:"var(--text-1)",fontFamily:"inherit",outline:"none",marginBottom:8,boxSizing:"border-box"}}/>
-
-                {/* Note */}
-                <textarea value={createNote} onChange={e=>setCreateNote(e.target.value)}
-                  placeholder="Note (ถ้ามี)..."
-                  rows={2}
-                  style={{width:"100%",padding:"11px 14px",background:"var(--bg-raised)",border:"1px solid var(--border)",borderRadius:12,fontSize:13,color:"var(--text-2)",fontFamily:"inherit",outline:"none",marginBottom:12,boxSizing:"border-box",resize:"none",lineHeight:1.5}}/>
-
-                {/* Area — from Notion via /api/areas, same system as AddTaskModal */}
-                <div style={{fontSize:10,color:"var(--text-3)",fontWeight:600,marginBottom:8,letterSpacing:"0.06em"}}>AREA</div>
-                <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:12}}>
-                  {createAreas.map(a=>{
-                    const sel=createAreaId===a.id;
-                    return (
-                      <button key={a.id} onClick={()=>setCreateAreaId(sel?"":a.id)}
-                        style={{
-                          padding:"8px 12px",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:sel?700:500,
-                          background:sel?"var(--brand-soft)":"var(--bg-raised)",
-                          border:`1.5px solid ${sel?"var(--amber)":"var(--border)"}`,
-                          color:sel?"var(--amber)":"var(--text-3)",
-                          transition:"all 0.15s",
-                        }}>
-                        {a.emoji||"📁"} {a.name}
-                      </button>
-                    );
-                  })}
-                  {createAreas.length===0&&<div style={{fontSize:12,color:"var(--text-3)"}}>โหลด...</div>}
-                </div>
-
-                {/* Priority */}
-                <div style={{fontSize:10,color:"var(--text-3)",fontWeight:600,marginBottom:8,letterSpacing:"0.06em"}}>PRIORITY</div>
-                <div style={{display:"flex",gap:6,marginBottom:16}}>
-                  {(["P1","P2","P3","P4"] as const).map(p=>{
-                    const active=createPriority===p;
-                    const pc=p==="P1"?"var(--red)":p==="P2"?"var(--amber)":p==="P3"?"var(--green)":"var(--text-3)";
-                    return (
-                      <button key={p} onClick={()=>setCreatePriority(active?null:p)}
-                        style={{flex:1,padding:"8px 0",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:700,background:active?pc+"22":"var(--bg-raised)",border:`1.5px solid ${active?pc:"var(--border)"}`,color:active?pc:"var(--text-3)",transition:"all 0.15s"}}>
-                        {p}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Pinned action buttons */}
-              <div style={{flexShrink:0,padding:"8px 20px calc(env(safe-area-inset-bottom) + 16px)",borderTop:"1px solid var(--border-soft)",background:"var(--bg-card)"}}>
-                <div style={{display:"flex",gap:10}}>
-                  <button onClick={()=>{ setCreateSheet(null); setCreateExpanded(false); setCreateAreaId(""); setCreatePriority(null); }} style={{flex:1,padding:13,borderRadius:12,background:"var(--bg-raised)",border:"1px solid var(--border)",color:"var(--text-3)",fontSize:14,cursor:"pointer"}}>ยกเลิก</button>
-                  <button disabled={!createTitle.trim()||creating}
-                    onClick={async()=>{
-                      if(!createTitle.trim())return;
-                      setCreating(true);
-                      const task=await createTaskApi(createTitle.trim(),createNote.trim(),curDate,createSheet.startMin,createSheet.endMin,createAreaId||undefined,createPriority);
-                      setBlocks(prev=>({...prev,[task.id]:{task,startMin:createSheet.startMin,dur:createSheet.endMin-createSheet.startMin}}));
-                      setCreateSheet(null); setCreateExpanded(false); setCreating(false); setCreateTitle(""); setCreateNote(""); setCreateAreaId(""); setCreatePriority(null);
-                    }}
-                    style={{flex:2,padding:13,borderRadius:12,background:createTitle.trim()?"var(--amber)":"var(--bg-raised)",border:"none",color:createTitle.trim()?"#000":"var(--text-3)",fontSize:14,fontWeight:700,cursor:createTitle.trim()?"pointer":"default"}}>
-                    {creating?"กำลังบันทึก...":"สร้าง"}
-                  </button>
-                </div>
-              </div>
-            </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

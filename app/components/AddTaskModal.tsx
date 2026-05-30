@@ -85,11 +85,16 @@ function AreaChip({ area, selected, pinned, onSelect, onPin }: {
 }
 
 /* ── Main Modal ── */
-export default function AddTaskModal({ onClose, onAdd }: { onClose: () => void; onAdd: (t: Task) => void }) {
+export default function AddTaskModal({
+  onClose, onAdd, initialDue, initialEndDue,
+}: {
+  onClose: () => void; onAdd: (t: Task) => void;
+  initialDue?: string; initialEndDue?: string;
+}) {
   const [title, setTitle]       = useState("");
   const [notes, setNotes]       = useState("");
-  const [due, setDue]           = useState("");
-  const [endDue, setEndDue]     = useState("");
+  const [due, setDue]           = useState(initialDue || "");
+  const [endDue, setEndDue]     = useState(initialEndDue || "");
   const [showCal, setShowCal]   = useState(false);
   const [areaId, setAreaId]     = useState("");
   const [quadrant, setQuadrant] = useState<Quadrant>("Q3");

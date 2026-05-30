@@ -10,8 +10,6 @@ import MonthView from "./components/MonthView";
 import AgendaView from "./components/AgendaView";
 import DayView from "./components/DayView";
 import SettingsSheet from "./components/SettingsSheet";
-import FeedbackStrip from "./components/FeedbackStrip";
-import Image from "next/image";
 import { Task, TaskData, detectCategory, getQuadrant, QUADRANT_INFO } from "./components/types";
 import {
   SearchIcon, GearIcon, LightningIcon, FlagIcon, ClockIcon, PauseIcon,
@@ -110,12 +108,12 @@ function Greeting() {
         เปลี่ยนชื่อ: แก้ text ด้านล่างได้เลย
       */}
       <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 8 }}>
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src="/logo-mark.png"
           alt="Norte"
-          width={22} height={22}
           style={{
-            height: 14,
+            height: 20,
             width: "auto",
             flexShrink: 0,
             animation: "pulse-dot 2.5s ease-in-out infinite",
@@ -920,16 +918,15 @@ function LoadingState() {
         ── LOADING LOGO — ขนาด Lock ไว้: max 280px / 74vw ──
         เปลี่ยนโลโก้: swap ไฟล์ /public/logo-white.png (ใช้ size เดิม อย่าแก้ CSS)
       */}
-      <Image
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/logo-white.png"
         alt="Logo"
-        width={512} height={512}
         style={{
           width: "min(74vw, 280px)",
           height: "auto",
           animation: "pulse-dot 2.5s ease-in-out infinite",
         }}
-        priority
       />
       <div style={{ color: "var(--text-3)", fontSize: 12, letterSpacing: "0.06em" }}>
         กำลังดึงข้อมูล...
@@ -1108,6 +1105,7 @@ export default function Home() {
   const [data, setData] = useState<TaskData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [createBlockTime, setCreateBlockTime] = useState<{due:string;endDue:string}|null>(null);
   const [refreshed, setRefreshed] = useState(new Date());
   const [detailTask, setDetailTask] = useState<(Task & { startMin?: number; endMin?: number }) | null>(null);
   const autoRefreshRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -1259,8 +1257,6 @@ export default function Home() {
             >
               <SearchIcon size={17} color="var(--icon-tint)" />
             </button>
-            {/* Feedback */}
-            <FeedbackStrip compact />
             {/* Settings */}
             <button
               onClick={() => setShowSettings(true)}
@@ -1446,6 +1442,7 @@ export default function Home() {
                     onDone={markDone}
                     scrollContainer={scrollRef}
                     resetKey={calDayReset}
+                    onCreateBlock={(due,endDue)=>setCreateBlockTime({due,endDue})}
                   />
                 )}
 
@@ -1498,7 +1495,14 @@ export default function Home() {
 
       <Nav active={tab} onChange={setTab} />
 
-      {showAdd && <AddTaskModal onClose={() => setShowAdd(false)} onAdd={addTask} />}
+      {(showAdd || createBlockTime) && (
+        <AddTaskModal
+          onClose={() => { setShowAdd(false); setCreateBlockTime(null); }}
+          onAdd={task => { addTask(task); setCreateBlockTime(null); }}
+          initialDue={createBlockTime?.due}
+          initialEndDue={createBlockTime?.endDue}
+        />
+      )}
       {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} />}
 
       {detailTask && (
